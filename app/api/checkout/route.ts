@@ -1,0 +1,106 @@
+import { NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
+import { prisma } from "@/lib/db";
+import { stripe } from "@/lib/stripe";
+
+type IncomingItem = { slug: string; size: string; qty: number };
+
+export async function POST(req: Request) {
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.email) {
+    return NextResponse.json({ error: "not_authenticated" }, { status: 401 });
+  }
+
+  let body: { items?: IncomingItem[] };
+  try {
+    body = await req.json();
+  } catch {
+    return NextResponse.json({ error: "bad_request" }, { status: 400 });
+  }
+
+  const incoming = body.items ?? [];
+  if (incoming.length === 0) {
+    return NextResponse.json({ error: "empty_cart" }, { status: 400 });
+  }
+
+  // Recompute prices/names from the database — never trust client totals.
+  const slugs = [...new Set(incoming.map((i) => i.slug))];
+  const products = await prisma.product.findMany({
+    where: { slug: { in: slugs } },
+  });
+  const bySlug = new Map(products.map((p) => [p.slug, p]));
+
+  const lineItems = incoming
+    .map((i) => {
+      const p = bySlug.get(i.slug);
+      if (!p) return null;
+      const qty = Math.max(1, Math.min(20, Math.floor(i.qty)));
+      return {
+        slug: p.slug,
+        name: p.name,
+        size: i.size,
+        unitPrice: p.price,
+        qty,
+        image: (JSON.parse(p.images) as string[])[0],
+      };
+    })
+    .filter((x): x is NonNullable<typeof x> => x !== null);
+
+  if (lineItems.length === 0) {
+    return NextResponse.json({ error: "no_valid_items" }, { status: 400 });
+  }
+
+  const total = lineItems.reduce((sum, i) => sum + i.unitPrice * i.qty, 0);
+  const userId = (session.user as { id?: string }).id ?? null;
+
+  const origin =
+    req.headers.get("origin") ??
+    process.env.NEXTAUTH_URL ??
+    "http://localhost:3002";
+
+  // --- Stub mode: no Stripe key. Mark paid immediately. ---
+  if (!stripe) {
+    const order = await prisma.order.create({
+      data: {
+        userId,
+        email: session.user.email,
+        items: JSON.stringify(lineItems),
+        total,
+        status: "paid",
+      },
+    });
+    return NextResponse.json({
+      url: `${origin}/order/success?order=${order.id}&demo=1`,
+    });
+  }
+
+  // --- Stripe test mode. ---
+  const order = await prisma.order.create({
+    data: {
+      userId,
+      email: session.user.email,
+      items: JSON.stringify(lineItems),
+      total,
+      status: "pending",
+    },
+  });
+
+  const checkout = await stripe.checkout.sessions.create({
+    mode: "payment",
+    customer_email: session.user.email,
+    line_items: lineItems.map((i) => ({
+      quantity: i.qty,
+      price_data: {
+        currency: "usd",
+        unit_amount: i.unitPrice,
+        product_data: { name: `${i.name} — ${i.size}` },
+      },
+    })),
+    success_url: `${origin}/order/success?order=${order.id}&session_id={CHECKOUT_SESSION_ID}`,
+    cancel_url: `${origin}/cart`,
+    metadata: { orderId: order.id },
+  });
+
+  return NextResponse.json({ url: checkout.url });
+}

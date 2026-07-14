@@ -1,12 +1,20 @@
 ---
-gsd_state_version: '1.0'  # placeholder; syncStateFrontmatter overwrites on first state.* call
+gsd_state_version: 1.0
+milestone: v1.0
+milestone_name: milestone
+current_phase: 8
+current_phase_name: Merchandising & Discovery
 status: planning
+stopped_at: Phase 8 context gathered
+last_updated: "2026-07-14T16:32:20.361Z"
+last_activity: 2026-07-14
+last_activity_desc: Ingest bootstrap; Milestone 1 marked delivered, Milestone 2 (Phases 8–11) planned
 progress:
-  total_phases: 11
-  completed_phases: 7
+  total_phases: 4
+  completed_phases: 0
   total_plans: 0
   completed_plans: 0
-  percent: 64
+  percent: 0
 ---
 
 # Project State
@@ -30,6 +38,7 @@ Progress: [██████░░░░] 64% (7 of 11 phases complete)
 ## Performance Metrics
 
 **Velocity:**
+
 - Total plans completed: Milestone 1 delivered (plan-level metrics not tracked at ingest)
 - Average duration: -
 - Total execution time: -
@@ -41,6 +50,7 @@ Progress: [██████░░░░] 64% (7 of 11 phases complete)
 | 1–7 (M1) | delivered | - | - |
 
 **Recent Trend:**
+
 - Last 5 plans: -
 - Trend: Stable (Milestone 1 shipped verified)
 
@@ -77,6 +87,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-07-14
-Stopped at: Ingest bootstrap complete — PROJECT.md, REQUIREMENTS.md, ROADMAP.md, STATE.md written
-Resume file: None
+Last session: 2026-07-14T16:32:20.344Z
+Stopped at: Phase 8 context gathered
+Resume file: .planning/phases/08-merchandising-discovery/08-CONTEXT.md

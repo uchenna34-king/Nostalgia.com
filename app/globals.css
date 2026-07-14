@@ -57,3 +57,13 @@
     @apply text-xs uppercase tracking-[0.25em] text-sepia;
   }
 }
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-marquee,
+  .animate-fade-up {
+    animation: none !important;
+  }
+  * {
+    scroll-behavior: auto !important;
+  }
+}

@@ -8,7 +8,7 @@ export default function Hero() {
         <div className="animate-fade-up">
           <p className="eyebrow">Autumn Archive — Volume I</p>
           <h1 className="mt-4 font-serif text-6xl font-black leading-[0.92] tracking-tight sm:text-7xl lg:text-8xl">
-            Wear the
+            Wear the{" "}
             <span className="block italic text-sepia">memory.</span>
           </h1>
           <p className="mt-6 max-w-md text-base text-ink-soft">

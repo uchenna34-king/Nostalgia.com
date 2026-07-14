@@ -1,0 +1,23 @@
+{
+  "source_path": "C:/Users/kingston williams/Desktop/CLAUDE ANTHROPIC/nostalgia/docs/superpowers/specs/2026-07-13-nostalgia-storefront-design.md",
+  "type": "SPEC",
+  "confidence": "high",
+  "manifest_override": true,
+  "title": "Nostalgia — Storefront Design Spec",
+  "summary": "Technical design spec for the Nostalgia clothing-brand storefront web app, covering architecture, pages, data model, and a local end-to-end vertical slice.",
+  "scope": [
+    "storefront web app",
+    "Next.js App Router",
+    "NextAuth Google auth",
+    "Prisma + SQLite",
+    "Stripe checkout",
+    "cart",
+    "product catalog",
+    "data model",
+    "pages and components"
+  ],
+  "cross_refs": [],
+  "locked": false,
+  "precedence": null,
+  "notes": ""
+}

@@ -1,0 +1,20 @@
+{
+  "source_path": "C:/Users/kingston williams/Desktop/CLAUDE ANTHROPIC/nostalgia/docs/superpowers/plans/2026-07-13-nostalgia-storefront.md",
+  "type": "DOC",
+  "confidence": "high",
+  "manifest_override": true,
+  "title": "Nostalgia Storefront Implementation Plan",
+  "summary": "Phased implementation plan for a Next.js clothing-brand storefront vertical slice: browse, cart, Google login, and Stripe test-mode checkout.",
+  "scope": [
+    "Next.js App Router storefront",
+    "product catalog (Prisma + SQLite)",
+    "cart (React context + localStorage)",
+    "NextAuth Google auth with dev fallback",
+    "Stripe test-mode checkout",
+    "design system (Tailwind, Fraunces/Inter, palette)"
+  ],
+  "cross_refs": [],
+  "locked": false,
+  "precedence": null,
+  "notes": ""
+}

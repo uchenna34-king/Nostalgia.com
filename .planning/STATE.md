@@ -5,14 +5,14 @@ milestone_name: milestone
 current_phase: 8
 current_phase_name: Merchandising & Discovery
 status: planning
-stopped_at: Phase 8 context gathered
-last_updated: "2026-07-14T16:32:20.361Z"
+stopped_at: Phase 8 planned + verified (8 plans, 4 waves) — ready to execute
+last_updated: "2026-07-14T17:16:15.360Z"
 last_activity: 2026-07-14
 last_activity_desc: Ingest bootstrap; Milestone 1 marked delivered, Milestone 2 (Phases 8–11) planned
 progress:
   total_phases: 4
   completed_phases: 0
-  total_plans: 0
+  total_plans: 8
   completed_plans: 0
   percent: 0
 ---
@@ -87,6 +87,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-07-14T16:32:20.344Z
-Stopped at: Phase 8 context gathered
-Resume file: .planning/phases/08-merchandising-discovery/08-CONTEXT.md
+Last session: 2026-07-14T17:16:15.325Z
+Stopped at: Phase 8 planned + verified (8 plans, 4 waves) — ready to execute
+Resume file: .planning/phases/08-merchandising-discovery/08-01-PLAN.md

@@ -140,11 +140,11 @@ paid purchase.
   4. Product detail pages show a multi-image gallery and richer details driven by per-product image sets.
   5. The catalog data model and image handling support thousands of products with multiple images each, without a redesign.
 
-**Plans**: 2/8 plans executed
+**Plans**: 3/8 plans executed
 
 - [x] 08-01-PLAN.md — Test harness (Vitest) + use-debounce install
 - [x] 08-02-PLAN.md — Catalog data model: ProductImage + Collection + indexes, reseed
-- [ ] 08-03-PLAN.md — Catalog query builder (lib/catalog.ts) + getCatalog/collections + unit tests
+- [x] 08-03-PLAN.md — Catalog query builder (lib/catalog.ts) + getCatalog/collections + unit tests
 - [ ] 08-04-PLAN.md — Wishlist reducer + WishlistContext + WishlistButton
 - [ ] 08-05-PLAN.md — Shop UI: URL-driven search/filter/sort/pagination
 - [ ] 08-06-PLAN.md — Richer PDP: multi-image gallery + materials/care + save
@@ -211,7 +211,7 @@ Phases execute in numeric order: 1 → … → 7 (done) → 8 → 9 → 10 → 1
 | 5. Auth | M1 | ✓ | Complete | 2026-07-13 |
 | 6. Checkout | M1 | ✓ | Complete | 2026-07-13 |
 | 7. Polish + verification | M1 | ✓ | Complete | 2026-07-13 |
-| 8. Merchandising & Discovery | M2 | 2/8 | In Progress|  |
+| 8. Merchandising & Discovery | M2 | 3/8 | In Progress|  |
 | 9. Store Operations / Admin | M2 | 0/TBD | Not started | - |
 | 10. Trust & Polish | M2 | 0/TBD | Not started | - |
 | 11. Go Live | M2 | 0/TBD | Not started | - |

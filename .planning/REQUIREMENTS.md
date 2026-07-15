@@ -36,9 +36,9 @@ Committed scope for the current milestone. Each maps to exactly one phase (8–1
 
 ### Merchandising & Discovery (Phase 8)
 
-- [ ] **DISC-01**: Customer can search products by keyword (name, description, category) and see relevant matches
-- [ ] **DISC-02**: Customer can filter the catalog by category, size, and price range
-- [ ] **DISC-03**: Customer can sort the catalog (e.g. price, newest, name)
+- [x] **DISC-01**: Customer can search products by keyword (name, description, category) and see relevant matches
+- [x] **DISC-02**: Customer can filter the catalog by category, size, and price range
+- [x] **DISC-03**: Customer can sort the catalog (e.g. price, newest, name)
 - [x] **DISC-04**: Customer can browse curated collections/categories that scale beyond a handful of items
 - [ ] **WISH-01**: Customer can add and remove products to a wishlist that persists across sessions
 - [x] **PDP-01**: Product detail pages show richer content (multi-image gallery + details) driven by per-product image sets
@@ -103,9 +103,9 @@ Deferred beyond Milestone 2. Tracked, not in the current roadmap.
 | PAY-01 | Phase 6 | Complete |
 | ORDER-01 | Phase 6 | Complete |
 | POLISH-01 | Phase 7 | Complete |
-| DISC-01 | Phase 8 | Pending |
-| DISC-02 | Phase 8 | Pending |
-| DISC-03 | Phase 8 | Pending |
+| DISC-01 | Phase 8 | Complete |
+| DISC-02 | Phase 8 | Complete |
+| DISC-03 | Phase 8 | Complete |
 | DISC-04 | Phase 8 | Complete |
 | WISH-01 | Phase 8 | Pending |
 | PDP-01 | Phase 8 | Complete |

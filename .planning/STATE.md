@@ -5,15 +5,15 @@ milestone_name: milestone
 current_phase: 08
 current_phase_name: merchandising-discovery
 status: executing
-stopped_at: Phase 8 planned + verified (8 plans, 4 waves) — ready to execute
-last_updated: "2026-07-15T09:30:41.221Z"
+stopped_at: Completed 08-03-PLAN.md
+last_updated: "2026-07-15T09:51:15.047Z"
 last_activity: 2026-07-15
 last_activity_desc: Phase 08 execution started
 progress:
   total_phases: 4
   completed_phases: 0
   total_plans: 8
-  completed_plans: 2
+  completed_plans: 3
   percent: 0
 ---
 
@@ -29,7 +29,7 @@ See: .planning/PROJECT.md (updated 2026-07-14)
 ## Current Position
 
 Phase: 08 (merchandising-discovery) — EXECUTING
-Plan: 2 of 8
+Plan: 3 of 8
 Status: Ready to execute
 Last activity: 2026-07-15 — Phase 08 execution started
 
@@ -56,6 +56,7 @@ Progress: [██████░░░░] 64% (7 of 11 phases complete)
 
 *Updated after each plan completion*
 | Phase 08 P02 | 5min | 3 tasks | 4 files |
+| Phase 08 P03 | 15min | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -70,6 +71,9 @@ Recent decisions affecting current work:
 - Catalog must be re-architected in Phase 8 to hold thousands of products with per-product image sets.
 - [Phase ?]: Kept sizes as JSON-encoded string column; not in scope to normalize this phase
 - [Phase ?]: Implicit many-to-many for Collection <-> Product (no explicit join model needed)
+- [Phase 08-03]: PAGE_SIZE = 24 per D-07's suggested value
+- [Phase 08-03]: buildOrderBy validates sort against an explicit allow-list before switching; unknown/malicious values fall back to newest (ASVS V5, T-08-02)
+- [Phase 08-03]: getCatalog computes skip/take from the requested page directly; paginationMeta only computes reported page/totalPages/hasPrev/hasNext from the returned total, avoiding a second query
 
 ### Pending Todos
 
@@ -90,6 +94,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-07-15T09:30:36.194Z
-Stopped at: Phase 8 planned + verified (8 plans, 4 waves) — ready to execute
+Last session: 2026-07-15T09:51:15.036Z
+Stopped at: Completed 08-03-PLAN.md
 Resume file: .planning/phases/08-merchandising-discovery/08-01-PLAN.md

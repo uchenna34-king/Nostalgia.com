@@ -10,6 +10,8 @@ type Seed = {
   description: string;
   sizes: string[];
   featured?: boolean;
+  materials?: string;
+  care?: string;
 };
 
 const products: Seed[] = [
@@ -22,6 +24,8 @@ const products: Seed[] = [
       "A double-faced wool overcoat in warm sepia. Tailored drop shoulders, horn buttons, and a relaxed archive silhouette that ages beautifully.",
     sizes: ["S", "M", "L", "XL"],
     featured: true,
+    materials: "100% double-faced wool with a horn-button placket.",
+    care: "Dry clean only. Store on a broad-shouldered hanger.",
   },
   {
     slug: "archive-bomber-jacket",
@@ -32,6 +36,8 @@ const products: Seed[] = [
       "Boxy bomber in weathered cotton with ribbed trims and a hidden placket. Built from a 1970s pattern, cut for today.",
     sizes: ["S", "M", "L", "XL"],
     featured: true,
+    materials: "Weathered 100% cotton shell with ribbed-knit trims.",
+    care: "Machine wash cold, inside out. Hang to dry.",
   },
   {
     slug: "heritage-cable-knit",
@@ -42,6 +48,8 @@ const products: Seed[] = [
       "Hand-framed lambswool cable knit with a rolled collar. Dense, warm, and quietly luxurious.",
     sizes: ["S", "M", "L"],
     featured: true,
+    materials: "100% hand-framed lambswool.",
+    care: "Hand wash cold. Dry flat, away from direct heat.",
   },
   {
     slug: "faded-mohair-cardigan",
@@ -61,6 +69,8 @@ const products: Seed[] = [
       "Heavyweight box-cut tee, garment-dyed to a lived-in sand. The everyday foundation of the house.",
     sizes: ["XS", "S", "M", "L", "XL"],
     featured: true,
+    materials: "Heavyweight 100% garment-dyed cotton, 260gsm.",
+    care: "Machine wash cold with like colors. Tumble dry low.",
   },
   {
     slug: "grain-logo-tee",
@@ -80,6 +90,8 @@ const products: Seed[] = [
       "Heavyweight loopback hoodie in cocoa. Oversized hood, embroidered wordmark, brushed interior.",
     sizes: ["S", "M", "L", "XL"],
     featured: true,
+    materials: "Heavyweight loopback cotton fleece, brushed interior.",
+    care: "Machine wash cold, inside out. Do not bleach.",
   },
   {
     slug: "pleated-trouser",
@@ -108,11 +120,49 @@ const products: Seed[] = [
       "Vegetable-tanned leather tote that patinas with use. Roomy, unlined, made to outlast trends.",
     sizes: ["One Size"],
     featured: true,
+    materials: "Vegetable-tanned full-grain leather.",
+    care: "Wipe clean with a dry cloth. Condition leather occasionally.",
+  },
+];
+
+const collections: {
+  slug: string;
+  name: string;
+  description: string;
+  productSlugs: string[];
+}[] = [
+  {
+    slug: "autumn-archive",
+    name: "Autumn Archive",
+    description:
+      "Wool, mohair, and cable-knit pulled from the archive for the season's turn.",
+    productSlugs: [
+      "sepia-wool-overcoat",
+      "archive-bomber-jacket",
+      "heritage-cable-knit",
+      "faded-mohair-cardigan",
+    ],
+  },
+  {
+    slug: "essentials",
+    name: "Essentials",
+    description:
+      "The everyday foundation — tees, hoodies, and accessories built to live in.",
+    productSlugs: [
+      "vintage-box-tee",
+      "grain-logo-tee",
+      "nostalgia-hoodie",
+      "corduroy-cap",
+      "leather-tote",
+    ],
   },
 ];
 
 async function main() {
+  // FK-safe truncation order: order -> productImage -> collection -> product
   await prisma.order.deleteMany();
+  await prisma.productImage.deleteMany();
+  await prisma.collection.deleteMany();
   await prisma.product.deleteMany();
 
   for (const p of products) {
@@ -124,16 +174,35 @@ async function main() {
         category: p.category,
         description: p.description,
         sizes: JSON.stringify(p.sizes),
-        images: JSON.stringify([
-          `/products/${p.slug}-1.svg`,
-          `/products/${p.slug}-2.svg`,
-        ]),
+        materials: p.materials,
+        care: p.care,
         featured: p.featured ?? false,
+        images: {
+          create: [
+            { url: `/products/${p.slug}-1.svg`, position: 0 },
+            { url: `/products/${p.slug}-2.svg`, position: 1 },
+          ],
+        },
       },
     });
   }
 
-  console.log(`Seeded ${products.length} products.`);
+  for (const c of collections) {
+    await prisma.collection.create({
+      data: {
+        slug: c.slug,
+        name: c.name,
+        description: c.description,
+        products: {
+          connect: c.productSlugs.map((slug) => ({ slug })),
+        },
+      },
+    });
+  }
+
+  console.log(
+    `Seeded ${products.length} products, ${products.length * 2} images, ${collections.length} collections.`,
+  );
 }
 
 main()

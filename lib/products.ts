@@ -10,6 +10,8 @@ export type Product = {
   images: string[];
   sizes: string[];
   featured: boolean;
+  materials?: string | null;
+  care?: string | null;
 };
 
 function deserialize(row: {
@@ -19,13 +21,15 @@ function deserialize(row: {
   price: number;
   category: string;
   description: string;
-  images: string;
   sizes: string;
   featured: boolean;
+  materials?: string | null;
+  care?: string | null;
+  images: { url: string }[];
 }): Product {
   return {
     ...row,
-    images: JSON.parse(row.images) as string[],
+    images: row.images.map((img) => img.url),
     sizes: JSON.parse(row.sizes) as string[],
   };
 }
@@ -34,6 +38,7 @@ export async function getProducts(category?: string): Promise<Product[]> {
   const rows = await prisma.product.findMany({
     where: category && category !== "All" ? { category } : undefined,
     orderBy: { createdAt: "asc" },
+    include: { images: { orderBy: { position: "asc" } } },
   });
   return rows.map(deserialize);
 }
@@ -42,12 +47,16 @@ export async function getFeaturedProducts(): Promise<Product[]> {
   const rows = await prisma.product.findMany({
     where: { featured: true },
     orderBy: { createdAt: "asc" },
+    include: { images: { orderBy: { position: "asc" } } },
   });
   return rows.map(deserialize);
 }
 
 export async function getProductBySlug(slug: string): Promise<Product | null> {
-  const row = await prisma.product.findUnique({ where: { slug } });
+  const row = await prisma.product.findUnique({
+    where: { slug },
+    include: { images: { orderBy: { position: "asc" } } },
+  });
   return row ? deserialize(row) : null;
 }
 

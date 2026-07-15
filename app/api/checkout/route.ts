@@ -28,6 +28,7 @@ export async function POST(req: Request) {
   const slugs = [...new Set(incoming.map((i) => i.slug))];
   const products = await prisma.product.findMany({
     where: { slug: { in: slugs } },
+    include: { images: { orderBy: { position: "asc" } } },
   });
   const bySlug = new Map(products.map((p) => [p.slug, p]));
 
@@ -42,7 +43,7 @@ export async function POST(req: Request) {
         size: i.size,
         unitPrice: p.price,
         qty,
-        image: (JSON.parse(p.images) as string[])[0],
+        image: p.images[0]?.url,
       };
     })
     .filter((x): x is NonNullable<typeof x> => x !== null);

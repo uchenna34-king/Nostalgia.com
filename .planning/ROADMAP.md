@@ -18,6 +18,7 @@ paid purchase.
 ## Phases
 
 **Phase Numbering:**
+
 - Integer phases (1, 2, 3): Planned milestone work
 - Decimal phases (2.1, 2.2): Urgent insertions (marked with INSERTED)
 
@@ -47,76 +48,101 @@ paid purchase.
 <summary>✅ Milestone 1 phase details (delivered)</summary>
 
 ### Phase 1: Project scaffold + design system
+
 **Goal**: A running Next.js app rendering the locked Nostalgia design system.
 **Depends on**: Nothing (first phase)
 **Requirements**: SETUP-01
 **Success Criteria** (what must be TRUE):
+
   1. App runs at `localhost:3000` with palette, Fraunces/Inter, film-grain, and marquee.
+
 **Plans**: Delivered
 
 ### Phase 2: Data layer + product catalog
+
 **Goal**: Persistence and a seeded catalog to render.
 **Depends on**: Phase 1
 **Requirements**: DATA-01
 **Success Criteria** (what must be TRUE):
+
   1. Prisma schema (Product/User/Order) exists and ~10 products are seeded across categories.
+
 **Plans**: Delivered
 
 ### Phase 3: Storefront UI
+
 **Goal**: Customers can browse the catalog.
 **Depends on**: Phase 2
 **Requirements**: STORE-01, STORE-02, STORE-03
 **Success Criteria** (what must be TRUE):
+
   1. Home shows editorial hero, marquee, and featured grid.
   2. `/shop` lists products with category filters; `/product/[slug]` shows gallery + size selector.
+
 **Plans**: Delivered
 
 ### Phase 4: Cart
+
 **Goal**: Customers can build a cart without logging in.
 **Depends on**: Phase 3
 **Requirements**: CART-01
 **Success Criteria** (what must be TRUE):
+
   1. Add/remove/update qty works via drawer and `/cart`, with correct subtotal and empty state.
+
 **Plans**: Delivered
 
 ### Phase 5: Auth
+
 **Goal**: Customers can sign in.
 **Depends on**: Phase 4
 **Requirements**: AUTH-01
 **Success Criteria** (what must be TRUE):
+
   1. NextAuth sign-in works via Google or dev-demo fallback; session shows in nav + account.
+
 **Plans**: Delivered
 
 ### Phase 6: Checkout
+
 **Goal**: Customers can place an order.
 **Depends on**: Phase 5
 **Requirements**: PAY-01, ORDER-01
 **Success Criteria** (what must be TRUE):
+
   1. Login-gated checkout runs Stripe test mode (or stub), recomputes totals server-side, persists the Order, and shows a success page that clears the cart.
+
 **Plans**: Delivered
 
 ### Phase 7: Polish + verification
+
 **Goal**: The slice is coherent and verified.
 **Depends on**: Phase 6
 **Requirements**: POLISH-01
 **Success Criteria** (what must be TRUE):
+
   1. Layout is responsive, error states are friendly, 404 is branded, and the full browse→buy flow is verified in-browser.
+
 **Plans**: Delivered
 
 </details>
 
 ### Phase 8: Merchandising & Discovery
+
 **Goal**: Customers can find products fast in a catalog built to scale to thousands of items with per-product image sets.
 **Depends on**: Phase 7 (Milestone 1 complete)
 **Requirements**: DISC-01, DISC-02, DISC-03, DISC-04, WISH-01, PDP-01, CATL-01
 **Success Criteria** (what must be TRUE):
+
   1. Customer can search products by keyword and see relevant matches.
   2. Customer can filter (category, size, price) and sort (price, newest, name) the catalog, with results updating live.
   3. Customer can save products to a wishlist that persists across sessions.
   4. Product detail pages show a multi-image gallery and richer details driven by per-product image sets.
   5. The catalog data model and image handling support thousands of products with multiple images each, without a redesign.
-**Plans**: 8 plans
-- [ ] 08-01-PLAN.md — Test harness (Vitest) + use-debounce install
+
+**Plans**: 1/8 plans executed
+
+- [x] 08-01-PLAN.md — Test harness (Vitest) + use-debounce install
 - [ ] 08-02-PLAN.md — Catalog data model: ProductImage + Collection + indexes, reseed
 - [ ] 08-03-PLAN.md — Catalog query builder (lib/catalog.ts) + getCatalog/collections + unit tests
 - [ ] 08-04-PLAN.md — Wishlist reducer + WishlistContext + WishlistButton
@@ -124,41 +150,51 @@ paid purchase.
 - [ ] 08-06-PLAN.md — Richer PDP: multi-image gallery + materials/care + save
 - [ ] 08-07-PLAN.md — Wishlist UI: card toggle + nav entry + /wishlist page
 - [ ] 08-08-PLAN.md — Collections index + detail routes (reuse paginated grid)
+
 **UI hint**: yes
 
 ### Phase 9: Store Operations / Admin
+
 **Goal**: The owner can run the store with no code — manage products, inventory, and orders.
 **Depends on**: Phase 8 (admin manages the scaled catalog structure)
 **Requirements**: ADMN-01, ADMN-02, ADMN-03, ADMN-04
 **Success Criteria** (what must be TRUE):
+
   1. Only authenticated admins can reach the admin dashboard; everyone else is blocked.
   2. Admin can create, edit, and delete products through the UI, and the changes appear on the storefront.
   3. Admin can set and adjust per-product stock, and out-of-stock state reflects on the storefront.
   4. Admin can view all orders and update fulfillment status.
+
 **Plans**: TBD
 **UI hint**: yes
 
 ### Phase 10: Trust & Polish
+
 **Goal**: The store earns customer trust and is discoverable, fast, and accessible.
 **Depends on**: Phase 9
 **Requirements**: TRST-01, TRST-02, TRST-03, SEO-01, PERF-01, ANLY-01
 **Success Criteria** (what must be TRUE):
+
   1. Customer can read and submit product reviews/ratings on product pages.
   2. Product pages surface size guides, and shipping & returns pages exist and are linked.
   3. Pages emit correct metadata, a sitemap, and structured data for search engines.
   4. Site meets defined performance and accessibility targets, and key events are tracked in analytics.
+
 **Plans**: TBD
 **UI hint**: yes
 
 ### Phase 11: Go Live
+
 **Goal**: A real customer can complete a real, paid purchase end-to-end on production — the primary success metric.
 **Depends on**: Phase 10
 **Requirements**: LIVE-01, LIVE-02, LIVE-03, LIVE-04, LIVE-05, LIVE-06
 **Success Criteria** (what must be TRUE):
+
   1. A customer signs in with real Google OAuth and pays with real Stripe (live keys).
   2. Customer receives an order confirmation email after purchase.
   3. Signed-in customer can view their order history on the account page.
   4. The app runs on a hosted Node platform against hosted Postgres (migrated from SQLite) and is publicly reachable.
+
 **Plans**: TBD
 
 ## Progress
@@ -175,7 +211,7 @@ Phases execute in numeric order: 1 → … → 7 (done) → 8 → 9 → 10 → 1
 | 5. Auth | M1 | ✓ | Complete | 2026-07-13 |
 | 6. Checkout | M1 | ✓ | Complete | 2026-07-13 |
 | 7. Polish + verification | M1 | ✓ | Complete | 2026-07-13 |
-| 8. Merchandising & Discovery | M2 | 0/8 | Not started | - |
+| 8. Merchandising & Discovery | M2 | 1/8 | In Progress|  |
 | 9. Store Operations / Admin | M2 | 0/TBD | Not started | - |
 | 10. Trust & Polish | M2 | 0/TBD | Not started | - |
 | 11. Go Live | M2 | 0/TBD | Not started | - |

@@ -2,13 +2,13 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-current_phase: 8
-current_phase_name: Merchandising & Discovery
-status: planning
+current_phase: 08
+current_phase_name: merchandising-discovery
+status: executing
 stopped_at: Phase 8 planned + verified (8 plans, 4 waves) — ready to execute
-last_updated: "2026-07-14T17:16:15.360Z"
-last_activity: 2026-07-14
-last_activity_desc: Ingest bootstrap; Milestone 1 marked delivered, Milestone 2 (Phases 8–11) planned
+last_updated: "2026-07-15T09:01:25.475Z"
+last_activity: 2026-07-15
+last_activity_desc: Phase 08 execution started
 progress:
   total_phases: 4
   completed_phases: 0
@@ -24,14 +24,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-07-14)
 
 **Core value:** A real customer can complete a real, paid purchase end-to-end (real Google login + real Stripe payment + email confirmation).
-**Current focus:** Phase 8 — Merchandising & Discovery (first phase of Milestone 2)
+**Current focus:** Phase 08 — merchandising-discovery
 
 ## Current Position
 
-Phase: 8 of 11 (Merchandising & Discovery)
-Plan: 0 of TBD in current phase
-Status: Ready to plan
-Last activity: 2026-07-14 — Ingest bootstrap; Milestone 1 marked delivered, Milestone 2 (Phases 8–11) planned
+Phase: 08 (merchandising-discovery) — EXECUTING
+Plan: 1 of 8
+Status: Executing Phase 08
+Last activity: 2026-07-15 — Phase 08 execution started
 
 Progress: [██████░░░░] 64% (7 of 11 phases complete)
 

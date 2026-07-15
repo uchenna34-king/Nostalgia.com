@@ -40,7 +40,7 @@ Committed scope for the current milestone. Each maps to exactly one phase (8–1
 - [x] **DISC-02**: Customer can filter the catalog by category, size, and price range
 - [x] **DISC-03**: Customer can sort the catalog (e.g. price, newest, name)
 - [x] **DISC-04**: Customer can browse curated collections/categories that scale beyond a handful of items
-- [ ] **WISH-01**: Customer can add and remove products to a wishlist that persists across sessions
+- [x] **WISH-01**: Customer can add and remove products to a wishlist that persists across sessions
 - [x] **PDP-01**: Product detail pages show richer content (multi-image gallery + details) driven by per-product image sets
 - [x] **CATL-01**: Catalog data model + image handling support thousands of products, each with multiple images, without redesign (structure only; real images supplied later)
 
@@ -107,7 +107,7 @@ Deferred beyond Milestone 2. Tracked, not in the current roadmap.
 | DISC-02 | Phase 8 | Complete |
 | DISC-03 | Phase 8 | Complete |
 | DISC-04 | Phase 8 | Complete |
-| WISH-01 | Phase 8 | Pending |
+| WISH-01 | Phase 8 | Complete |
 | PDP-01 | Phase 8 | Complete |
 | CATL-01 | Phase 8 | Complete |
 | ADMN-01 | Phase 9 | Pending |

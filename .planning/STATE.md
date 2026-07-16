@@ -4,17 +4,17 @@ milestone: v1.0
 milestone_name: milestone
 current_phase: 08
 current_phase_name: merchandising-discovery
-status: executing
-stopped_at: Completed 08-07-PLAN.md
-last_updated: "2026-07-16T09:46:51.828Z"
+status: verifying
+stopped_at: Completed 08-08-PLAN.md
+last_updated: "2026-07-16T09:53:09.880Z"
 last_activity: 2026-07-16
 last_activity_desc: Completed 08-06 (PDP Gallery & enrichment)
 progress:
   total_phases: 4
-  completed_phases: 0
+  completed_phases: 1
   total_plans: 8
-  completed_plans: 7
-  percent: 0
+  completed_plans: 8
+  percent: 25
 ---
 
 # Project State
@@ -30,7 +30,7 @@ See: .planning/PROJECT.md (updated 2026-07-14)
 
 Phase: 08 (merchandising-discovery) — EXECUTING
 Plan: 8 of 8
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-07-16 — Completed 08-06 (PDP Gallery & enrichment)
 
 Progress: [██████░░░░] 64% (7 of 11 phases complete)
@@ -61,6 +61,7 @@ Progress: [██████░░░░] 64% (7 of 11 phases complete)
 | Phase 08 P05 | 20min | 3 tasks | 5 files |
 | Phase 08 P06 | 12min | 2 tasks | 2 files |
 | Phase 08 P07 | 18min | 3 tasks | 3 files |
+| Phase 08 P08 | 10min | 3 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -86,6 +87,8 @@ Recent decisions affecting current work:
 - [Phase 08-06]: PDP related-products fetch switched from unbounded getProducts(category) to getCatalog({category, page:1}) for CATL-01 consistency
 - [Phase ?]: [Phase 08-07] Nav Wishlist badge mirrors the cart badge exactly, no explicit hydrated-guard state, relying on WishlistContext's client-only load
 - [Phase ?]: [Phase 08-07] /wishlist page renders item fields directly rather than reusing ProductCard, since WishlistItem is a denormalized snapshot not a full Product
+- [Phase 08-08]: Collections index uses its own card layout rather than reusing ProductCard, since CollectionSummary is not a Product
+- [Phase 08-08]: Collection detail page omits FilterPanel/SearchBox (optional per plan), keeping only sort + pagination via getCatalog for CATL-01/D-12
 
 ### Pending Todos
 
@@ -106,6 +109,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-07-16T09:46:51.813Z
-Stopped at: Completed 08-07-PLAN.md
+Last session: 2026-07-16T09:53:09.866Z
+Stopped at: Completed 08-08-PLAN.md
 Resume file: None

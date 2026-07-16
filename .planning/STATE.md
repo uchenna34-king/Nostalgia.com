@@ -5,15 +5,15 @@ milestone_name: milestone
 current_phase: 08
 current_phase_name: merchandising-discovery
 status: executing
-stopped_at: Completed 08-05-PLAN.md
-last_updated: "2026-07-15T15:55:23.536Z"
-last_activity: 2026-07-15
-last_activity_desc: Phase 08 execution started
+stopped_at: Completed 08-06-PLAN.md
+last_updated: "2026-07-16T09:31:16.610Z"
+last_activity: 2026-07-16
+last_activity_desc: Completed 08-06 (PDP Gallery & enrichment)
 progress:
   total_phases: 4
   completed_phases: 0
   total_plans: 8
-  completed_plans: 5
+  completed_plans: 6
   percent: 0
 ---
 
@@ -29,9 +29,9 @@ See: .planning/PROJECT.md (updated 2026-07-14)
 ## Current Position
 
 Phase: 08 (merchandising-discovery) — EXECUTING
-Plan: 5 of 8
+Plan: 7 of 8
 Status: Ready to execute
-Last activity: 2026-07-15 — Phase 08 execution started
+Last activity: 2026-07-16 — Completed 08-06 (PDP Gallery & enrichment)
 
 Progress: [██████░░░░] 64% (7 of 11 phases complete)
 
@@ -59,6 +59,7 @@ Progress: [██████░░░░] 64% (7 of 11 phases complete)
 | Phase 08 P03 | 15min | 2 tasks | 3 files |
 | Phase 08 P04 | 12min | 2 tasks | 5 files |
 | Phase 08 P05 | 20min | 3 tasks | 5 files |
+| Phase 08 P06 | 12min | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -80,6 +81,8 @@ Recent decisions affecting current work:
 - [Phase 08-04]: No hydrated-gating inside WishlistButton itself; context state is empty on server + first client render, mirroring the cart nav badge's stability approach
 - [Phase 08-05]: Static known size set (XS,S,M,L,XL) for FilterPanel size filter, per CONTEXT.md's discretion clause
 - [Phase 08-05]: Price range inputs commit on blur, not per-keystroke, to avoid a URL replace on every digit
+- [Phase 08-06]: Pre-existing untracked Gallery.tsx from a prior interrupted run verified against spec and tsc, committed as-is rather than rewritten
+- [Phase 08-06]: PDP related-products fetch switched from unbounded getProducts(category) to getCatalog({category, page:1}) for CATL-01 consistency
 
 ### Pending Todos
 
@@ -100,6 +103,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-07-15T15:55:23.512Z
-Stopped at: Completed 08-05-PLAN.md
+Last session: 2026-07-16T09:31:16.610Z
+Stopped at: Completed 08-06-PLAN.md
 Resume file: None

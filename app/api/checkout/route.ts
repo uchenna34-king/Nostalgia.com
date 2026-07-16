@@ -78,10 +78,12 @@ export async function POST(req: Request) {
   const total = lineItems.reduce((sum, i) => sum + i.unitPrice * i.qty, 0);
   const userId = (session.user as { id?: string }).id ?? null;
 
-  const origin =
-    req.headers.get("origin") ??
-    process.env.NEXTAUTH_URL ??
-    "http://localhost:3002";
+  // Never derive Stripe redirect targets from the client-controlled `Origin`
+  // header — it is attacker-forgeable on any direct (non-browser) request and
+  // Stripe accepts any HTTPS success_url/cancel_url, so trusting it would let
+  // a forged Origin redirect a paying user to an attacker-controlled domain
+  // after checkout. Always use the server-configured site URL.
+  const origin = process.env.NEXTAUTH_URL ?? "http://localhost:3002";
 
   // --- Stub mode: no Stripe key. Mark paid immediately. ---
   if (!stripe) {

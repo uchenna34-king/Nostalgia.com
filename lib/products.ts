@@ -115,25 +115,23 @@ export async function getCatalog(params: CatalogParams): Promise<CatalogResult> 
   });
   const orderBy = buildOrderBy(params.sort);
 
-  // Compute skip/take from the requested page against PAGE_SIZE; the total
-  // count (below) is used afterward to clamp the *reported* page/meta via
-  // paginationMeta, but the query itself always runs against the requested
-  // page so a single round trip suffices.
-  const skip = (page - 1) * PAGE_SIZE;
-
-  const [rows, total, categories] = await Promise.all([
-    prisma.product.findMany({
-      where,
-      orderBy,
-      include: { images: { orderBy: { position: "asc" } } },
-      skip,
-      take: PAGE_SIZE,
-    }),
+  // The row query must run against the *clamped* page (meta.skip/meta.take),
+  // not the raw requested page — otherwise an over-range page returns an
+  // empty result set while still reporting a valid, in-range page/totalPages.
+  const [total, categories] = await Promise.all([
     prisma.product.count({ where }),
     getCategories(),
   ]);
 
   const meta = paginationMeta(total, page, PAGE_SIZE);
+
+  const rows = await prisma.product.findMany({
+    where,
+    orderBy,
+    include: { images: { orderBy: { position: "asc" } } },
+    skip: meta.skip,
+    take: meta.take,
+  });
 
   return {
     products: rows.map(deserialize),

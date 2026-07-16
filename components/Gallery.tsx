@@ -10,6 +10,17 @@ export default function Gallery({
   name: string;
 }) {
   const [selectedIndex, setSelectedIndex] = useState(0);
+
+  if (images.length === 0) {
+    return (
+      <div
+        className="aspect-[3/4] bg-cream-dark"
+        role="img"
+        aria-label={`${name} — no image available`}
+      />
+    );
+  }
+
   const activeImage = images[selectedIndex] ?? images[0];
 
   return (

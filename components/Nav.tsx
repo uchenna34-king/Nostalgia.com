@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { useCart } from "@/context/CartContext";
+import { useWishlist } from "@/context/WishlistContext";
 import { useSession, signIn } from "next-auth/react";
 
 const LINKS = [
@@ -14,6 +15,7 @@ const LINKS = [
 
 export default function Nav() {
   const { count, openDrawer } = useCart();
+  const { count: wishlistCount } = useWishlist();
   const { data: session } = useSession();
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -68,6 +70,16 @@ export default function Nav() {
               Sign in
             </button>
           )}
+          <Link
+            href="/wishlist"
+            className="relative text-xs uppercase tracking-[0.18em] text-ink hover:text-sepia"
+            aria-label="Open wishlist"
+          >
+            Wishlist
+            <span className="ml-1 inline-flex min-w-5 items-center justify-center rounded-full bg-ink px-1.5 py-0.5 text-[10px] leading-none text-cream">
+              {wishlistCount}
+            </span>
+          </Link>
           <button
             onClick={openDrawer}
             className="relative text-xs uppercase tracking-[0.18em] text-ink hover:text-sepia"

@@ -6,20 +6,43 @@ import { stripe } from "@/lib/stripe";
 
 type IncomingItem = { slug: string; size: string; qty: number };
 
+// Runtime guard — `body.items` is untrusted client input, not just a type
+// assertion. Rejects non-array `items` and any item with a missing/wrong-typed
+// or non-numeric `qty` with a 400 instead of throwing (non-array) or flowing
+// a NaN qty/total into the order (bad qty) further down.
+function isIncomingItem(x: unknown): x is IncomingItem {
+  return (
+    typeof x === "object" &&
+    x !== null &&
+    typeof (x as Record<string, unknown>).slug === "string" &&
+    typeof (x as Record<string, unknown>).size === "string" &&
+    typeof (x as Record<string, unknown>).qty === "number" &&
+    Number.isFinite((x as Record<string, unknown>).qty)
+  );
+}
+
 export async function POST(req: Request) {
   const session = await getServerSession(authOptions);
   if (!session?.user?.email) {
     return NextResponse.json({ error: "not_authenticated" }, { status: 401 });
   }
 
-  let body: { items?: IncomingItem[] };
+  let body: unknown;
   try {
     body = await req.json();
   } catch {
     return NextResponse.json({ error: "bad_request" }, { status: 400 });
   }
 
-  const incoming = body.items ?? [];
+  const rawItems =
+    body && typeof body === "object"
+      ? (body as { items?: unknown }).items
+      : undefined;
+  if (!Array.isArray(rawItems) || !rawItems.every(isIncomingItem)) {
+    return NextResponse.json({ error: "bad_request" }, { status: 400 });
+  }
+  const incoming: IncomingItem[] = rawItems;
+
   if (incoming.length === 0) {
     return NextResponse.json({ error: "empty_cart" }, { status: 400 });
   }

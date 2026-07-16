@@ -24,7 +24,13 @@ export default function FilterPanel({ categories }: { categories: string[] }) {
   const activeCategory = searchParams.get("category") ?? "All";
   const activeSize = searchParams.get("size") ?? "";
   const activeSort = searchParams.get("sort") ?? "newest";
-  const [minPriceRaw, maxPriceRaw] = (searchParams.get("price") ?? "").split("-");
+  const priceParam = searchParams.get("price") ?? "";
+  const [minPriceRaw, maxPriceRaw] = priceParam.split("-");
+  // `key`ed off the URL's `price` param so these uncontrolled inputs remount
+  // (and thus reapply `defaultValue`) whenever the price filter changes
+  // externally — e.g. via clearFilters() — instead of silently keeping
+  // stale text after the filter has been removed from the URL.
+  const priceKey = priceParam || "none";
 
   function setParam(key: string, value: string | null) {
     const params = new URLSearchParams(searchParams);
@@ -104,6 +110,7 @@ export default function FilterPanel({ categories }: { categories: string[] }) {
         <p className="eyebrow mb-3">Price</p>
         <div className="flex items-center gap-2">
           <input
+            key={`min-${priceKey}`}
             type="number"
             min={0}
             placeholder="Min"
@@ -114,6 +121,7 @@ export default function FilterPanel({ categories }: { categories: string[] }) {
           />
           <span className="text-ink-soft">&ndash;</span>
           <input
+            key={`max-${priceKey}`}
             type="number"
             min={0}
             placeholder="Max"

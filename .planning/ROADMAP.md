@@ -37,7 +37,7 @@ paid purchase.
 
 ### 🚧 M2 — Ready for the world (Phases 8–11)
 
-- [ ] **Phase 8: Merchandising & Discovery** - Search, filter/sort, scalable collections, wishlist, richer PDPs, catalog built for thousands
+- [x] **Phase 8: Merchandising & Discovery** - Search, filter/sort, scalable collections, wishlist, richer PDPs, catalog built for thousands (completed 2026-07-16)
 - [ ] **Phase 9: Store Operations / Admin** - No-code admin for product CRUD, inventory, and order/fulfillment management
 - [ ] **Phase 10: Trust & Polish** - Reviews, size guides, shipping/returns, SEO, performance, accessibility, analytics
 - [ ] **Phase 11: Go Live** - Real Google OAuth + real Stripe, confirmation emails, order history, Postgres, deployment
@@ -211,7 +211,7 @@ Phases execute in numeric order: 1 → … → 7 (done) → 8 → 9 → 10 → 1
 | 5. Auth | M1 | ✓ | Complete | 2026-07-13 |
 | 6. Checkout | M1 | ✓ | Complete | 2026-07-13 |
 | 7. Polish + verification | M1 | ✓ | Complete | 2026-07-13 |
-| 8. Merchandising & Discovery | M2 | 8/8 | Complete   | 2026-07-16 |
+| 8. Merchandising & Discovery | M2 | 8/8 | Complete    | 2026-07-16 |
 | 9. Store Operations / Admin | M2 | 0/TBD | Not started | - |
 | 10. Trust & Polish | M2 | 0/TBD | Not started | - |
 | 11. Go Live | M2 | 0/TBD | Not started | - |

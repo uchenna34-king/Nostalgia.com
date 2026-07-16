@@ -1,10 +1,12 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import AddToCart from "@/components/AddToCart";
+import Gallery from "@/components/Gallery";
 import ProductCard from "@/components/ProductCard";
+import WishlistButton from "@/components/WishlistButton";
 import {
   getProductBySlug,
-  getProducts,
+  getCatalog,
   formatPrice,
 } from "@/lib/products";
 
@@ -18,9 +20,15 @@ export default async function ProductPage({
   const product = await getProductBySlug(params.slug);
   if (!product) notFound();
 
-  const related = (await getProducts(product.category))
+  const relatedResult = await getCatalog({
+    category: product.category,
+    page: 1,
+  });
+  const related = relatedResult.products
     .filter((p) => p.slug !== product.slug)
     .slice(0, 4);
+
+  const hasDetails = Boolean(product.materials || product.care);
 
   return (
     <main className="container-x py-10">
@@ -33,24 +41,7 @@ export default async function ProductPage({
       </nav>
 
       <div className="grid gap-10 lg:grid-cols-2">
-        {/* Gallery */}
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-          {product.images.map((img, i) => (
-            <div
-              key={i}
-              className={`aspect-[3/4] overflow-hidden bg-cream-dark ${
-                product.images.length > 1 && i === 0 ? "sm:col-span-2" : ""
-              }`}
-            >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={img}
-                alt={`${product.name} view ${i + 1}`}
-                className="h-full w-full object-cover"
-              />
-            </div>
-          ))}
-        </div>
+        <Gallery images={product.images} name={product.name} />
 
         {/* Details */}
         <div className="lg:sticky lg:top-24 lg:self-start">
@@ -65,8 +56,19 @@ export default async function ProductPage({
             {product.description}
           </p>
 
-          <div className="mt-8 max-w-sm">
-            <AddToCart product={product} />
+          <div className="mt-8 flex max-w-sm items-center gap-3">
+            <div className="flex-1">
+              <AddToCart product={product} />
+            </div>
+            <WishlistButton
+              product={{
+                slug: product.slug,
+                name: product.name,
+                price: product.price,
+                image: product.images[0],
+              }}
+              className="border border-ink/15"
+            />
           </div>
 
           <ul className="mt-8 space-y-1 text-xs uppercase tracking-[0.15em] text-ink-soft">
@@ -74,6 +76,18 @@ export default async function ProductPage({
             <li>— Free shipping over $200</li>
             <li>— 30-day returns</li>
           </ul>
+
+          {hasDetails && (
+            <div className="mt-8 max-w-md border-t border-ink/10 pt-6">
+              <h2 className="text-xs uppercase tracking-[0.18em] text-ink">
+                Materials & Care
+              </h2>
+              <ul className="mt-3 space-y-1 text-xs uppercase tracking-[0.15em] text-ink-soft">
+                {product.materials && <li>— {product.materials}</li>}
+                {product.care && <li>— {product.care}</li>}
+              </ul>
+            </div>
+          )}
         </div>
       </div>
 

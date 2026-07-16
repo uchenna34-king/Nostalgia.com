@@ -87,7 +87,18 @@ export async function POST(req: Request) {
   }
 
   const total = lineItems.reduce((sum, i) => sum + i.unitPrice * i.qty, 0);
-  const userId = (session.user as { id?: string }).id ?? null;
+  // `user.id` is expected to always be populated for an authenticated
+  // session (see the `session` callback in lib/auth.ts). Surface it loudly
+  // if that invariant ever breaks instead of silently writing an orphaned
+  // Order with userId: null.
+  const rawUserId = (session.user as { id?: string }).id;
+  if (!rawUserId) {
+    console.error(
+      "checkout: authenticated session is missing user.id — order will be created with userId: null",
+      { email: session.user.email },
+    );
+  }
+  const userId = rawUserId ?? null;
 
   // Never derive Stripe redirect targets from the client-controlled `Origin`
   // header — it is attacker-forgeable on any direct (non-browser) request and

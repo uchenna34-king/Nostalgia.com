@@ -24,6 +24,11 @@ export default function SearchBox() {
 
   return (
     <input
+      // Keyed off the URL's `q` param so this uncontrolled input remounts
+      // (and reapplies `defaultValue`) when `q` changes externally — e.g.
+      // FilterPanel's "Clear filters" removing `?q=` — instead of leaving a
+      // stale search term visible after the query has actually been cleared.
+      key={searchParams.get("q") ?? "none"}
       type="text"
       placeholder="Search the collection..."
       defaultValue={searchParams.get("q") ?? ""}

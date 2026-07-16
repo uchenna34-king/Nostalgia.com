@@ -50,6 +50,17 @@ export function parsePriceRange(raw: string | undefined): PriceRange {
     const max = Number(maxStr);
     if (Number.isFinite(max) && max >= 0) result.maxPrice = max;
   }
+  // Guard against an inverted range (e.g. `?price=20000-5000`), which would
+  // otherwise silently produce an impossible `price >= 20000 AND price <=
+  // 5000` where clause and zero results with no indication anything was
+  // wrong with the input.
+  if (
+    result.minPrice !== undefined &&
+    result.maxPrice !== undefined &&
+    result.minPrice > result.maxPrice
+  ) {
+    [result.minPrice, result.maxPrice] = [result.maxPrice, result.minPrice];
+  }
   return result;
 }
 

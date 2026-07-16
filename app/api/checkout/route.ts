@@ -59,6 +59,17 @@ export async function POST(req: Request) {
     .map((i) => {
       const p = bySlug.get(i.slug);
       if (!p) return null;
+      // `sizes` is a JSON-encoded string column (see lib/products.ts
+      // `deserialize`) — parse it to validate the client-supplied size
+      // against the product's real size list rather than trusting it
+      // verbatim (it is persisted to Order.items and sent to Stripe).
+      let validSizes: string[] = [];
+      try {
+        validSizes = JSON.parse(p.sizes) as string[];
+      } catch {
+        validSizes = [];
+      }
+      if (!validSizes.includes(i.size)) return null;
       const qty = Math.max(1, Math.min(20, Math.floor(i.qty)));
       return {
         slug: p.slug,

@@ -8,6 +8,7 @@ import { useSession, signIn } from "next-auth/react";
 
 const LINKS = [
   { href: "/shop", label: "Shop" },
+  { href: "/collections", label: "Collections" },
   { href: "/shop?category=Outerwear", label: "Outerwear" },
   { href: "/shop?category=Knitwear", label: "Knitwear" },
   { href: "/shop?category=Accessories", label: "Accessories" },

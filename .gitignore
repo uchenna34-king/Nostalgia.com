@@ -32,3 +32,6 @@ prisma/dev.db-journal
 
 # typescript
 *.tsbuildinfo
+
+# GSD research tooling cache (not a planning artifact)
+.planning/research/

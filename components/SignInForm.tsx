@@ -6,11 +6,14 @@ import { useState } from "react";
 export default function SignInForm({
   googleEnabled,
   callbackUrl,
+  ownerEmail,
 }: {
   googleEnabled: boolean;
   callbackUrl: string;
+  ownerEmail?: string;
 }) {
   const [loading, setLoading] = useState(false);
+  const [email, setEmail] = useState("");
 
   async function handleGoogle() {
     setLoading(true);
@@ -18,13 +21,39 @@ export default function SignInForm({
       // Real OAuth — redirects to Google's consent screen.
       await signIn("google", { callbackUrl });
     } else {
-      // Dev fallback — signs in as a demo Google user, no external setup.
-      await signIn("demo", { callbackUrl });
+      // Dev fallback — sign in as the typed demo email (blank → default demo
+      // customer via the credentials provider).
+      await signIn("demo", { email: email.trim(), callbackUrl });
     }
+  }
+
+  async function handleOwner() {
+    setLoading(true);
+    // Dev convenience: sign in as the store owner and go straight to /admin.
+    await signIn("demo", { email: ownerEmail, callbackUrl: "/admin" });
   }
 
   return (
     <div className="w-full max-w-sm">
+      {!googleEnabled && (
+        <div className="mb-4 text-left">
+          <label
+            htmlFor="dev-email"
+            className="mb-1 block text-xs uppercase tracking-[0.15em] text-ink-soft"
+          >
+            Dev email (optional)
+          </label>
+          <input
+            id="dev-email"
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="you@example.com"
+            className="w-full border border-ink/20 bg-cream px-3 py-2.5 text-sm"
+          />
+        </div>
+      )}
+
       <button
         onClick={handleGoogle}
         disabled={loading}
@@ -52,12 +81,28 @@ export default function SignInForm({
       </button>
 
       {!googleEnabled && (
-        <p className="mt-4 text-center text-xs text-ink-soft">
-          Dev mode: no Google keys set, so this signs you in as a demo customer.
-          Add <span className="font-mono">GOOGLE_CLIENT_ID</span> /{" "}
-          <span className="font-mono">GOOGLE_CLIENT_SECRET</span> in{" "}
-          <span className="font-mono">.env</span> for real Google auth.
-        </p>
+        <>
+          <button
+            onClick={handleOwner}
+            disabled={loading}
+            className="mt-3 w-full border border-sepia px-6 py-3 text-sm font-medium text-sepia transition-colors hover:bg-sepia hover:text-cream disabled:opacity-60"
+          >
+            Sign in as store owner → Admin
+          </button>
+          <p className="mt-4 text-center text-xs text-ink-soft">
+            Dev mode: no Google keys set. Leave email blank to sign in as a demo
+            customer, or use “Sign in as store owner” to open the admin
+            {ownerEmail ? (
+              <>
+                {" "}
+                as <span className="font-mono">{ownerEmail}</span>
+              </>
+            ) : null}
+            . Add <span className="font-mono">GOOGLE_CLIENT_ID</span> /{" "}
+            <span className="font-mono">GOOGLE_CLIENT_SECRET</span> in{" "}
+            <span className="font-mono">.env</span> for real Google auth.
+          </p>
+        </>
       )}
     </div>
   );

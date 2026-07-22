@@ -1,0 +1,1 @@
+{"content":"next-auth middleware.ts withAuth supports JWT-strategy sessions only, matcher config protects page routes only -- does not cover Server Actions/Route Handlers, which need independent per-action guards.","source":"web","provider":"websearch","confidence":"MEDIUM","fetched_at":"2026-07-20T09:35:31.675Z","ttl":86400000,"kind":"docs"}

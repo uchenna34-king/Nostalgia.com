@@ -1,0 +1,1 @@
+{"content":"Next.js Server Actions are public HTTP endpoints with no built-in authorization; every action must independently verify auth/authz and explicitly validate input, never spread raw FormData into ORM writes.","source":"web","provider":"websearch","confidence":"LOW","fetched_at":"2026-07-20T09:35:32.467Z","ttl":86400000,"kind":"web"}

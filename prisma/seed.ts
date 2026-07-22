@@ -2,6 +2,9 @@ import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
+// Default per-size stock for any size not given an explicit count below.
+const DEFAULT_STOCK = 8;
+
 type Seed = {
   slug: string;
   name: string;
@@ -12,7 +15,17 @@ type Seed = {
   featured?: boolean;
   materials?: string;
   care?: string;
+  stock?: Record<string, number>; // per-size stock override; sizes omitted default to DEFAULT_STOCK
 };
+
+// Resolve a product's per-size stock rows (explicit override or DEFAULT_STOCK), position-ordered by its sizes list.
+function resolveVariants(p: Seed): { size: string; stock: number; position: number }[] {
+  return p.sizes.map((size, position) => ({
+    size,
+    position,
+    stock: p.stock?.[size] ?? DEFAULT_STOCK,
+  }));
+}
 
 const products: Seed[] = [
   {
@@ -50,6 +63,7 @@ const products: Seed[] = [
     featured: true,
     materials: "100% hand-framed lambswool.",
     care: "Hand wash cold. Dry flat, away from direct heat.",
+    stock: { S: 0 }, // fixture: one sold-out size (partial), rest default in stock
   },
   {
     slug: "faded-mohair-cardigan",
@@ -110,6 +124,7 @@ const products: Seed[] = [
     description:
       "Six-panel corduroy cap in burnt sepia with an embroidered eyelet vent and adjustable strap.",
     sizes: ["One Size"],
+    stock: { "One Size": 0 }, // fixture: entirely sold out -> hidden from listings
   },
   {
     slug: "leather-tote",
@@ -159,13 +174,17 @@ const collections: {
 ];
 
 async function main() {
-  // FK-safe truncation order: order -> productImage -> collection -> product
+  // FK-safe truncation order: order -> productImage -> productSizeStock -> collection -> product
   await prisma.order.deleteMany();
   await prisma.productImage.deleteMany();
+  await prisma.productSizeStock.deleteMany();
   await prisma.collection.deleteMany();
   await prisma.product.deleteMany();
 
+  let sizeStockRows = 0;
   for (const p of products) {
+    const variants = resolveVariants(p);
+    sizeStockRows += variants.length;
     await prisma.product.create({
       data: {
         slug: p.slug,
@@ -182,6 +201,9 @@ async function main() {
             { url: `/products/${p.slug}-1.svg`, position: 0 },
             { url: `/products/${p.slug}-2.svg`, position: 1 },
           ],
+        },
+        variants: {
+          create: variants,
         },
       },
     });
@@ -200,8 +222,25 @@ async function main() {
     });
   }
 
+  // Invariant assertions: guarantee the downstream stock-aware fixtures exist, so `npm run seed`
+  // exiting 0 is itself proof that (a) a fully sold-out product and (b) a partial sold-out size were created.
+  const fullySoldOut = products.some((p) => {
+    const v = resolveVariants(p);
+    return v.length > 0 && v.every((row) => row.stock === 0);
+  });
+  const partialSoldOut = products.some((p) => {
+    const v = resolveVariants(p);
+    return v.some((row) => row.stock === 0) && v.some((row) => row.stock > 0);
+  });
+  if (!fullySoldOut) {
+    throw new Error("Seed invariant failed: expected at least one fully sold-out product (all sizes 0).");
+  }
+  if (!partialSoldOut) {
+    throw new Error("Seed invariant failed: expected at least one product with a partial sold-out size.");
+  }
+
   console.log(
-    `Seeded ${products.length} products, ${products.length * 2} images, ${collections.length} collections.`,
+    `Seeded ${products.length} products, ${products.length * 2} images, ${sizeStockRows} size-stock rows, ${collections.length} collections.`,
   );
 }
 

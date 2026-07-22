@@ -10,6 +10,8 @@ import {
 
 export { PAGE_SIZE };
 
+export type ProductVariant = { size: string; stock: number };
+
 export type Product = {
   id: string;
   slug: string;
@@ -19,6 +21,7 @@ export type Product = {
   description: string;
   images: string[];
   sizes: string[];
+  variants: ProductVariant[];
   featured: boolean;
   materials?: string | null;
   care?: string | null;
@@ -36,11 +39,13 @@ function deserialize(row: {
   materials?: string | null;
   care?: string | null;
   images: { url: string }[];
+  variants: { size: string; stock: number }[];
 }): Product {
   return {
     ...row,
     images: row.images.map((img) => img.url),
     sizes: JSON.parse(row.sizes) as string[],
+    variants: row.variants.map((v) => ({ size: v.size, stock: v.stock })),
   };
 }
 
@@ -48,7 +53,10 @@ export async function getProducts(category?: string): Promise<Product[]> {
   const rows = await prisma.product.findMany({
     where: category && category !== "All" ? { category } : undefined,
     orderBy: { createdAt: "asc" },
-    include: { images: { orderBy: { position: "asc" } } },
+    include: {
+      images: { orderBy: { position: "asc" } },
+      variants: { orderBy: { position: "asc" } },
+    },
   });
   return rows.map(deserialize);
 }
@@ -57,7 +65,10 @@ export async function getFeaturedProducts(): Promise<Product[]> {
   const rows = await prisma.product.findMany({
     where: { featured: true },
     orderBy: { createdAt: "asc" },
-    include: { images: { orderBy: { position: "asc" } } },
+    include: {
+      images: { orderBy: { position: "asc" } },
+      variants: { orderBy: { position: "asc" } },
+    },
   });
   return rows.map(deserialize);
 }
@@ -65,7 +76,10 @@ export async function getFeaturedProducts(): Promise<Product[]> {
 export async function getProductBySlug(slug: string): Promise<Product | null> {
   const row = await prisma.product.findUnique({
     where: { slug },
-    include: { images: { orderBy: { position: "asc" } } },
+    include: {
+      images: { orderBy: { position: "asc" } },
+      variants: { orderBy: { position: "asc" } },
+    },
   });
   return row ? deserialize(row) : null;
 }
@@ -128,7 +142,10 @@ export async function getCatalog(params: CatalogParams): Promise<CatalogResult> 
   const rows = await prisma.product.findMany({
     where,
     orderBy,
-    include: { images: { orderBy: { position: "asc" } } },
+    include: {
+      images: { orderBy: { position: "asc" } },
+      variants: { orderBy: { position: "asc" } },
+    },
     skip: meta.skip,
     take: meta.take,
   });

@@ -1,0 +1,1 @@
+{"content":"prisma db push has no migration history/files, best for prototyping; prisma migrate dev maintains migration history and will prompt a DB reset if run against a DB previously managed only by db push.","source":"web","provider":"websearch","confidence":"MEDIUM","fetched_at":"2026-07-20T09:35:32.061Z","ttl":86400000,"kind":"docs"}

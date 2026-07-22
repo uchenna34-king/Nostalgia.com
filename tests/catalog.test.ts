@@ -112,14 +112,32 @@ describe("buildProductWhere", () => {
     }
   });
 
-  it("size uses a quote-guarded contains", () => {
+  it("size filters by an in-stock variant relation (not the JSON sizes column)", () => {
     const where = buildProductWhere({ size: "M" }) as { AND: unknown[] };
     const sizeClause = where.AND.find(
-      (c) => c && typeof c === "object" && "sizes" in (c as object),
-    ) as { sizes: { contains: string } };
+      (c) =>
+        c &&
+        typeof c === "object" &&
+        "variants" in (c as object) &&
+        (c as { variants: { some: { size?: string } } }).variants.some.size !==
+          undefined,
+    ) as { variants: { some: { size: string; stock: { gt: number } } } };
     expect(sizeClause).toBeDefined();
-    expect(sizeClause.sizes.contains).toBe(`"M"`);
-    expect(sizeClause.sizes.contains).toHaveLength(3);
+    expect(sizeClause.variants.some.size).toBe("M");
+    expect(sizeClause.variants.some.stock.gt).toBe(0);
+    // the old JSON quote-guard against the `sizes` column must be gone
+    for (const clause of where.AND) {
+      expect(clause).not.toHaveProperty("sizes");
+    }
+  });
+
+  it("always includes an in-stock clause (hides fully sold-out products)", () => {
+    for (const params of [{}, { category: "Outerwear" }, { q: "wool" }]) {
+      const where = buildProductWhere(params) as { AND: unknown[] };
+      expect(where.AND).toContainEqual({
+        variants: { some: { stock: { gt: 0 } } },
+      });
+    }
   });
 
   it("minPrice produces a gte clause", () => {
@@ -139,12 +157,13 @@ describe("buildProductWhere", () => {
     });
   });
 
-  it("empty params produce a where with no effective filters", () => {
+  it("empty params produce only the always-on in-stock clause", () => {
     const where = buildProductWhere({}) as { AND: unknown[] };
     expect(Array.isArray(where.AND)).toBe(true);
-    for (const clause of where.AND) {
-      expect(clause).toEqual({});
-    }
+    const nonEmpty = where.AND.filter(
+      (c) => c && typeof c === "object" && Object.keys(c as object).length > 0,
+    );
+    expect(nonEmpty).toEqual([{ variants: { some: { stock: { gt: 0 } } } }]);
   });
 });
 

@@ -77,13 +77,16 @@ export type CatalogFilterParams = {
  * Builds a Prisma `Product.where` clause from untrusted URL params. Search is
  * an OR across name/description/category; all other filters AND together.
  *
- * SQLite-only workarounds isolated here (revisit at the Phase 11 Postgres
- * migration — RESEARCH Pitfalls 2/3):
- * - `contains` search is case-sensitive on SQLite (no `mode: "insensitive"`,
- *   which is Postgres/MongoDB-only and unsupported here).
- * - `sizes` is still a JSON-encoded string column, so size filtering is a
- *   quote-guarded string `contains` (`'"M"'`) rather than a real relational
- *   or JSON-array filter, so "M" doesn't also match inside "SM".
+ * Stock (D-09): every query carries an always-on `inStockClause`
+ * (`variants: { some: { stock: { gt: 0 } } }`), so a fully-sold-out product is
+ * hidden from `/shop` AND every collection listing. The `?size=` filter is
+ * likewise stock-aware — it matches only products offering that size in stock —
+ * via the relational `ProductSizeStock` table (replacing the old SQLite JSON
+ * quote-guard string match on the `sizes` column).
+ *
+ * SQLite-only workaround still isolated here (revisit at the Phase 11 Postgres
+ * migration): `contains` search is case-sensitive on SQLite (no
+ * `mode: "insensitive"`, which is Postgres/MongoDB-only and unsupported here).
  */
 export function buildProductWhere(
   params: CatalogFilterParams,
@@ -103,11 +106,19 @@ export function buildProductWhere(
   const categoryClause: Prisma.ProductWhereInput =
     category && category !== "All" ? { category } : {};
 
-  // SQLite-specific: sizes is JSON text, not a native array — quote-guard the
-  // contains so "M" cannot match inside another size token like "SM".
+  // Stock-aware, relational size filter (D-09): a `?size=M` filter returns only
+  // products that offer M *in stock*. Replaces the old SQLite JSON quote-guard
+  // string match against the `sizes` column. (To later mean "offers M
+  // regardless of stock", drop the inner `stock` filter — a one-line change.)
   const sizeClause: Prisma.ProductWhereInput = size
-    ? { sizes: { contains: `"${size}"` } }
+    ? { variants: { some: { size, stock: { gt: 0 } } } }
     : {};
+
+  // Always-on: hide any product whose every size is 0 (D-09). `some: stock > 0`
+  // (not `none`) also excludes a malformed product with zero variant rows.
+  const inStockClause: Prisma.ProductWhereInput = {
+    variants: { some: { stock: { gt: 0 } } },
+  };
 
   const minPriceClause: Prisma.ProductWhereInput =
     minPrice !== undefined ? { price: { gte: minPrice } } : {};
@@ -127,6 +138,7 @@ export function buildProductWhere(
       minPriceClause,
       maxPriceClause,
       collectionClause,
+      inStockClause,
     ],
   };
 }

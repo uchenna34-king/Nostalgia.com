@@ -1,8 +1,8 @@
 ---
 phase: 10
 slug: trust-polish
-status: draft
-nyquist_compliant: false
+status: approved
+nyquist_compliant: true
 wave_0_complete: false
 created: 2026-07-24
 ---
@@ -90,6 +90,6 @@ created: 2026-07-24
 - [ ] Wave 0 covers all MISSING references (`jest-axe` install + 5 new test files)
 - [ ] No watch-mode flags (all commands use `vitest run`, not `vitest`)
 - [ ] Feedback latency < 30s
-- [ ] `nyquist_compliant: true` set in frontmatter (after planner wires tasks)
+- [x] `nyquist_compliant: true` set in frontmatter (after planner wires tasks)
 
-**Approval:** pending
+**Approval:** approved 2026-07-24 (plan-checker VERIFICATION PASSED, 12/12 plans)

@@ -8,8 +8,8 @@ datasource db {
 }
 
 model Product {
-  id          String   @id @default(cuid())
-  slug        String   @unique
+  id          String             @id @default(cuid())
+  slug        String             @unique
   name        String
   price       Int // stored in cents
   category    String
@@ -17,11 +17,12 @@ model Product {
   materials   String?
   care        String?
   sizes       String // JSON-encoded string[]
-  featured    Boolean  @default(false)
-  createdAt   DateTime @default(now())
+  featured    Boolean            @default(false)
+  createdAt   DateTime           @default(now())
   images      ProductImage[]
   variants    ProductSizeStock[]
   collections Collection[]
+  reviews     Review[]
 
   @@index([category])
   @@index([price])
@@ -51,6 +52,26 @@ model ProductSizeStock {
   @@index([productId])
 }
 
+// Verified-purchase product reviews (D-01, D-03). Mirrors ProductSizeStock:
+// cuid id, String FKs with onDelete: Cascade, a compound @@unique, and an
+// @@index on each FK. One review per user per product enforced at the DB level.
+model Review {
+  id        String   @id @default(cuid())
+  productId String
+  userId    String
+  rating    Int // 1-5, validated in app code (not a DB check) for SQLite-now / Postgres-later portability
+  title     String
+  body      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([productId, userId])
+  @@index([productId])
+  @@index([userId])
+}
+
 model Collection {
   id          String    @id @default(cuid())
   slug        String    @unique
@@ -60,17 +81,17 @@ model Collection {
 }
 
 model Order {
-  id        String   @id @default(cuid())
-  userId    String?
-  email     String
-  items     String // JSON-encoded cart items
-  total     Int // cents
+  id             String   @id @default(cuid())
+  userId         String?
+  email          String
+  items          String // JSON-encoded cart items
+  total          Int // cents
   // status allowed values (enforced in app code via allow-list, not a DB enum, for SQLite-now / Postgres-later portability): pending, paid, fulfilled, cancelled
   status         String   @default("pending")
   trackingNumber String?
   notes          String?
-  createdAt DateTime @default(now())
-  user      User?    @relation(fields: [userId], references: [id])
+  createdAt      DateTime @default(now())
+  user           User?    @relation(fields: [userId], references: [id])
 }
 
 // ---- NextAuth models ----
@@ -83,6 +104,7 @@ model User {
   accounts      Account[]
   sessions      Session[]
   orders        Order[]
+  reviews       Review[]
 }
 
 model Account {

@@ -1,4 +1,5 @@
 import { PrismaClient } from "@prisma/client";
+import { parseOrderItems, type OrderItem } from "../lib/orders";
 
 const prisma = new PrismaClient();
 
@@ -173,8 +174,68 @@ const collections: {
   },
 ];
 
+// Verified-purchase review fixtures (D-01, D-03). Each reviewer is a real user
+// who "purchased" the products they review; an Order snapshot backs every review
+// so the seed invariant below can prove the verified-purchase trust signal.
+// friend@nostalgia.test matches the demo-login default so a manual login lands
+// on an existing verified purchaser.
+type ReviewFixture = {
+  slug: string;
+  size: string;
+  rating: number; // 1-5
+  title: string;
+  body?: string; // optional per D-03 — at least one omitted to exercise the null path
+};
+const reviewers: { email: string; name: string; status: string; reviews: ReviewFixture[] }[] = [
+  {
+    email: "friend@nostalgia.test",
+    name: "Nostalgia Friend",
+    status: "fulfilled",
+    reviews: [
+      {
+        slug: "sepia-wool-overcoat",
+        size: "M",
+        rating: 5,
+        title: "Wears like an heirloom",
+        body: "The sepia deepens with every wear and the shoulders sit exactly right. Worth every cent.",
+      },
+      {
+        slug: "nostalgia-hoodie",
+        size: "L",
+        rating: 4,
+        title: "My weekend uniform",
+        body: "Brushed interior is unreal. Only wish the cocoa ran a touch darker.",
+      },
+    ],
+  },
+  {
+    email: "mara@nostalgia.test",
+    name: "Mara Quinn",
+    status: "paid",
+    reviews: [
+      // Body intentionally omitted — exercises the optional-body path.
+      { slug: "sepia-wool-overcoat", size: "S", rating: 4, title: "Archive silhouette, done right" },
+    ],
+  },
+  {
+    email: "theo@nostalgia.test",
+    name: "Theo Vance",
+    status: "paid",
+    reviews: [
+      {
+        slug: "vintage-box-tee",
+        size: "M",
+        rating: 5,
+        title: "The only tee I reach for",
+        body: "Heavyweight and boxy without swallowing me. Already bought two more.",
+      },
+    ],
+  },
+];
+
 async function main() {
-  // FK-safe truncation order: order -> productImage -> productSizeStock -> collection -> product
+  // FK-safe truncation order: review -> order -> productImage -> productSizeStock -> collection -> product
+  await prisma.review.deleteMany();
   await prisma.order.deleteMany();
   await prisma.productImage.deleteMany();
   await prisma.productSizeStock.deleteMany();
@@ -222,6 +283,91 @@ async function main() {
     });
   }
 
+  // ---- Verified-purchase reviews (TRST-01) ----
+  // Map slug -> created product so orders/reviews reference real ids and copy real names/prices.
+  const productRows = await prisma.product.findMany({
+    select: { id: true, slug: true, name: true, price: true },
+  });
+  const bySlug = new Map(productRows.map((p) => [p.slug, p]));
+
+  let reviewerCount = 0;
+  let orderCount = 0;
+  let reviewCount = 0;
+  for (const r of reviewers) {
+    const user = await prisma.user.upsert({
+      where: { email: r.email },
+      update: { name: r.name },
+      create: { email: r.email, name: r.name },
+    });
+    reviewerCount++;
+
+    // One paid/fulfilled order snapshotting every product this reviewer reviews,
+    // so each review is a genuine verified purchase (slug present in the order items).
+    const items: OrderItem[] = r.reviews.map((rev) => {
+      const p = bySlug.get(rev.slug);
+      if (!p) throw new Error(`Seed error: review references unknown product slug "${rev.slug}".`);
+      return { slug: p.slug, name: p.name, size: rev.size, unitPrice: p.price, qty: 1 };
+    });
+    const total = items.reduce((sum, it) => sum + it.unitPrice * it.qty, 0);
+    await prisma.order.create({
+      data: {
+        userId: user.id,
+        email: r.email,
+        items: JSON.stringify(items),
+        total,
+        status: r.status,
+      },
+    });
+    orderCount++;
+
+    for (const rev of r.reviews) {
+      const p = bySlug.get(rev.slug)!;
+      await prisma.review.create({
+        data: {
+          productId: p.id,
+          userId: user.id,
+          rating: rev.rating,
+          title: rev.title,
+          body: rev.body,
+        },
+      });
+      reviewCount++;
+    }
+  }
+
+  // Verified-purchase invariant: every seeded review must be backed by a paid/fulfilled
+  // order for the same user whose items snapshot contains the reviewed product's slug.
+  // `npm run seed` exiting 0 is therefore proof no fabricated "verified purchase" exists.
+  const seededReviews = await prisma.review.findMany({
+    select: { userId: true, product: { select: { slug: true } } },
+  });
+  const paidOrders = await prisma.order.findMany({
+    where: { status: { in: ["paid", "fulfilled"] } },
+    select: { userId: true, items: true },
+  });
+  for (const rev of seededReviews) {
+    const backed = paidOrders.some(
+      (o) =>
+        o.userId === rev.userId &&
+        parseOrderItems(o.items).some((it) => it.slug === rev.product.slug),
+    );
+    if (!backed) {
+      throw new Error(
+        `Seed invariant failed: review of "${rev.product.slug}" is not backed by a paid/fulfilled order for its user.`,
+      );
+    }
+  }
+  if (reviewCount < 4) {
+    throw new Error(`Seed invariant failed: expected at least 4 reviews, got ${reviewCount}.`);
+  }
+  const perProduct = new Map<string, number>();
+  for (const rev of seededReviews) {
+    perProduct.set(rev.product.slug, (perProduct.get(rev.product.slug) ?? 0) + 1);
+  }
+  if (![...perProduct.values()].some((n) => n >= 2)) {
+    throw new Error("Seed invariant failed: expected at least one product with 2+ reviews.");
+  }
+
   // Invariant assertions: guarantee the downstream stock-aware fixtures exist, so `npm run seed`
   // exiting 0 is itself proof that (a) a fully sold-out product and (b) a partial sold-out size were created.
   const fullySoldOut = products.some((p) => {
@@ -240,7 +386,7 @@ async function main() {
   }
 
   console.log(
-    `Seeded ${products.length} products, ${products.length * 2} images, ${sizeStockRows} size-stock rows, ${collections.length} collections.`,
+    `Seeded ${products.length} products, ${products.length * 2} images, ${sizeStockRows} size-stock rows, ${collections.length} collections, ${reviewerCount} reviewers, ${orderCount} purchase orders, ${reviewCount} verified-purchase reviews.`,
   );
 }
 

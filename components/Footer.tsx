@@ -43,6 +43,16 @@ export default function Footer() {
             <li>Journal</li>
             <li>Stockists</li>
             <li>Contact</li>
+            <li>
+              <Link href="/shipping" className="link-underline">
+                Shipping
+              </Link>
+            </li>
+            <li>
+              <Link href="/returns" className="link-underline">
+                Returns
+              </Link>
+            </li>
           </ul>
         </div>
       </div>

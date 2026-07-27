@@ -73,8 +73,18 @@ export default async function ProductPage({
 
           <ul className="mt-8 space-y-1 text-xs uppercase tracking-[0.15em] text-ink-soft">
             <li>— Made in limited runs</li>
-            <li>— Free shipping over $200</li>
-            <li>— 30-day returns</li>
+            <li>
+              —{" "}
+              <Link href="/shipping" className="link-underline">
+                Free shipping over $200
+              </Link>
+            </li>
+            <li>
+              —{" "}
+              <Link href="/returns" className="link-underline">
+                30-day returns
+              </Link>
+            </li>
           </ul>
 
           {hasDetails && (

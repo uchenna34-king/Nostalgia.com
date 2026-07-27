@@ -3,9 +3,16 @@
 import { useState } from "react";
 import { useCart } from "@/context/CartContext";
 import type { Product } from "@/lib/products";
+import { getSizeGuide } from "@/lib/size-guides";
+import SizeGuideModal from "@/components/SizeGuideModal";
 
 export default function AddToCart({ product }: { product: Product }) {
   const { addItem } = useCart();
+
+  // Always resolve a renderable guide (D-07 safe fallback): unknown categories
+  // fall back to the Tees chart rather than hiding the trigger or crashing.
+  const sizeGuide = getSizeGuide(product.category) ?? getSizeGuide("Tees")!;
+  const [guideOpen, setGuideOpen] = useState(false);
 
   const allSoldOut =
     product.variants.length === 0 ||
@@ -40,9 +47,18 @@ export default function AddToCart({ product }: { product: Product }) {
     <div>
       <div className="mb-2 flex items-center justify-between">
         <p className="eyebrow">Size</p>
-        {error && !size && (
-          <span className="text-xs text-sepia">Select a size</span>
-        )}
+        <div className="flex flex-wrap items-center justify-end gap-x-3 gap-y-1">
+          {error && !size && (
+            <span className="text-xs text-sepia">Select a size</span>
+          )}
+          <button
+            type="button"
+            onClick={() => setGuideOpen(true)}
+            className="text-xs uppercase tracking-[0.15em] text-sepia link-underline"
+          >
+            Size guide
+          </button>
+        </div>
       </div>
       <div className="flex flex-wrap gap-2">
         {product.variants.map((v) => {
@@ -79,6 +95,12 @@ export default function AddToCart({ product }: { product: Product }) {
       >
         {allSoldOut ? "Sold out" : "Add to cart"}
       </button>
+
+      <SizeGuideModal
+        sizeGuide={sizeGuide}
+        open={guideOpen}
+        onClose={() => setGuideOpen(false)}
+      />
     </div>
   );
 }

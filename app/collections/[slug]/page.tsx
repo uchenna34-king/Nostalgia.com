@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import ProductGrid from "@/components/ProductGrid";
@@ -5,6 +6,25 @@ import Pagination from "@/components/shop/Pagination";
 import { getCatalog, getCollectionBySlug } from "@/lib/products";
 
 export const dynamic = "force-dynamic";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: { slug: string };
+}): Promise<Metadata> {
+  const collection = await getCollectionBySlug(params.slug);
+  if (!collection) return {};
+  const title = `${collection.name} — Nostalgia`;
+  const description =
+    collection.description ??
+    `Shop the ${collection.name} collection from Nostalgia.`;
+  return {
+    title,
+    description,
+    openGraph: { title, description },
+    twitter: { card: "summary_large_image", title, description },
+  };
+}
 
 type CollectionSearchParams = {
   sort?: string;

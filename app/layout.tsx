@@ -6,6 +6,7 @@ import AppFrame from "@/components/AppFrame";
 import "./globals.css";
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXTAUTH_URL ?? "http://localhost:3002"),
   title: "Nostalgia — Wear the memory",
   description:
     "Nostalgia is a clothing house blending vintage editorial, quiet luxury, and bold streetwear.",

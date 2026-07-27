@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import AddToCart from "@/components/AddToCart";
@@ -12,8 +13,34 @@ import {
   formatPrice,
 } from "@/lib/products";
 import { getReviewsForProduct } from "@/lib/reviews";
+import { buildProductJsonLd, serializeJsonLd } from "@/lib/seo";
 
 export const dynamic = "force-dynamic";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: { slug: string };
+}): Promise<Metadata> {
+  const product = await getProductBySlug(params.slug);
+  if (!product) return {};
+  const image = product.images[0] ? [{ url: product.images[0] }] : undefined;
+  return {
+    title: `${product.name} — Nostalgia`,
+    description: product.description,
+    openGraph: {
+      title: product.name,
+      description: product.description,
+      images: image,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: product.name,
+      description: product.description,
+      images: product.images[0] ? [product.images[0]] : undefined,
+    },
+  };
+}
 
 /** Server-side relative date so there is no client/server hydration mismatch. */
 const RELATIVE = new Intl.RelativeTimeFormat("en", { numeric: "auto" });
@@ -58,8 +85,26 @@ export default async function ProductPage({
     dateLabel: relativeDate(r.createdAt),
   }));
 
+  // Product JSON-LD (SEO-01, D-14). aggregateRating reuses the same
+  // product.rating as the on-page summary, so structured data and the visible
+  // number can never disagree (D-04). Escaped against <script> breakout.
+  const jsonLd = serializeJsonLd(
+    buildProductJsonLd({
+      name: product.name,
+      images: product.images,
+      description: product.description,
+      price: product.price,
+      inStock: product.variants.some((v) => v.stock > 0),
+      rating: product.rating ?? { avg: 0, count: 0 },
+    }),
+  );
+
   return (
     <main className="container-x py-10">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: jsonLd }}
+      />
       <nav className="mb-8 text-xs uppercase tracking-[0.18em] text-ink-soft">
         <Link href="/shop" className="link-underline">
           Shop

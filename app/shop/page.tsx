@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { Suspense } from "react";
 import Link from "next/link";
 import ProductGrid from "@/components/ProductGrid";
@@ -7,6 +8,26 @@ import Pagination from "@/components/shop/Pagination";
 import { getCatalog } from "@/lib/products";
 
 export const dynamic = "force-dynamic";
+
+export async function generateMetadata({
+  searchParams,
+}: {
+  searchParams: { category?: string };
+}): Promise<Metadata> {
+  const category = searchParams.category;
+  const title =
+    category && category !== "All"
+      ? `${category} — Nostalgia`
+      : "Shop all — Nostalgia";
+  const description =
+    "Browse the Nostalgia collection — vintage editorial, quiet luxury, and bold streetwear, made in limited runs.";
+  return {
+    title,
+    description,
+    openGraph: { title, description },
+    twitter: { card: "summary_large_image", title, description },
+  };
+}
 
 type ShopSearchParams = {
   q?: string;

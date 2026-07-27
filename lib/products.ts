@@ -7,6 +7,7 @@ import {
   parsePage,
   parsePriceRange,
 } from "@/lib/catalog";
+import { getRatingSummaries, type RatingSummary } from "@/lib/reviews";
 
 export { PAGE_SIZE };
 
@@ -25,6 +26,7 @@ export type Product = {
   featured: boolean;
   materials?: string | null;
   care?: string | null;
+  rating: RatingSummary;
 };
 
 function deserialize(row: {
@@ -40,13 +42,25 @@ function deserialize(row: {
   care?: string | null;
   images: { url: string }[];
   variants: { size: string; stock: number }[];
-}): Product {
+}): Omit<Product, "rating"> {
   return {
     ...row,
     images: row.images.map((img) => img.url),
     sizes: JSON.parse(row.sizes) as string[],
     variants: row.variants.map((v) => ({ size: v.size, stock: v.stock })),
   };
+}
+
+/**
+ * Attach aggregate ratings to a set of deserialized products via ONE bounded
+ * getRatingSummaries call (D-04). The zero-review default is mandatory: groupBy
+ * omits reviewless products, and an undefined rating would crash the PDP/card or
+ * produce NaN in a star-width calc (RESEARCH Pitfall 2). This runs AFTER the
+ * stock-aware rows are fetched — rating is never merged into the where clause.
+ */
+async function withRatings(base: Omit<Product, "rating">[]): Promise<Product[]> {
+  const summaries = await getRatingSummaries(base.map((p) => p.id));
+  return base.map((p) => ({ ...p, rating: summaries.get(p.id) ?? { avg: 0, count: 0 } }));
 }
 
 export async function getProducts(category?: string): Promise<Product[]> {
@@ -58,7 +72,7 @@ export async function getProducts(category?: string): Promise<Product[]> {
       variants: { orderBy: { position: "asc" } },
     },
   });
-  return rows.map(deserialize);
+  return withRatings(rows.map(deserialize));
 }
 
 export async function getFeaturedProducts(): Promise<Product[]> {
@@ -70,7 +84,7 @@ export async function getFeaturedProducts(): Promise<Product[]> {
       variants: { orderBy: { position: "asc" } },
     },
   });
-  return rows.map(deserialize);
+  return withRatings(rows.map(deserialize));
 }
 
 export async function getProductBySlug(slug: string): Promise<Product | null> {
@@ -81,7 +95,9 @@ export async function getProductBySlug(slug: string): Promise<Product | null> {
       variants: { orderBy: { position: "asc" } },
     },
   });
-  return row ? deserialize(row) : null;
+  if (!row) return null;
+  const [product] = await withRatings([deserialize(row)]);
+  return product;
 }
 
 export async function getCategories(): Promise<string[]> {
@@ -151,7 +167,7 @@ export async function getCatalog(params: CatalogParams): Promise<CatalogResult> 
   });
 
   return {
-    products: rows.map(deserialize),
+    products: await withRatings(rows.map(deserialize)),
     total,
     totalPages: meta.totalPages,
     page: meta.page,

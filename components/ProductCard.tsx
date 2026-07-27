@@ -2,8 +2,10 @@ import Link from "next/link";
 import type { Product } from "@/lib/products";
 import { formatPrice } from "@/lib/products";
 import WishlistButton from "@/components/WishlistButton";
+import RatingStars from "@/components/RatingStars";
 
 export default function ProductCard({ product }: { product: Product }) {
+  const reviewCount = product.rating?.count ?? 0;
   return (
     <Link href={`/product/${product.slug}`} className="group block">
       <div className="relative aspect-[3/4] overflow-hidden bg-cream-dark">
@@ -39,6 +41,12 @@ export default function ProductCard({ product }: { product: Product }) {
         <h3 className="font-serif text-lg leading-tight">{product.name}</h3>
         <span className="text-sm text-ink-soft">{formatPrice(product.price)}</span>
       </div>
+      {reviewCount > 0 && (
+        <div className="mt-1 flex items-center gap-1 text-[11px] text-ink-soft">
+          <RatingStars value={product.rating.avg} size={16} count={reviewCount} />
+          <span>({reviewCount})</span>
+        </div>
+      )}
     </Link>
   );
 }

@@ -3,14 +3,30 @@ import { notFound } from "next/navigation";
 import AddToCart from "@/components/AddToCart";
 import Gallery from "@/components/Gallery";
 import ProductCard from "@/components/ProductCard";
+import RatingStars from "@/components/RatingStars";
+import ReviewList, { type ReviewDisplay } from "@/components/ReviewList";
 import WishlistButton from "@/components/WishlistButton";
 import {
   getProductBySlug,
   getCatalog,
   formatPrice,
 } from "@/lib/products";
+import { getReviewsForProduct } from "@/lib/reviews";
 
 export const dynamic = "force-dynamic";
+
+/** Server-side relative date so there is no client/server hydration mismatch. */
+const RELATIVE = new Intl.RelativeTimeFormat("en", { numeric: "auto" });
+function relativeDate(from: Date): string {
+  const diffMs = from.getTime() - Date.now();
+  const day = 86_400_000;
+  const abs = Math.abs(diffMs);
+  if (abs >= 365 * day) return RELATIVE.format(Math.round(diffMs / (365 * day)), "year");
+  if (abs >= 30 * day) return RELATIVE.format(Math.round(diffMs / (30 * day)), "month");
+  if (abs >= 7 * day) return RELATIVE.format(Math.round(diffMs / (7 * day)), "week");
+  if (abs >= day) return RELATIVE.format(Math.round(diffMs / day), "day");
+  return "today";
+}
 
 export default async function ProductPage({
   params,
@@ -29,6 +45,18 @@ export default async function ProductPage({
     .slice(0, 4);
 
   const hasDetails = Boolean(product.materials || product.care);
+
+  // Verified-purchase reviews (bounded set) for the #reviews list.
+  const { reviews: reviewRows } = await getReviewsForProduct(product.id);
+  const reviews: ReviewDisplay[] = reviewRows.map((r) => ({
+    id: r.id,
+    rating: r.rating,
+    title: r.title,
+    body: r.body,
+    authorName: r.authorName.split(/\s+/)[0] || "A Nostalgia customer",
+    dateIso: r.createdAt.toISOString(),
+    dateLabel: relativeDate(r.createdAt),
+  }));
 
   return (
     <main className="container-x py-10">
@@ -52,6 +80,31 @@ export default async function ProductPage({
           <p className="mt-3 text-xl text-ink-soft">
             {formatPrice(product.price)}
           </p>
+
+          {product.rating.count > 0 ? (
+            <Link
+              href="#reviews"
+              className="mt-4 inline-flex items-center gap-3 link-underline"
+            >
+              <span className="font-serif text-3xl">
+                {product.rating.avg.toFixed(1)}
+              </span>
+              <RatingStars
+                value={product.rating.avg}
+                size={20}
+                count={product.rating.count}
+              />
+              <span className="text-sm text-ink-soft">
+                ({product.rating.count} review
+                {product.rating.count === 1 ? "" : "s"})
+              </span>
+            </Link>
+          ) : (
+            <p className="mt-4 text-sm text-ink-soft">
+              No reviews yet — be the first to review this product.
+            </p>
+          )}
+
           <p className="mt-6 max-w-md leading-relaxed text-ink-soft">
             {product.description}
           </p>
@@ -113,6 +166,18 @@ export default async function ProductPage({
           </div>
         </section>
       )}
+
+      <section id="reviews" className="mt-24">
+        <h2 className="font-serif text-3xl font-black">Reviews</h2>
+        {reviews.length > 0 ? (
+          <ReviewList reviews={reviews} />
+        ) : (
+          <p className="mt-6 text-sm text-ink-soft">
+            No reviews yet — be the first to review this product.
+          </p>
+        )}
+        {/* 10-05 submit-review form (eligibility states + Server Action) mounts here. */}
+      </section>
     </main>
   );
 }

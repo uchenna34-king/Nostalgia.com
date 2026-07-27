@@ -88,7 +88,7 @@ export async function getRatingSummaries(
   if (productIds.length === 0) return new Map();
   const grouped = await prisma.review.groupBy({
     by: ["productId"],
-    where: { productId: { in: productIds } },
+    where: { productId: { in: productIds }, hidden: false },
     _avg: { rating: true },
     _count: { rating: true },
   });
@@ -98,7 +98,7 @@ export async function getRatingSummaries(
 /** Single-product rating aggregate (used by 10-11 JSON-LD aggregateRating). */
 export async function getRatingSummary(productId: string): Promise<RatingSummary> {
   const agg = await prisma.review.aggregate({
-    where: { productId },
+    where: { productId, hidden: false },
     _avg: { rating: true },
     _count: { rating: true },
   });
@@ -135,13 +135,13 @@ export async function getReviewsForProduct(
 ): Promise<{ reviews: ReviewWithAuthor[]; total: number }> {
   const [rows, total] = await Promise.all([
     prisma.review.findMany({
-      where: { productId },
+      where: { productId, hidden: false },
       orderBy: { createdAt: "desc" },
       take: opts?.take,
       skip: opts?.skip,
       include: { user: { select: { name: true } } },
     }),
-    prisma.review.count({ where: { productId } }),
+    prisma.review.count({ where: { productId, hidden: false } }),
   ]);
   const reviews: ReviewWithAuthor[] = rows.map((r) => ({
     id: r.id,

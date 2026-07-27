@@ -62,6 +62,7 @@ model Review {
   rating    Int // 1-5, validated in app code (not a DB check) for SQLite-now / Postgres-later portability
   title     String
   body      String?
+  hidden    Boolean  @default(false) // owner-moderation soft flag (D-02): excluded from all storefront reads
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)

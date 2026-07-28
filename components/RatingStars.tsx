@@ -5,7 +5,9 @@
 // always exposed as a numeric text equivalent via role="img" + aria-label; the
 // decorative SVGs are aria-hidden.
 
-const STAR_PATH =
+/** The single 24×24 star glyph, shared with ReviewForm's interactive input so
+ * the display and input stars can never drift apart. */
+export const STAR_PATH =
   "M12 2l2.9 6.3 6.9.8-5.1 4.7 1.4 6.8L12 17.8 5.9 21.4l1.4-6.8L2.2 9.9l6.9-.8z";
 
 /** Clamp to [0,5], round to the nearest half-star, return a 0–100 fill %. */

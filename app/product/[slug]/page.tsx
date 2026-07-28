@@ -5,15 +5,19 @@ import AddToCart from "@/components/AddToCart";
 import Gallery from "@/components/Gallery";
 import ProductCard from "@/components/ProductCard";
 import RatingStars from "@/components/RatingStars";
+import ReviewForm, { type ReviewEligibility } from "@/components/ReviewForm";
 import ReviewList, { type ReviewDisplay } from "@/components/ReviewList";
 import ViewProductTracker from "@/components/ViewProductTracker";
 import WishlistButton from "@/components/WishlistButton";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
+import { prisma } from "@/lib/db";
 import {
   getProductBySlug,
   getCatalog,
   formatPrice,
 } from "@/lib/products";
-import { getReviewsForProduct } from "@/lib/reviews";
+import { getReviewsForProduct, hasPurchased } from "@/lib/reviews";
 import { buildProductJsonLd, serializeJsonLd } from "@/lib/seo";
 
 export const dynamic = "force-dynamic";
@@ -85,6 +89,33 @@ export default async function ProductPage({
     dateIso: r.createdAt.toISOString(),
     dateLabel: relativeDate(r.createdAt),
   }));
+
+  // Review-form eligibility, derived server-side (D-01). This drives DISPLAY
+  // only — submitReview re-checks session + purchase independently on every
+  // submit, so this is never the security boundary (T-10-05-01).
+  const session = await getServerSession(authOptions);
+  const userId = (session?.user as { id?: string } | undefined)?.id;
+  let eligibility: ReviewEligibility = "signed-out";
+  let existingReview:
+    | { rating: number; title: string; body: string | null }
+    | undefined;
+
+  if (userId) {
+    if (!(await hasPurchased(userId, product.slug))) {
+      eligibility = "no-purchase";
+    } else {
+      const own = await prisma.review.findUnique({
+        where: { productId_userId: { productId: product.id, userId } },
+        select: { rating: true, title: true, body: true },
+      });
+      if (own) {
+        eligibility = "already-reviewed";
+        existingReview = own;
+      } else {
+        eligibility = "eligible";
+      }
+    }
+  }
 
   // Product JSON-LD (SEO-01, D-14). aggregateRating reuses the same
   // product.rating as the on-page summary, so structured data and the visible
@@ -223,7 +254,11 @@ export default async function ProductPage({
             No reviews yet — be the first to review this product.
           </p>
         )}
-        {/* 10-05 submit-review form (eligibility states + Server Action) mounts here. */}
+        <ReviewForm
+          slug={product.slug}
+          eligibility={eligibility}
+          existingReview={existingReview}
+        />
       </section>
     </main>
   );

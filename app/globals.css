@@ -23,6 +23,16 @@
   h1, h2, h3, h4 {
     @apply font-serif;
   }
+
+  /* WCAG 2.4.7 — a visible keyboard focus indicator on every interactive
+     control (nav links, product cards, gallery thumbnails, add-to-cart, star
+     rating, form fields). :focus-visible so it appears for keyboard/AT users
+     without drawing a ring on mouse clicks. Default outlines are never
+     suppressed anywhere. */
+  :focus-visible {
+    outline: 2px solid theme(colors.sepia);
+    outline-offset: 2px;
+  }
 }
 
 @layer components {

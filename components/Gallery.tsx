@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useState } from "react";
 
 export default function Gallery({
@@ -25,12 +26,16 @@ export default function Gallery({
 
   return (
     <div>
-      <div className="aspect-[3/4] overflow-hidden bg-cream-dark">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
+      {/* `relative` is required for next/image `fill` to size against this box. */}
+      <div className="relative aspect-[3/4] overflow-hidden bg-cream-dark">
+        {/* PDP LCP element — eager. */}
+        <Image
           src={activeImage}
           alt={`${name} view ${selectedIndex + 1}`}
-          className="h-full w-full object-cover transition-opacity duration-300 ease-out motion-reduce:transition-none"
+          fill
+          priority
+          sizes="(max-width: 1024px) 100vw, 50vw"
+          className="object-cover transition-opacity duration-300 ease-out motion-reduce:transition-none"
         />
       </div>
 
@@ -48,18 +53,19 @@ export default function Gallery({
               aria-current={i === selectedIndex}
               aria-pressed={i === selectedIndex}
               aria-label={`View image ${i + 1} of ${images.length}`}
-              className={`aspect-[3/4] overflow-hidden bg-cream-dark transition-colors ${
+              className={`relative aspect-[3/4] overflow-hidden bg-cream-dark transition-colors ${
                 i === selectedIndex
                   ? "border-2 border-ink"
                   : "border border-ink/15 hover:border-ink/40"
               }`}
             >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
+              <Image
                 src={img}
                 alt=""
                 aria-hidden="true"
-                className="h-full w-full object-cover"
+                fill
+                sizes="(max-width: 1024px) 25vw, 12vw"
+                className="object-cover"
               />
             </button>
           ))}

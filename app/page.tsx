@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import Hero from "@/components/Hero";
 import Marquee from "@/components/Marquee";
@@ -55,12 +56,16 @@ export default async function Home() {
               Explore the collection
             </Link>
           </div>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src="/products/archive-bomber-jacket-1.svg"
-            alt="Archive Bomber Jacket"
-            className="aspect-[4/5] w-full object-cover"
-          />
+          {/* Below the fold — lazy (the next/image default, no `priority`). */}
+          <div className="relative aspect-[4/5] w-full">
+            <Image
+              src="/products/archive-bomber-jacket-1.svg"
+              alt="Archive Bomber Jacket"
+              fill
+              sizes="(max-width: 768px) 100vw, 50vw"
+              className="object-cover"
+            />
+          </div>
         </div>
       </section>
     </main>

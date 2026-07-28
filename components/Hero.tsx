@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 
 export default function Hero() {
@@ -27,18 +28,27 @@ export default function Hero() {
 
         {/* Image collage */}
         <div className="relative grid grid-cols-2 gap-3">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src="/products/sepia-wool-overcoat-1.svg"
-            alt="Sepia Wool Overcoat"
-            className="col-span-1 mt-8 aspect-[3/4] w-full object-cover"
-          />
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src="/products/nostalgia-hoodie-1.svg"
-            alt="Nostalgia Hoodie"
-            className="col-span-1 aspect-[3/4] w-full object-cover"
-          />
+          {/* Above the fold — LCP candidates, so both are `priority` (eager). */}
+          <div className="relative col-span-1 mt-8 aspect-[3/4] w-full">
+            <Image
+              src="/products/sepia-wool-overcoat-1.svg"
+              alt="Sepia Wool Overcoat"
+              fill
+              priority
+              sizes="(max-width: 768px) 50vw, 25vw"
+              className="object-cover"
+            />
+          </div>
+          <div className="relative col-span-1 aspect-[3/4] w-full">
+            <Image
+              src="/products/nostalgia-hoodie-1.svg"
+              alt="Nostalgia Hoodie"
+              fill
+              priority
+              sizes="(max-width: 768px) 50vw, 25vw"
+              className="object-cover"
+            />
+          </div>
         </div>
       </div>
     </section>

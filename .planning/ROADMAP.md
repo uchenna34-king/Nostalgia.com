@@ -180,13 +180,13 @@ paid purchase.
   3. Pages emit correct metadata, a sitemap, and structured data for search engines.
   4. Site meets defined performance and accessibility targets, and key events are tracked in analytics.
 
-**Plans**: 10/12 plans executed
+**Plans**: 11/12 plans executed
 
 - [x] 10-01-PLAN.md
 - [x] 10-02-PLAN.md
 - [x] 10-03-PLAN.md
 - [x] 10-04-PLAN.md
-- [ ] 10-05-PLAN.md
+- [x] 10-05-PLAN.md
 - [x] 10-06-PLAN.md
 - [x] 10-07-PLAN.md
 - [x] 10-08-PLAN.md
@@ -227,5 +227,5 @@ Phases execute in numeric order: 1 → … → 7 (done) → 8 → 9 → 10 → 1
 | 7. Polish + verification | M1 | ✓ | Complete | 2026-07-13 |
 | 8. Merchandising & Discovery | M2 | 8/8 | Complete    | 2026-07-16 |
 | 9. Store Operations / Admin | M2 | 6/6 | Complete | 2026-07-22 |
-| 10. Trust & Polish | M2 | 10/12 | In Progress|  |
+| 10. Trust & Polish | M2 | 11/12 | In Progress|  |
 | 11. Go Live | M2 | 0/TBD | Not started | - |

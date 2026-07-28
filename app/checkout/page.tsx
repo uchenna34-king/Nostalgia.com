@@ -2,10 +2,11 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useSession } from "next-auth/react";
 import { useCart } from "@/context/CartContext";
 import { formatPrice } from "@/lib/products";
+import { trackEvent } from "@/lib/analytics";
 
 export default function CheckoutPage() {
   const { data: session, status } = useSession();
@@ -13,6 +14,7 @@ export default function CheckoutPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const beganRef = useRef(false);
 
   // Require authentication — redirect to sign-in, returning here afterward.
   useEffect(() => {
@@ -20,6 +22,16 @@ export default function CheckoutPage() {
       router.replace("/signin?callbackUrl=/checkout");
     }
   }, [status, router]);
+
+  // begin_checkout (D-09): fire once when an authenticated user reaches checkout
+  // with a non-empty cart. Declared above the early returns (Rules of Hooks).
+  // Payload is non-PII — item count + cart subtotal in cents, never the email.
+  useEffect(() => {
+    if (status === "authenticated" && items.length > 0 && !beganRef.current) {
+      beganRef.current = true;
+      trackEvent("begin_checkout", { itemCount: items.length, amount: subtotal });
+    }
+  }, [status, items.length, subtotal]);
 
   if (status === "loading" || status === "unauthenticated") {
     return (

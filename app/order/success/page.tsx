@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Suspense, useEffect, useRef } from "react";
 import { useSearchParams } from "next/navigation";
 import { useCart } from "@/context/CartContext";
+import { trackEvent } from "@/lib/analytics";
 
 function SuccessInner() {
   const params = useSearchParams();
@@ -11,6 +12,7 @@ function SuccessInner() {
   const isDemo = params.get("demo") === "1";
   const { clear } = useCart();
   const cleared = useRef(false);
+  const trackedRef = useRef(false);
 
   // Empty the bag once the order is confirmed.
   useEffect(() => {
@@ -19,6 +21,15 @@ function SuccessInner() {
       cleared.current = true;
     }
   }, [clear]);
+
+  // purchase (D-09): fire once on mount when an order reference is present.
+  // orderId is an opaque transaction_id (cuid), not a user identifier — non-PII.
+  useEffect(() => {
+    if (orderId && !trackedRef.current) {
+      trackedRef.current = true;
+      trackEvent("purchase", { orderId, demo: isDemo });
+    }
+  }, [orderId, isDemo]);
 
   return (
     <main className="container-x flex min-h-[70vh] flex-col items-center justify-center py-20 text-center">

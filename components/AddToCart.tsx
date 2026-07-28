@@ -5,6 +5,7 @@ import { useCart } from "@/context/CartContext";
 import type { Product } from "@/lib/products";
 import { getSizeGuide } from "@/lib/size-guides";
 import SizeGuideModal from "@/components/SizeGuideModal";
+import { trackEvent } from "@/lib/analytics";
 
 export default function AddToCart({ product }: { product: Product }) {
   const { addItem } = useCart();
@@ -41,6 +42,8 @@ export default function AddToCart({ product }: { product: Product }) {
       image: product.images[0],
       size: selected.size,
     });
+    // Success path only — the no-size/sold-out branch returns above. Non-PII.
+    trackEvent("add_to_cart", { productSlug: product.slug, size: selected.size });
   }
 
   return (

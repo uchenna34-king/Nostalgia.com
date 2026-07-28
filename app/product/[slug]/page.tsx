@@ -6,6 +6,7 @@ import Gallery from "@/components/Gallery";
 import ProductCard from "@/components/ProductCard";
 import RatingStars from "@/components/RatingStars";
 import ReviewList, { type ReviewDisplay } from "@/components/ReviewList";
+import ViewProductTracker from "@/components/ViewProductTracker";
 import WishlistButton from "@/components/WishlistButton";
 import {
   getProductBySlug,
@@ -101,6 +102,7 @@ export default async function ProductPage({
 
   return (
     <main className="container-x py-10">
+      <ViewProductTracker productSlug={product.slug} />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: jsonLd }}

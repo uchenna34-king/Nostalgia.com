@@ -39,7 +39,7 @@ paid purchase.
 
 - [x] **Phase 8: Merchandising & Discovery** - Search, filter/sort, scalable collections, wishlist, richer PDPs, catalog built for thousands (completed 2026-07-16)
 - [x] **Phase 9: Store Operations / Admin** - No-code admin for product CRUD, inventory, and order/fulfillment management (completed 2026-07-22)
-- [ ] **Phase 10: Trust & Polish** - Reviews, size guides, shipping/returns, SEO, performance, accessibility, analytics
+- [x] **Phase 10: Trust & Polish** - Reviews, size guides, shipping/returns, SEO, performance, accessibility, analytics (completed 2026-07-29)
 - [ ] **Phase 11: Go Live** - Real Google OAuth + real Stripe, confirmation emails, order history, Postgres, deployment
 
 ## Phase Details
@@ -180,7 +180,7 @@ paid purchase.
   3. Pages emit correct metadata, a sitemap, and structured data for search engines.
   4. Site meets defined performance and accessibility targets, and key events are tracked in analytics.
 
-**Plans**: 11/12 plans executed
+**Plans**: 12/12 plans executed
 
 - [x] 10-01-PLAN.md
 - [x] 10-02-PLAN.md
@@ -193,7 +193,7 @@ paid purchase.
 - [x] 10-09-PLAN.md
 - [x] 10-10-PLAN.md
 - [x] 10-11-PLAN.md
-- [ ] 10-12-PLAN.md
+- [x] 10-12-PLAN.md
 
 **UI hint**: yes
 
@@ -227,5 +227,5 @@ Phases execute in numeric order: 1 → … → 7 (done) → 8 → 9 → 10 → 1
 | 7. Polish + verification | M1 | ✓ | Complete | 2026-07-13 |
 | 8. Merchandising & Discovery | M2 | 8/8 | Complete    | 2026-07-16 |
 | 9. Store Operations / Admin | M2 | 6/6 | Complete | 2026-07-22 |
-| 10. Trust & Polish | M2 | 11/12 | In Progress|  |
+| 10. Trust & Polish | M2 | 12/12 | Complete | 2026-07-29 |
 | 11. Go Live | M2 | 0/TBD | Not started | - |

@@ -67,6 +67,8 @@ export default async function CollectionDetailPage({
         )}
       </header>
 
+      {/* Same heading-order fix as /shop: keeps the outline h1 -> h2 -> h3. */}
+      <h2 className="sr-only">Products</h2>
       <ProductGrid products={products} />
 
       <Suspense fallback={<div className="mt-14 h-10" />}>

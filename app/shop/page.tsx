@@ -107,6 +107,11 @@ export default async function ShopPage({
         </Suspense>
 
         <div className="flex-1">
+          {/* Gives the grid a section heading so the outline runs h1 -> h2 -> h3
+              (ProductCard's name). Without it the page jumped h1 -> h3, which
+              breaks heading-order navigation for screen-reader users. Visually
+              hidden because the page title already conveys this sighted-side. */}
+          <h2 className="sr-only">Products</h2>
           <ProductGrid products={products} />
 
           <Suspense fallback={<div className="mt-14 h-10" />}>

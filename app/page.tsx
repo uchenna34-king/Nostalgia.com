@@ -41,7 +41,9 @@ export default async function Home() {
       <section className="bg-ink text-cream">
         <div className="container-x grid items-center gap-10 py-20 md:grid-cols-2">
           <div>
-            <p className="text-xs uppercase tracking-[0.25em] text-sepia">
+            {/* sepia-light, not sepia: this sits on bg-ink where the accent
+                measures only 3.28:1. sepia-light reaches 5.28:1 (WCAG 1.4.3). */}
+            <p className="text-xs uppercase tracking-[0.25em] text-sepia-light">
               The House of Nostalgia
             </p>
             <h2 className="mt-4 font-serif text-4xl font-black leading-tight sm:text-5xl">

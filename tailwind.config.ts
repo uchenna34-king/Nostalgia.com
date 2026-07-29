@@ -12,6 +12,13 @@ const config: Config = {
         cream: "#F4EEE4",
         ink: "#1A1A1A",
         sepia: "#A6552F",
+        // AA-passing siblings of the locked sepia accent, for contexts where
+        // #A6552F cannot reach 4.5:1 (WCAG 1.4.3). The accent itself is
+        // unchanged — these are used only where measurement showed a failure.
+        // sepia-deep on cream 6.15:1, on cream-dark 5.37:1 (was 4.59 / 4.01).
+        // sepia-light on ink   5.28:1 (was 3.28).
+        "sepia-deep": "#8A4524",
+        "sepia-light": "#C97A4A",
         "cream-dark": "#E8DFCF",
         "ink-soft": "#3A3A3A",
       },

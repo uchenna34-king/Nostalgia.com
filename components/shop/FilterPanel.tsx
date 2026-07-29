@@ -135,7 +135,11 @@ export default function FilterPanel({ categories }: { categories: string[] }) {
 
       <div>
         <p className="eyebrow mb-3">Sort by</p>
+        {/* The "Sort by" <p> above is visual only — it is not programmatically
+            associated, so screen readers announced this as an unlabelled combo
+            box. aria-label matches the pattern used by the price inputs above. */}
         <select
+          aria-label="Sort by"
           value={activeSort}
           onChange={(e) => setParam("sort", e.target.value)}
           className="w-full border border-ink/25 bg-cream px-3 py-2 text-sm text-ink outline-none focus:border-sepia"

@@ -63,8 +63,11 @@
     @apply mx-auto w-full max-w-7xl px-5 sm:px-8;
   }
 
+  /* sepia-deep (not the sepia accent): the eyebrow is 12px text, and #A6552F
+     measures 4.01:1 on cream-dark (footer) — below the 4.5:1 AA floor — and a
+     marginal 4.59:1 on cream. sepia-deep clears both (5.37 / 6.15). */
   .eyebrow {
-    @apply text-xs uppercase tracking-[0.25em] text-sepia;
+    @apply text-xs uppercase tracking-[0.25em] text-sepia-deep;
   }
 }
 

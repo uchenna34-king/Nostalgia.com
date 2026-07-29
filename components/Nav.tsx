@@ -32,12 +32,12 @@ export default function Nav() {
           >
             <span className="text-xl">≡</span>
           </button>
-          <ul className="hidden items-center gap-6 md:flex">
+          <ul className="hidden items-center gap-6 md:mr-8 md:flex">
             {LINKS.map((l) => (
               <li key={l.label}>
                 <Link
                   href={l.href}
-                  className="link-underline text-xs uppercase tracking-[0.18em] text-ink-soft hover:text-ink"
+                  className="link-underline text-sm font-bold uppercase tracking-[0.18em] text-ink-soft hover:text-ink"
                 >
                   {l.label}
                 </Link>
@@ -59,22 +59,25 @@ export default function Nav() {
           {session?.user ? (
             <Link
               href="/account"
-              className="hidden text-xs uppercase tracking-[0.18em] text-ink-soft hover:text-ink sm:block"
+              className="hidden text-sm font-bold uppercase tracking-[0.18em] text-ink-soft hover:text-ink sm:block"
             >
               {session.user.name?.split(" ")[0] ?? "Account"}
             </Link>
           ) : (
             <button
               onClick={() => signIn()}
-              className="hidden text-xs uppercase tracking-[0.18em] text-ink-soft hover:text-ink sm:block"
+              className="hidden text-sm font-bold uppercase tracking-[0.18em] text-ink-soft hover:text-ink sm:block"
             >
               Sign in
             </button>
           )}
+          {/* No aria-label: the visible text ("Wishlist" + the count badge) IS
+              the accessible name. An "Open wishlist" label would not contain the
+              visible string, breaking WCAG 2.5.3 Label in Name — a speech-input
+              user saying "click Wishlist" would not match. */}
           <Link
             href="/wishlist"
-            className="relative text-xs uppercase tracking-[0.18em] text-ink hover:text-sepia"
-            aria-label="Open wishlist"
+            className="relative text-sm font-bold uppercase tracking-[0.18em] text-ink hover:text-sepia"
           >
             Wishlist
             <span className="ml-1 inline-flex min-w-5 items-center justify-center rounded-full bg-ink px-1.5 py-0.5 text-[10px] leading-none text-cream">
@@ -83,8 +86,7 @@ export default function Nav() {
           </Link>
           <button
             onClick={openDrawer}
-            className="relative text-xs uppercase tracking-[0.18em] text-ink hover:text-sepia"
-            aria-label="Open cart"
+            className="relative text-sm font-bold uppercase tracking-[0.18em] text-ink hover:text-sepia"
           >
             Cart
             <span className="ml-1 inline-flex min-w-5 items-center justify-center rounded-full bg-ink px-1.5 py-0.5 text-[10px] leading-none text-cream">
@@ -102,7 +104,7 @@ export default function Nav() {
               <Link
                 href={l.href}
                 onClick={() => setMobileOpen(false)}
-                className="block py-2 text-sm uppercase tracking-[0.18em] text-ink-soft"
+                className="block py-2 text-sm font-bold uppercase tracking-[0.18em] text-ink-soft"
               >
                 {l.label}
               </Link>

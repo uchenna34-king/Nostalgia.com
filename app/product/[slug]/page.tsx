@@ -57,6 +57,7 @@ function relativeDate(from: Date): string {
   if (abs >= 30 * day) return RELATIVE.format(Math.round(diffMs / (30 * day)), "month");
   if (abs >= 7 * day) return RELATIVE.format(Math.round(diffMs / (7 * day)), "week");
   if (abs >= day) return RELATIVE.format(Math.round(diffMs / day), "day");
+  if (diffMs > 0) return "just now"; // future timestamp (clock skew) — treat as now
   return "today";
 }
 
@@ -196,7 +197,7 @@ export default async function ProductPage({
                 slug: product.slug,
                 name: product.name,
                 price: product.price,
-                image: product.images[0],
+                image: product.images[0] ?? "",
               }}
               className="border border-ink/15"
             />

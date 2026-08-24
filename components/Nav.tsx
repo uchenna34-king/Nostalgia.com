@@ -28,6 +28,8 @@ export default function Nav() {
           <button
             className="md:hidden"
             aria-label="Menu"
+            aria-expanded={mobileOpen}
+            aria-controls="mobile-nav"
             onClick={() => setMobileOpen((v) => !v)}
           >
             <span className="text-xl">≡</span>
@@ -98,7 +100,7 @@ export default function Nav() {
 
       {/* Mobile menu */}
       {mobileOpen && (
-        <ul className="flex flex-col gap-1 border-t border-ink/10 px-5 py-3 md:hidden">
+        <ul id="mobile-nav" className="flex flex-col gap-1 border-t border-ink/10 px-5 py-3 md:hidden">
           {LINKS.map((l) => (
             <li key={l.label}>
               <Link

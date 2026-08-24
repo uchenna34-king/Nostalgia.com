@@ -165,7 +165,7 @@ export async function getUserReview(
 }
 
 const TITLE_MAX = 120;
-const BODY_MAX = 4000;
+const BODY_MAX = 2000; // matches actions.ts and ReviewForm maxLength={2000}
 
 /**
  * Upsert (not delete-then-recreate) preserves the row id and createdAt on edit

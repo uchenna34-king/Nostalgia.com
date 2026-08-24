@@ -47,7 +47,10 @@ export function CartProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) setItems(JSON.parse(raw) as CartItem[]);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) setItems(parsed as CartItem[]);
+      }
     } catch {
       // ignore malformed storage
     }

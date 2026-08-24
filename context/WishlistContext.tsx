@@ -37,7 +37,10 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) setItems(JSON.parse(raw) as WishlistItem[]);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) setItems(parsed as WishlistItem[]);
+      }
     } catch {
       // ignore malformed storage
     }

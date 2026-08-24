@@ -42,7 +42,8 @@ export function parsePriceRange(raw: string | undefined): PriceRange {
   if (!match) return {};
   const [, minStr, maxStr] = match;
   const result: PriceRange = {};
-  if (minStr !== undefined) {
+  if (minStr) {
+    // Only set if non-empty — Number("") === 0 would incorrectly add a minPrice:0 clause.
     const min = Number(minStr);
     if (Number.isFinite(min) && min >= 0) result.minPrice = min;
   }

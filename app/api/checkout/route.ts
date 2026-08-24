@@ -86,12 +86,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "no_valid_items" }, { status: 400 });
   }
 
-  const subtotal = lineItems.reduce((sum, i) => sum + i.unitPrice * i.qty, 0);
-  // Mirror the UI's shipping logic: free over $200, $15 otherwise (cents).
-  const FREE_SHIPPING_THRESHOLD = 20000;
-  const SHIPPING_FEE = 1500;
-  const shipping = subtotal >= FREE_SHIPPING_THRESHOLD ? 0 : SHIPPING_FEE;
-  const total = subtotal + shipping;
+  const total = lineItems.reduce((sum, i) => sum + i.unitPrice * i.qty, 0);
   // `user.id` is expected to always be populated for an authenticated
   // session (see the `session` callback in lib/auth.ts). Surface it loudly
   // if that invariant ever breaks instead of silently writing an orphaned

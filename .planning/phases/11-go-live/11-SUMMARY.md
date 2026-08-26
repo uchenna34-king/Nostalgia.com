@@ -1,10 +1,10 @@
 ---
 phase: 11-go-live
 type: planning-handoff
-status: plans-written-unverified
+status: plans-verified
 plans_total: 8
 plans_written: 8
-plan_checker_run: false
+plan_checker_run: true
 created: 2026-08-24
 resume_command: continue phase 11 — run gsd-plan-checker, then execute wave 1
 ---
@@ -19,8 +19,16 @@ All 8 PLAN.md files are **written and committed**. Planning artifacts complete:
 CONTEXT, DISCUSSION-LOG, OWNER-SETUP, RESEARCH (682 lines), VALIDATION, UI-SPEC
 (verified 6/6), PATTERNS, PLAN-OUTLINE, and 11-01…11-08 PLAN.md.
 
-**Not yet done:** the `gsd-plan-checker` verification pass (pipeline step 10). No plan
-has been executed — no application code changed in this phase yet.
+**Plan-checker: PASSED** (no blockers; 2 cosmetic warnings — see below). No plan has been
+executed — no application code changed in this phase yet. Planning is COMPLETE.
+
+**Checker warnings (non-blocking, documentation-level):**
+1. 11-02 uses `lib/auth-flags.ts`; the outline named it `lib/auth-providers.ts`. Internally
+   self-consistent, no wave conflict. Note in 11-02-SUMMARY at execution.
+2. 11-07 `T-11-07-05` marks a `high` EoP (`ALLOW_DEMO_LOGIN=true` on public URL) as
+   `accept` under a "block on high" header. Substantively justified by D-11 (time-boxed,
+   owner-locked, compensating control = 11-08 checklist). Reword to `transfer` or cite the
+   D-11 exception at execution.
 
 ## The 8 plans
 
@@ -76,11 +84,17 @@ committed to git history**.
 
 ## Resume — do this next
 
-1. **Run `gsd-plan-checker`** over all 8 plans (pipeline step 10). Spawn the
-   `gsd-plan-checker` subagent; on `## VERIFICATION PASSED`, planning is done. On
-   `## ISSUES FOUND`, revise (max 3 iterations).
-2. Then update ROADMAP/STATE to mark Phase 11 planned, and stop for owner go-ahead
-   before `/gsd-execute-phase 11` — execution starts with Wave 1 and several plans are
-   `autonomous:false` (need owner accounts per `11-OWNER-SETUP.md`).
+Planning is done and verified. The next action is **execution**, but it needs owner
+input: several Wave 1 plans are `autonomous:false` because they require real external
+accounts (Neon, Resend) whose credentials only the owner can supply — see
+`11-OWNER-SETUP.md`.
 
-Latest commits: `7b445e1` (11-08), `61d69cf` (11-07), `04e42a6` (11-06).
+- **`/gsd-execute-phase 11`** starts Wave 1. Expect it to pause at checkpoints for:
+  Neon connection strings (11-01), and the `resend`/`react-email` install approval (11-04).
+- Fully autonomous Wave 1 plans (no owner input): 11-02 (demo-login gate), 11-03 (order
+  list). These can run without accounts.
+- Owner should work through `11-OWNER-SETUP.md` (Neon → Google → Stripe → Resend → Vercel)
+  in parallel; the deploy plan (11-07) needs all of them.
+
+ROADMAP now shows Phase 11 "In Progress". Latest commits: `206a3bd` (summary),
+`7b445e1` (11-08), `61d69cf` (11-07).

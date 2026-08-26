@@ -1,6 +1,6 @@
 import Link from "next/link";
 import SignInForm from "@/components/SignInForm";
-import { googleEnabled } from "@/lib/auth";
+import { googleEnabled, demoLoginEnabled } from "@/lib/auth";
 import { OWNER_EMAIL } from "@/lib/admin";
 
 export default function SignInPage({
@@ -21,8 +21,9 @@ export default function SignInPage({
       <div className="mt-10 flex justify-center">
         <SignInForm
           googleEnabled={googleEnabled}
+          demoEnabled={demoLoginEnabled}
           callbackUrl={callbackUrl}
-          ownerEmail={googleEnabled ? undefined : OWNER_EMAIL}
+          ownerEmail={demoLoginEnabled ? OWNER_EMAIL : undefined}
         />
       </div>
 

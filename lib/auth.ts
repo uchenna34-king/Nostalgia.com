@@ -3,15 +3,28 @@ import GoogleProvider from "next-auth/providers/google";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import { prisma } from "@/lib/db";
+import { buildProviderFlags } from "@/lib/auth-flags";
 
-const hasGoogle = Boolean(
-  process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET,
-);
+const { hasGoogle, allowDemoLogin } = buildProviderFlags(process.env);
+
+if (!hasGoogle && !allowDemoLogin) {
+  console.warn(
+    "[auth] No sign-in provider is configured: GOOGLE_CLIENT_ID/GOOGLE_CLIENT_SECRET are absent and ALLOW_DEMO_LOGIN is not the exact string \"true\". /signin will render with no provider buttons.",
+  );
+}
 
 /**
- * Auth is wired for real Google OAuth. When Google credentials are absent
- * (local dev), a mock "Continue with Google (demo)" credentials provider stands
- * in so the full sign-in → checkout flow is testable without external setup.
+ * Google OAuth is registered when both GOOGLE_CLIENT_ID and
+ * GOOGLE_CLIENT_SECRET are present. The demo credentials provider is
+ * registered only when ALLOW_DEMO_LOGIN holds the exact string "true".
+ *
+ * The demo provider authenticates as any supplied email with no secret of
+ * any kind — leaving it enabled on a public URL grants anyone the owner
+ * address and therefore /admin (see lib/admin.ts requireOwner()). It is
+ * deliberately enabled for UAT and disabled at go-live (D-03, D-11). The gate
+ * must never be loosened to a truthiness check: an operator typing a value
+ * meant to disable it (e.g. the word "false") would otherwise re-enable it,
+ * since a non-empty string is truthy.
  */
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
@@ -27,29 +40,34 @@ export const authOptions: NextAuthOptions = {
           }),
         ]
       : []),
-    CredentialsProvider({
-      id: "demo",
-      name: "Google (demo)",
-      credentials: {
-        email: { label: "Email", type: "email" },
-        name: { label: "Name", type: "text" },
-      },
-      async authorize(credentials) {
-        const email = credentials?.email?.trim() || "friend@nostalgia.test";
-        const name = credentials?.name?.trim() || "Nostalgia Friend";
-        const user = await prisma.user.upsert({
-          where: { email },
-          update: { name },
-          create: { email, name },
-        });
-        return {
-          id: user.id,
-          email: user.email,
-          name: user.name,
-          image: user.image,
-        };
-      },
-    }),
+    ...(allowDemoLogin
+      ? [
+          CredentialsProvider({
+            id: "demo",
+            name: "Google (demo)",
+            credentials: {
+              email: { label: "Email", type: "email" },
+              name: { label: "Name", type: "text" },
+            },
+            async authorize(credentials) {
+              const email =
+                credentials?.email?.trim() || "friend@nostalgia.test";
+              const name = credentials?.name?.trim() || "Nostalgia Friend";
+              const user = await prisma.user.upsert({
+                where: { email },
+                update: { name },
+                create: { email, name },
+              });
+              return {
+                id: user.id,
+                email: user.email,
+                name: user.name,
+                image: user.image,
+              };
+            },
+          }),
+        ]
+      : []),
   ],
   callbacks: {
     async jwt({ token, user }) {
@@ -66,3 +84,4 @@ export const authOptions: NextAuthOptions = {
 };
 
 export const googleEnabled = hasGoogle;
+export const demoLoginEnabled = allowDemoLogin;

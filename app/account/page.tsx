@@ -1,27 +1,47 @@
-"use client";
-
 import Link from "next/link";
-import { useSession, signIn, signOut } from "next-auth/react";
+import { redirect } from "next/navigation";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
+import { prisma } from "@/lib/db";
+import OrderList, { toOrderRows } from "@/components/account/OrderList";
+import {
+  AccountSignedOut,
+  AccountSignOutButton,
+} from "@/components/account/AccountAuthActions";
 
-export default function AccountPage() {
-  const { data: session, status } = useSession();
+// Renders one customer's private order history — must never be cached or
+// statically prerendered, or one customer's list could be served to another
+// (T-11-03-04).
+export const dynamic = "force-dynamic";
 
-  if (status === "loading") {
-    return (
-      <main className="container-x py-24 text-center text-ink-soft">Loading…</main>
-    );
-  }
+export default async function AccountPage() {
+  const session = await getServerSession(authOptions);
 
   if (!session?.user) {
     return (
-      <main className="container-x flex min-h-[50vh] flex-col items-center justify-center gap-5 py-20 text-center">
-        <h1 className="font-serif text-4xl font-black">You&apos;re signed out</h1>
-        <button onClick={() => signIn()} className="btn-primary">
-          Sign in
-        </button>
+      <main>
+        <AccountSignedOut />
       </main>
     );
   }
+
+  const userId = (session.user as { id?: string }).id;
+
+  // Critical guard (D-07, T-11-03-02): Prisma silently drops an `undefined`
+  // filter value, so an unguarded order lookup scoped by `{ userId: undefined }`
+  // would return EVERY order in the database — handing one customer the
+  // entire customer base's order history. Never let the query below run
+  // unscoped; treat a missing id the same as signed-out. Do not delete this
+  // guard as "redundant" in a future refactor.
+  if (!userId) {
+    redirect("/signin?callbackUrl=/account");
+  }
+
+  const orders = await prisma.order.findMany({
+    where: { userId },
+    orderBy: { createdAt: "desc" },
+  });
+  const rows = toOrderRows(orders);
 
   return (
     <main className="container-x py-16">
@@ -35,13 +55,10 @@ export default function AccountPage() {
         <Link href="/shop" className="btn-primary">
           Continue shopping
         </Link>
-        <button
-          onClick={() => signOut({ callbackUrl: "/" })}
-          className="btn-outline"
-        >
-          Sign out
-        </button>
+        <AccountSignOutButton />
       </div>
+
+      <OrderList orders={rows} />
     </main>
   );
 }

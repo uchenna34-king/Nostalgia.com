@@ -3,8 +3,9 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL") // pooled — Neon's POOLED endpoint (hostname contains "-pooler"); every application query at runtime
+  directUrl = env("DIRECT_URL") // direct — Neon's UNPOOLED endpoint; touched only by `prisma migrate` commands
 }
 
 model Product {

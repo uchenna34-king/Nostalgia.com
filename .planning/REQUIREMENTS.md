@@ -66,7 +66,7 @@ Committed scope for the current milestone. Each maps to exactly one phase (8–1
 - [ ] **LIVE-02**: Customer can pay with real Stripe (test cards graduating to live keys)
 - [ ] **LIVE-03**: Customer receives an order confirmation email after purchase
 - [ ] **LIVE-04**: Signed-in customer can view order history on the account page
-- [ ] **LIVE-05**: Production runs on hosted Postgres, migrated from SQLite
+- [x] **LIVE-05**: Production runs on hosted Postgres, migrated from SQLite
 - [ ] **LIVE-06**: App is deployed to a hosted Node platform and is publicly reachable
 
 ## v2 Requirements
@@ -124,7 +124,7 @@ Deferred beyond Milestone 2. Tracked, not in the current roadmap.
 | LIVE-02 | Phase 11 | Pending |
 | LIVE-03 | Phase 11 | Pending |
 | LIVE-04 | Phase 11 | Pending |
-| LIVE-05 | Phase 11 | Pending |
+| LIVE-05 | Phase 11 | Complete |
 | LIVE-06 | Phase 11 | Pending |
 
 **Coverage:**

@@ -2,18 +2,18 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-current_phase: 10
-current_phase_name: Trust & Polish
-status: planned
-stopped_at: Phase 11 context gathered
-last_updated: "2026-08-26T13:53:50.340Z"
-last_activity: 2026-07-25
-last_activity_desc: Phase 10 execution started
+current_phase: 11
+current_phase_name: go-live
+status: executing
+stopped_at: Completed 11-01-PLAN.md (Neon Postgres cutover + env contract)
+last_updated: "2026-08-31T09:26:19.036Z"
+last_activity: 2026-08-28
+last_activity_desc: Phase 11 execution started
 progress:
   total_phases: 4
   completed_phases: 3
-  total_plans: 26
-  completed_plans: 26
+  total_plans: 34
+  completed_plans: 31
   percent: 75
 ---
 
@@ -24,14 +24,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-07-14)
 
 **Core value:** A real customer can complete a real, paid purchase end-to-end (real Google login + real Stripe payment + email confirmation).
-**Current focus:** Phase 10 — Trust & Polish
+**Current focus:** Phase 11 — go-live
 
 ## Current Position
 
-Phase: 10 (Trust & Polish) — EXECUTING
-Plan: 1 of 12
-Status: planned
-Last activity: 2026-07-25 — Phase 10 execution started
+Phase: 11 (go-live) — EXECUTING
+Plan: 2 of 8
+Status: Ready to execute
+Last activity: 2026-08-28 — Phase 11 execution started
 
 Progress: [███████░░░] 73% (8 of 11 phases complete)
 
@@ -63,6 +63,7 @@ Progress: [███████░░░] 73% (8 of 11 phases complete)
 | Phase 08 P06 | 12min | 2 tasks | 2 files |
 | Phase 08 P07 | 18min | 3 tasks | 3 files |
 | Phase 08 P08 | 10min | 3 tasks | 3 files |
+| Phase 11 P01 | multi-day (interrupted) | 3 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -90,6 +91,9 @@ Recent decisions affecting current work:
 - [Phase ?]: [Phase 08-07] /wishlist page renders item fields directly rather than reusing ProductCard, since WishlistItem is a denormalized snapshot not a full Product
 - [Phase 08-08]: Collections index uses its own card layout rather than reusing ProductCard, since CollectionSummary is not a Product
 - [Phase 08-08]: Collection detail page omits FilterPanel/SearchBox (optional per plan), keeping only sort + pagination via getCatalog for CATL-01/D-12
+- [Phase ?]: D-01/D-02 confirmed: lib/db.ts needs zero structural change under the pooled-connection-string approach; only a rationale comment added
+- [Phase ?]: D-08: three SQLite-dialect migrations deleted wholesale and replaced by one regenerated Postgres init migration (20260828160053_init), never hand-edited
+- [Phase ?]: .env.example six-variable Phase 11 contract landed as a purely-additive append; DATABASE_URL's pre-existing example value left untouched
 
 ### Pending Todos
 
@@ -110,6 +114,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-07-29T12:04:00.532Z
-Stopped at: Phase 11 context gathered
-Resume file: .planning/phases/11-go-live/11-CONTEXT.md
+Last session: 2026-08-31T09:25:41.740Z
+Stopped at: Completed 11-01-PLAN.md (Neon Postgres cutover + env contract)
+Resume file: None

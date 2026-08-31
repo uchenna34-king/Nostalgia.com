@@ -64,7 +64,7 @@ Committed scope for the current milestone. Each maps to exactly one phase (8–1
 
 - [ ] **LIVE-01**: Customer can sign in with real Google OAuth in production
 - [ ] **LIVE-02**: Customer can pay with real Stripe (test cards graduating to live keys)
-- [ ] **LIVE-03**: Customer receives an order confirmation email after purchase
+- [x] **LIVE-03**: Customer receives an order confirmation email after purchase
 - [ ] **LIVE-04**: Signed-in customer can view order history on the account page
 - [x] **LIVE-05**: Production runs on hosted Postgres, migrated from SQLite
 - [ ] **LIVE-06**: App is deployed to a hosted Node platform and is publicly reachable
@@ -122,7 +122,7 @@ Deferred beyond Milestone 2. Tracked, not in the current roadmap.
 | ANLY-01 | Phase 10 | Pending |
 | LIVE-01 | Phase 11 | Pending |
 | LIVE-02 | Phase 11 | Pending |
-| LIVE-03 | Phase 11 | Pending |
+| LIVE-03 | Phase 11 | Complete |
 | LIVE-04 | Phase 11 | Pending |
 | LIVE-05 | Phase 11 | Complete |
 | LIVE-06 | Phase 11 | Pending |

@@ -5,15 +5,15 @@ milestone_name: milestone
 current_phase: 11
 current_phase_name: go-live
 status: executing
-stopped_at: Completed 11-01-PLAN.md (Neon Postgres cutover + env contract)
-last_updated: "2026-08-31T09:26:19.036Z"
+stopped_at: Completed 11-04-PLAN.md (Resend + React Email order confirmation)
+last_updated: "2026-08-31T12:56:17.104Z"
 last_activity: 2026-08-28
 last_activity_desc: Phase 11 execution started
 progress:
   total_phases: 4
   completed_phases: 3
   total_plans: 34
-  completed_plans: 31
+  completed_plans: 32
   percent: 75
 ---
 
@@ -29,7 +29,7 @@ See: .planning/PROJECT.md (updated 2026-07-14)
 ## Current Position
 
 Phase: 11 (go-live) — EXECUTING
-Plan: 2 of 8
+Plan: 3 of 8
 Status: Ready to execute
 Last activity: 2026-08-28 — Phase 11 execution started
 
@@ -64,6 +64,7 @@ Progress: [███████░░░] 73% (8 of 11 phases complete)
 | Phase 08 P07 | 18min | 3 tasks | 3 files |
 | Phase 08 P08 | 10min | 3 tasks | 3 files |
 | Phase 11 P01 | multi-day (interrupted) | 3 tasks | 6 files |
+| Phase 11-go-live P04 | 30min | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -94,6 +95,8 @@ Recent decisions affecting current work:
 - [Phase ?]: D-01/D-02 confirmed: lib/db.ts needs zero structural change under the pooled-connection-string approach; only a rationale comment added
 - [Phase ?]: D-08: three SQLite-dialect migrations deleted wholesale and replaced by one regenerated Postgres init migration (20260828160053_init), never hand-edited
 - [Phase ?]: .env.example six-variable Phase 11 contract landed as a purely-additive append; DATABASE_URL's pre-existing example value left untouched
+- [Phase ?]: [Phase 11-04]: resend + react-email approved (T-11-04-SC); react-email's own render() export used, no separate @react-email/render dependency needed
+- [Phase ?]: [Phase 11-04]: sendOrderConfirmation(orderId) mirrors lib/stripe.ts null-if-no-key idiom; recipient derived solely from looked-up order row (T-11-04-01)
 
 ### Pending Todos
 
@@ -114,6 +117,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-08-31T09:25:41.740Z
-Stopped at: Completed 11-01-PLAN.md (Neon Postgres cutover + env contract)
+Last session: 2026-08-31T12:56:17.092Z
+Stopped at: Completed 11-04-PLAN.md (Resend + React Email order confirmation)
 Resume file: None

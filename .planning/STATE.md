@@ -5,15 +5,15 @@ milestone_name: milestone
 current_phase: 11
 current_phase_name: go-live
 status: executing
-stopped_at: Completed 11-04-PLAN.md (Resend + React Email order confirmation)
-last_updated: "2026-08-31T12:56:17.104Z"
+stopped_at: Completed 11-05-PLAN.md (Stripe webhook — payment confirmation)
+last_updated: "2026-08-31T13:06:20.321Z"
 last_activity: 2026-08-28
 last_activity_desc: Phase 11 execution started
 progress:
   total_phases: 4
   completed_phases: 3
   total_plans: 34
-  completed_plans: 32
+  completed_plans: 33
   percent: 75
 ---
 
@@ -29,7 +29,7 @@ See: .planning/PROJECT.md (updated 2026-07-14)
 ## Current Position
 
 Phase: 11 (go-live) — EXECUTING
-Plan: 3 of 8
+Plan: 4 of 8
 Status: Ready to execute
 Last activity: 2026-08-28 — Phase 11 execution started
 
@@ -65,6 +65,7 @@ Progress: [███████░░░] 73% (8 of 11 phases complete)
 | Phase 08 P08 | 10min | 3 tasks | 3 files |
 | Phase 11 P01 | multi-day (interrupted) | 3 tasks | 6 files |
 | Phase 11-go-live P04 | 30min | 2 tasks | 4 files |
+| Phase 11-go-live P05 | ~40min | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -97,6 +98,9 @@ Recent decisions affecting current work:
 - [Phase ?]: .env.example six-variable Phase 11 contract landed as a purely-additive append; DATABASE_URL's pre-existing example value left untouched
 - [Phase ?]: [Phase 11-04]: resend + react-email approved (T-11-04-SC); react-email's own render() export used, no separate @react-email/render dependency needed
 - [Phase ?]: [Phase 11-04]: sendOrderConfirmation(orderId) mirrors lib/stripe.ts null-if-no-key idiom; recipient derived solely from looked-up order row (T-11-04-01)
+- [Phase 11-05]: Idempotency guard implemented as order.status === "pending" (not RESEARCH's !== "paid" sketch) so fulfilled/cancelled orders are never re-flipped to paid or re-emailed
+- [Phase 11-05]: sendOrderConfirmation wired at exactly two call sites (webhook pending->paid transition, checkout stub branch); Stripe test-mode branch deliberately excluded to avoid double-send
+- [Phase 11-05]: checkout route's redirect origin has zero hardcoded fallback; unset NEXTAUTH_URL returns 500 before any Order row is created (D-09)
 
 ### Pending Todos
 
@@ -117,6 +121,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-08-31T12:56:17.092Z
-Stopped at: Completed 11-04-PLAN.md (Resend + React Email order confirmation)
-Resume file: None
+Last session: 2026-08-31T13:06:20.310Z
+Stopped at: Completed 11-05-PLAN.md (Stripe webhook — payment confirmation)
+Resume file: 

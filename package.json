@@ -22,8 +22,11 @@
     "@vercel/speed-insights": "^2.0.0",
     "next": "^14.2.35",
     "next-auth": "^4.24.11",
+    "pg": "^8.23.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
+    "react-email": "^6.9.3",
+    "resend": "^6.25.0",
     "stripe": "^17.4.0",
     "use-debounce": "^10.1.1"
   },

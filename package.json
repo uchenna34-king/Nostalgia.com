@@ -10,6 +10,7 @@
     "test": "vitest run",
     "seed": "tsx prisma/seed.ts",
     "db:push": "prisma db push",
+    "vercel-build": "prisma migrate deploy && next build",
     "postinstall": "prisma generate"
   },
   "prisma": {

@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { stripe } from "@/lib/stripe";
 import { calculateShipping } from "@/lib/shipping";
+import { sendOrderConfirmation } from "@/lib/email";
 
 type IncomingItem = { slug: string; size: string; qty: number };
 
@@ -111,7 +112,22 @@ export async function POST(req: Request) {
   // Stripe accepts any HTTPS success_url/cancel_url, so trusting it would let
   // a forged Origin redirect a paying user to an attacker-controlled domain
   // after checkout. Always use the server-configured site URL.
-  const origin = process.env.NEXTAUTH_URL ?? "http://localhost:3002";
+  //
+  // No hardcoded fallback origin (D-09): NEXTAUTH_URL is already required by
+  // NextAuth and is set in every deployed environment and local .env.local,
+  // so if it is ever unset here that is a genuine misconfiguration — fail
+  // loudly with a 500 before any order is created, rather than silently
+  // redirecting a paying customer to a dead origin.
+  const origin = process.env.NEXTAUTH_URL;
+  if (!origin) {
+    console.error(
+      "checkout: NEXTAUTH_URL is not set — refusing to build a redirect URL",
+    );
+    return NextResponse.json(
+      { error: "server_misconfigured" },
+      { status: 500 },
+    );
+  }
 
   // --- Stub mode: no Stripe key. Mark paid immediately. ---
   if (!stripe) {
@@ -124,6 +140,11 @@ export async function POST(req: Request) {
         status: "paid",
       },
     });
+    // D-06: the demo/stub branch sends the same shared confirmation email a
+    // real payment does, so UAT testers exercise the identical send path.
+    // Not called in the Stripe branch below — that order is pending and its
+    // email fires from the webhook once payment is confirmed.
+    await sendOrderConfirmation(order.id);
     return NextResponse.json({
       url: `${origin}/order/success?order=${order.id}&demo=1`,
     });

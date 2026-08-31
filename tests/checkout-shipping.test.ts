@@ -60,9 +60,15 @@ function request(items: Array<{ slug: string; size: string; qty: number }>) {
   });
 }
 
+const ORIGINAL_NEXTAUTH_URL = process.env.NEXTAUTH_URL;
+
 beforeEach(() => {
   vi.clearAllMocks();
   vi.resetModules();
+  // D-09: the checkout route now fails loudly (500) if NEXTAUTH_URL is
+  // unset rather than falling back to a hardcoded origin — set a realistic
+  // test value so these shipping-focused tests aren't coupled to that guard.
+  process.env.NEXTAUTH_URL = "http://localhost:3000";
   getServerSession.mockResolvedValue({
     user: { id: "user-1", email: "shopper@example.test" },
   });
@@ -75,6 +81,7 @@ beforeEach(() => {
 
 afterEach(() => {
   vi.doUnmock("@/lib/stripe");
+  process.env.NEXTAUTH_URL = ORIGINAL_NEXTAUTH_URL;
 });
 
 describe("checkout route — Stripe test mode (STRIPE_SECRET_KEY configured)", () => {

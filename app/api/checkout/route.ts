@@ -147,7 +147,7 @@ export async function POST(req: Request) {
       ...lineItems.map((i) => ({
         quantity: i.qty,
         price_data: {
-          currency: "naira",
+          currency: "usd",
           unit_amount: i.unitPrice,
           product_data: { name: `${i.name} — ${i.size}` },
         },
@@ -160,9 +160,9 @@ export async function POST(req: Request) {
             {
               quantity: 1,
               price_data: {
-                currency: "naira",
+                currency: "usd",
                 unit_amount: shipping,
-                product_data: { name: "Shipping" },
+                product_data: { name: "Shipping Delivery Fees" },
               },
             },
           ]

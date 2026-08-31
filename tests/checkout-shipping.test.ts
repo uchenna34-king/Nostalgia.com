@@ -103,13 +103,17 @@ describe("checkout route — Stripe test mode (STRIPE_SECRET_KEY configured)", (
     const orderTotal = orderCreate.mock.calls[0][0].data.total;
     expect(orderTotal).toBe(stripeCharge);
 
-    // And the shipping line itself is explicit and correctly priced — not
-    // folded silently into a product line.
+    // The shipping fee is an explicit, separate line item — not folded
+    // silently into a product line's price. Identified by amount/currency
+    // rather than its display label, which is cosmetic copy and not this
+    // test's concern.
+    expect(call.line_items).toHaveLength(2);
     const shippingLine = call.line_items.find(
-      (li: { price_data: { product_data: { name: string } } }) =>
-        li.price_data.product_data.name === "Shipping",
+      (li: { price_data: { unit_amount: number } }) =>
+        li.price_data.unit_amount === SHIPPING_FEE,
     );
-    expect(shippingLine.price_data.unit_amount).toBe(SHIPPING_FEE);
+    expect(shippingLine).toBeDefined();
+    expect(shippingLine.price_data.currency).toBe("usd");
   });
 
   it("at/above the free-shipping threshold: no shipping line item is added, and Order.total equals the product-only Stripe charge", async () => {

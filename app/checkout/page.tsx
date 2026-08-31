@@ -7,6 +7,7 @@ import { useSession } from "next-auth/react";
 import { useCart } from "@/context/CartContext";
 import { formatPrice } from "@/lib/products";
 import { trackEvent } from "@/lib/analytics";
+import { calculateShipping } from "@/lib/shipping";
 
 export default function CheckoutPage() {
   const { data: session, status } = useSession();
@@ -120,12 +121,16 @@ export default function CheckoutPage() {
             </div>
             <div className="mt-2 flex justify-between text-sm text-ink-soft">
               <span>Shipping</span>
-              <span>{subtotal >= 20000 ? "Free" : formatPrice(1500)}</span>
+              <span>
+                {calculateShipping(subtotal) === 0
+                  ? "Free"
+                  : formatPrice(calculateShipping(subtotal))}
+              </span>
             </div>
             <div className="mt-5 flex justify-between border-t border-ink/10 pt-5 text-lg">
               <span className="font-serif">Total</span>
               <span className="font-serif">
-                {formatPrice(subtotal + (subtotal >= 20000 ? 0 : 1500))}
+                {formatPrice(subtotal + calculateShipping(subtotal))}
               </span>
             </div>
 

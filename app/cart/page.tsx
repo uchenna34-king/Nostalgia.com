@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useCart } from "@/context/CartContext";
 import { formatPrice } from "@/lib/products";
+import { FREE_SHIPPING_THRESHOLD } from "@/lib/shipping";
 
 export default function CartPage() {
   const { items, updateQty, removeItem, subtotal, count } = useCart();
@@ -88,7 +89,11 @@ export default function CartPage() {
             </div>
             <div className="mt-2 flex justify-between text-sm text-ink-soft">
               <span>Shipping</span>
-              <span>{subtotal >= 20000 ? "Free" : "Calculated at checkout"}</span>
+              <span>
+                {subtotal >= FREE_SHIPPING_THRESHOLD
+                  ? "Free"
+                  : "Calculated at checkout"}
+              </span>
             </div>
             <div className="mt-5 flex justify-between border-t border-ink/10 pt-5 text-lg">
               <span className="font-serif">Total</span>

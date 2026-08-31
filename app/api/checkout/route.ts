@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { stripe } from "@/lib/stripe";
+import { calculateShipping } from "@/lib/shipping";
 
 type IncomingItem = { slug: string; size: string; qty: number };
 
@@ -86,7 +87,12 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "no_valid_items" }, { status: 400 });
   }
 
-  const total = lineItems.reduce((sum, i) => sum + i.unitPrice * i.qty, 0);
+  const subtotal = lineItems.reduce((sum, i) => sum + i.unitPrice * i.qty, 0);
+  // Single source of truth for the fee (lib/shipping.ts) so the amount Stripe
+  // charges, the amount persisted to Order.total, and the amount the cart/
+  // checkout UI displays can never drift apart from one another again.
+  const shipping = calculateShipping(subtotal);
+  const total = subtotal + shipping;
   // `user.id` is expected to always be populated for an authenticated
   // session (see the `session` callback in lib/auth.ts). Surface it loudly
   // if that invariant ever breaks instead of silently writing an orphaned
@@ -137,14 +143,31 @@ export async function POST(req: Request) {
   const checkout = await stripe.checkout.sessions.create({
     mode: "payment",
     customer_email: session.user.email,
-    line_items: lineItems.map((i) => ({
-      quantity: i.qty,
-      price_data: {
-        currency: "usd",
-        unit_amount: i.unitPrice,
-        product_data: { name: `${i.name} — ${i.size}` },
-      },
-    })),
+    line_items: [
+      ...lineItems.map((i) => ({
+        quantity: i.qty,
+        price_data: {
+          currency: "naira",
+          unit_amount: i.unitPrice,
+          product_data: { name: `${i.name} — ${i.size}` },
+        },
+      })),
+      // Only added when a fee actually applies — an explicit $0 line item is
+      // unnecessary noise on the Stripe checkout page for orders that qualify
+      // for free shipping.
+      ...(shipping > 0
+        ? [
+            {
+              quantity: 1,
+              price_data: {
+                currency: "naira",
+                unit_amount: shipping,
+                product_data: { name: "Shipping" },
+              },
+            },
+          ]
+        : []),
+    ],
     success_url: `${origin}/order/success?order=${order.id}&session_id={CHECKOUT_SESSION_ID}`,
     cancel_url: `${origin}/cart`,
     metadata: { orderId: order.id },

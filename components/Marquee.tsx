@@ -1,21 +1,24 @@
 const PHRASES = [
-  "FREE SHIPPING OVER $200",
-  "THE ARCHIVE DROP IS LIVE",
-  "WEAR THE MEMORY",
-  "HANDMADE IN LIMITED RUNS",
+  "Keep what moves you",
+  "Small batches",
+  "Considered pieces",
+  "Made for the long way home",
 ];
 
 export default function Marquee() {
   const strip = [...PHRASES, ...PHRASES];
   return (
-    <div className="overflow-hidden border-y border-ink/15 bg-ink py-2.5 text-cream">
+    <div className="overflow-hidden border-y border-ink/12 bg-ink py-3 text-cream">
       <div className="flex w-max animate-marquee whitespace-nowrap">
         {strip.map((p, i) => (
           <span
             key={i}
-            className="mx-8 text-xs uppercase tracking-[0.3em] opacity-90"
+            className="mx-7 text-[11px] uppercase tracking-[0.32em] text-cream/85"
           >
-            {p} <span className="mx-4 text-sepia">✦</span>
+            {p}
+            <span aria-hidden className="mx-3 text-sepia-light">
+              /
+            </span>
           </span>
         ))}
       </div>

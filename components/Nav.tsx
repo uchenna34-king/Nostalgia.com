@@ -21,7 +21,7 @@ export default function Nav() {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
-    <header className="sticky top-0 z-50 bg-cream/60 backdrop-blur-md relative">
+    <header className="glass-panel sticky top-0 z-50 relative">
       <nav className="container-x relative flex h-16 items-center gap-4">
         {/* Mobile / tablet toggle */}
         <button
@@ -156,7 +156,7 @@ export default function Nav() {
       <div
         id="mobile-nav"
         aria-hidden={!mobileOpen}
-        className={`absolute inset-x-0 top-full origin-top border-b border-ink/10 bg-cream/70 backdrop-blur-md transition-all duration-300 ease-out lg:hidden ${
+        className={`glass-panel absolute inset-x-0 top-full origin-top transition-all duration-300 ease-out lg:hidden ${
           mobileOpen
             ? "translate-y-0 opacity-100"
             : "pointer-events-none -translate-y-3 opacity-0"

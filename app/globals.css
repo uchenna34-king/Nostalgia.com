@@ -70,23 +70,111 @@
     @apply text-xs uppercase tracking-[0.25em] text-sepia-deep;
   }
 
-  /* Glass controls. Deliberately scoped to controls that sit ON photography,
-     where a solid fill punches a hole in the image and a bare outline loses
-     contrast against a moving background. Controls on paper stay solid
-     (.btn-primary) — two control classes, two surfaces, no ambiguity. */
-  .btn-glass {
-    @apply inline-flex items-center justify-center gap-3 rounded-full border border-cream/45
-           bg-cream/15 px-8 py-4 text-xs font-medium uppercase tracking-[0.2em] text-cream
-           backdrop-blur-md transition-[background-color,border-color,transform] duration-300
-           hover:-translate-y-0.5 hover:border-cream/80 hover:bg-cream/25;
+  /* Liquid glass. Deliberately scoped to controls that sit ON photography,
+     where a solid fill punches a hole in the image. The fill is kept very low
+     so the photograph genuinely reads through; legibility comes from the blur
+     and the saturation lift, not from opacity. The inset highlights are the
+     specular edge — light catching the top rim and grazing the bottom — which
+     is what separates real glass from a translucent rectangle. */
+  .btn-glass,
+  .btn-glass-ink {
+    @apply relative inline-flex items-center justify-center gap-3 rounded-full px-8 py-4
+           text-xs font-medium uppercase tracking-[0.2em];
+    -webkit-backdrop-filter: blur(22px) saturate(180%);
+    backdrop-filter: blur(22px) saturate(180%);
+    transition:
+      background-color 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+      box-shadow 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+      transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
   }
 
-  /* Same control, inverted for light imagery where cream-on-photo would vanish. */
+  /* On darker imagery — cream type, light catching the rim. */
+  .btn-glass {
+    color: #f4eee4;
+    background: rgb(244 238 228 / 0.1);
+    border: 1px solid rgb(244 238 228 / 0.22);
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.42),
+      inset 0 -1px 1px rgb(255 255 255 / 0.1),
+      0 10px 30px rgb(26 26 26 / 0.22);
+  }
+  .btn-glass:hover {
+    background: rgb(244 238 228 / 0.19);
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.58),
+      inset 0 -1px 1px rgb(255 255 255 / 0.14),
+      0 16px 40px rgb(26 26 26 / 0.3);
+    transform: translateY(-2px);
+  }
+
+  /* On lighter imagery — ink type; slightly more fill so the type still clears
+     contrast over a bright, busy photograph. */
   .btn-glass-ink {
-    @apply inline-flex items-center justify-center gap-3 rounded-full border border-ink/25
-           bg-cream/35 px-8 py-4 text-xs font-medium uppercase tracking-[0.2em] text-ink
-           backdrop-blur-md transition-[background-color,border-color,transform] duration-300
-           hover:-translate-y-0.5 hover:border-ink/50 hover:bg-cream/60;
+    color: #1a1a1a;
+    background: rgb(244 238 228 / 0.24);
+    border: 1px solid rgb(26 26 26 / 0.1);
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.7),
+      inset 0 -1px 1px rgb(255 255 255 / 0.25),
+      0 10px 30px rgb(26 26 26 / 0.12);
+  }
+  .btn-glass-ink:hover {
+    background: rgb(244 238 228 / 0.4);
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.85),
+      inset 0 -1px 1px rgb(255 255 255 / 0.3),
+      0 16px 40px rgb(26 26 26 / 0.18);
+    transform: translateY(-2px);
+  }
+
+  /* No backdrop-filter (older Firefox): fall back to an opaque control rather
+     than shipping unreadable type over a photograph. */
+  @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    .btn-glass {
+      background: rgb(26 26 26 / 0.72);
+    }
+    .btn-glass-ink {
+      background: rgb(244 238 228 / 0.9);
+    }
+  }
+
+  /* Respect a stated preference for less transparency (iOS/macOS expose this). */
+  @media (prefers-reduced-transparency: reduce) {
+    .btn-glass {
+      background: rgb(26 26 26 / 0.82);
+      -webkit-backdrop-filter: none;
+      backdrop-filter: none;
+    }
+    .btn-glass-ink {
+      background: #f4eee4;
+      -webkit-backdrop-filter: none;
+      backdrop-filter: none;
+    }
+  }
+
+  /* Panel-grade glass — the same material as the controls, at surface scale.
+     Used for the header and the menu so the page reads through them. The
+     hairline is an inset highlight rather than a border, so the panel ends in
+     a catch of light instead of a drawn rule. */
+  .glass-panel {
+    background: rgb(244 238 228 / 0.5);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    backdrop-filter: blur(24px) saturate(180%);
+    box-shadow: inset 0 -1px 0 rgb(255 255 255 / 0.4);
+  }
+
+  @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    .glass-panel {
+      background: rgb(244 238 228 / 0.94);
+    }
+  }
+
+  @media (prefers-reduced-transparency: reduce) {
+    .glass-panel {
+      background: #f4eee4;
+      -webkit-backdrop-filter: none;
+      backdrop-filter: none;
+    }
   }
 
   /* Horizontal edit rail — scroll-snap, chrome hidden (the index rail below it

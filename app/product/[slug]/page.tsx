@@ -152,11 +152,13 @@ export default async function ProductPage({
 
         {/* Details */}
         <div className="lg:sticky lg:top-24 lg:self-start">
-          <p className="eyebrow">{product.category}</p>
-          <h1 className="mt-2 font-serif text-4xl font-black sm:text-5xl">
+          <p className="text-[11px] uppercase tracking-[0.32em] text-sepia-deep">
+            {product.category}
+          </p>
+          <h1 className="mt-4 font-serif font-normal leading-[0.92] tracking-[-0.03em] text-[clamp(2.25rem,4.5vw,3.75rem)]">
             {product.name}
           </h1>
-          <p className="mt-3 text-xl text-ink-soft">
+          <p className="mt-4 text-xl tabular-nums text-ink-soft">
             {formatPrice(product.price)}
           </p>
 
@@ -165,7 +167,7 @@ export default async function ProductPage({
               href="#reviews"
               className="mt-4 inline-flex items-center gap-3 link-underline"
             >
-              <span className="font-serif text-3xl">
+              <span className="font-serif text-3xl tabular-nums">
                 {product.rating.avg.toFixed(1)}
               </span>
               <RatingStars

@@ -22,14 +22,16 @@ export default function Hero() {
         className="drift -z-10 object-cover object-[64%_center]"
       />
 
-      {/* Floor scrim carries the type; the photograph stays legible above it. */}
+      {/* Floor scrim carries the type. Held to the lower two-thirds and eased
+          so the photograph still owns the top of the frame — a full-height
+          wash flattens the image to paper on short viewports. */}
       <div
         aria-hidden
-        className="absolute inset-0 -z-10 bg-gradient-to-t from-cream via-cream/55 to-transparent"
+        className="absolute inset-x-0 bottom-0 -z-10 h-2/3 bg-gradient-to-t from-cream via-cream/60 to-transparent"
       />
       <div
         aria-hidden
-        className="absolute inset-0 -z-10 hidden bg-gradient-to-r from-cream/75 via-cream/10 to-transparent md:block"
+        className="absolute inset-0 -z-10 hidden bg-gradient-to-r from-cream/60 via-transparent to-transparent md:block"
       />
 
       {/* Index rail — chapter and place as real information, set in the

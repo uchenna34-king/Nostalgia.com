@@ -57,7 +57,7 @@ export default async function ShopPage({
   searchParams: ShopSearchParams;
 }) {
   const active = searchParams.category ?? "All";
-  const { products, totalPages, categories } = await getCatalog({
+  const { products, total, totalPages, categories } = await getCatalog({
     q: searchParams.q,
     category: searchParams.category,
     size: searchParams.size,
@@ -68,25 +68,40 @@ export default async function ShopPage({
 
   return (
     <main className="container-x py-14">
-      <header className="mb-10 text-center">
-        <p className="eyebrow">The Collection</p>
-        <h1 className="mt-2 font-serif text-5xl font-black sm:text-6xl">
-          Shop all
-        </h1>
+      {/* Editorial masthead. The heading names where you actually are, and the
+          count is live — this is an Operate surface, so the brand shows up in
+          the typographic register rather than in decoration. */}
+      <header className="mb-10 border-b border-ink/10 pb-9">
+        <div className="flex flex-wrap items-end justify-between gap-x-8 gap-y-4">
+          <div>
+            <p className="text-[11px] uppercase tracking-[0.32em] text-sepia-deep">
+              The Collection
+            </p>
+            <h1 className="mt-4 font-serif font-normal leading-[0.9] tracking-[-0.03em] text-[clamp(2.75rem,8vw,6rem)]">
+              {active === "All" ? "Everything" : active}
+            </h1>
+          </div>
+          <p className="pb-2 text-[11px] uppercase tracking-[0.28em] tabular-nums text-ink-soft">
+            {total} {total === 1 ? "piece" : "pieces"}
+          </p>
+        </div>
       </header>
 
-      {/* Category pills — fast path alongside the filter panel (D-05) */}
-      <div className="mb-8 flex flex-wrap justify-center gap-2">
+      {/* Category pills — fast path alongside the filter panel (D-05). Scrolls
+          horizontally on narrow screens instead of wrapping into a tall block
+          that pushes the grid below the fold. */}
+      <div className="no-scrollbar -mx-5 mb-8 flex gap-2 overflow-x-auto px-5 sm:mx-0 sm:flex-wrap sm:px-0">
         {categories.map((c) => {
           const isActive = c === active;
           return (
             <Link
               key={c}
               href={categoryHref(searchParams, c)}
-              className={`border px-4 py-2 text-xs uppercase tracking-[0.18em] transition-colors ${
+              aria-current={isActive ? "page" : undefined}
+              className={`shrink-0 rounded-full border px-5 py-2.5 text-[11px] uppercase tracking-[0.2em] transition-colors ${
                 isActive
                   ? "border-ink bg-ink text-cream"
-                  : "border-ink/25 text-ink-soft hover:border-ink hover:text-ink"
+                  : "border-ink/20 text-ink-soft hover:border-ink hover:text-ink"
               }`}
             >
               {c}

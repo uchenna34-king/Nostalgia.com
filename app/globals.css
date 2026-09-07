@@ -69,6 +69,96 @@
   .eyebrow {
     @apply text-xs uppercase tracking-[0.25em] text-sepia-deep;
   }
+
+  /* Glass controls. Deliberately scoped to controls that sit ON photography,
+     where a solid fill punches a hole in the image and a bare outline loses
+     contrast against a moving background. Controls on paper stay solid
+     (.btn-primary) — two control classes, two surfaces, no ambiguity. */
+  .btn-glass {
+    @apply inline-flex items-center justify-center gap-3 rounded-full border border-cream/45
+           bg-cream/15 px-8 py-4 text-xs font-medium uppercase tracking-[0.2em] text-cream
+           backdrop-blur-md transition-[background-color,border-color,transform] duration-300
+           hover:-translate-y-0.5 hover:border-cream/80 hover:bg-cream/25;
+  }
+
+  /* Same control, inverted for light imagery where cream-on-photo would vanish. */
+  .btn-glass-ink {
+    @apply inline-flex items-center justify-center gap-3 rounded-full border border-ink/25
+           bg-cream/35 px-8 py-4 text-xs font-medium uppercase tracking-[0.2em] text-ink
+           backdrop-blur-md transition-[background-color,border-color,transform] duration-300
+           hover:-translate-y-0.5 hover:border-ink/50 hover:bg-cream/60;
+  }
+
+  /* Horizontal edit rail — scroll-snap, chrome hidden (the index rail below it
+     carries the affordance instead of a browser bar). */
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* Browser surfaces themed from the palette rather than left at defaults. */
+html {
+  scrollbar-color: rgb(26 26 26 / 0.28) #f4eee4;
+}
+::-webkit-scrollbar {
+  width: 11px;
+  height: 11px;
+}
+::-webkit-scrollbar-track {
+  background: #f4eee4;
+}
+::-webkit-scrollbar-thumb {
+  background: rgb(26 26 26 / 0.22);
+  border: 3px solid #f4eee4;
+  border-radius: 999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #a6552f;
+}
+body {
+  caret-color: #a6552f;
+}
+
+/* Scroll-driven reveal. Default state is fully visible, so browsers without
+   scroll-timeline (and anyone with reduced motion) get the finished page with
+   no JS and no flash of hidden content. */
+@keyframes reveal-in {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes drift-in {
+  from {
+    transform: scale(1.09);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    .reveal {
+      animation: reveal-in linear both;
+      animation-timeline: view();
+      animation-range: entry 4% cover 26%;
+    }
+  }
+
+  /* Slow settle on the opening frame — one authored moment, not a page of them. */
+  .drift {
+    animation: drift-in 2.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

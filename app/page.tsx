@@ -2,8 +2,26 @@ import Image from "next/image";
 import Link from "next/link";
 import Hero from "@/components/Hero";
 import Marquee from "@/components/Marquee";
-import ProductCard from "@/components/ProductCard";
+import EditRail from "@/components/EditRail";
 import { getFeaturedProducts } from "@/lib/products";
+
+/** Shared arrow for glass controls — one drawn mark, one stroke weight. */
+function Arrow({ className = "h-4 w-4" }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.6}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+      aria-hidden
+    >
+      <path d="M5 12h13M13 6l6 6-6 6" />
+    </svg>
+  );
+}
 
 export default async function Home() {
   const featured = await getFeaturedProducts();
@@ -13,154 +31,137 @@ export default async function Home() {
       <Hero />
       <Marquee />
 
-      {/* The Current Edit — live featured catalogue, framed editorially. */}
-      <section className="container-x py-24">
-        <div className="mb-12 max-w-xl">
-          <p className="text-xs uppercase tracking-[0.32em] text-sepia-deep">
-            The Current Edit
-          </p>
-          <h2 className="mt-4 font-serif text-4xl font-normal leading-[1.05] tracking-[-0.01em] sm:text-5xl">
-            Familiar, reframed.
-          </h2>
-        </div>
-
-        <div className="grid grid-cols-2 gap-x-6 gap-y-12 md:grid-cols-3 lg:grid-cols-4">
-          {featured.map((p) => (
-            <ProductCard key={p.id} product={p} />
-          ))}
-        </div>
-
-        <div className="mt-12">
+      {/* ── The Edit: a curated sequence, scrolled rather than gridded ── */}
+      <section className="container-x reveal py-24 md:py-32">
+        <div className="flex flex-wrap items-end justify-between gap-6 pb-12">
+          <div>
+            <p className="text-[11px] uppercase tracking-[0.32em] text-sepia-deep">
+              The current edit
+            </p>
+            <h2 className="mt-5 font-serif font-normal leading-[0.9] tracking-[-0.025em] text-[clamp(2.5rem,7vw,5.5rem)]">
+              Familiar,
+              <span className="italic"> reframed.</span>
+            </h2>
+          </div>
           <Link
             href="/shop"
-            className="link-underline text-sm uppercase tracking-[0.2em]"
+            className="link-underline pb-2 text-xs uppercase tracking-[0.24em]"
           >
-            View all pieces
+            All pieces
           </Link>
         </div>
+
+        <EditRail products={featured} />
       </section>
 
-      {/* New Chapter feature — the lead outerwear piece over real photography. */}
-      <section className="bg-cream-dark">
-        <div className="container-x grid items-stretch gap-0 md:grid-cols-2">
-          <div className="relative aspect-[4/5] w-full md:aspect-auto md:min-h-[34rem]">
+      {/* ── Two chapters, given equal weight and full height ── */}
+      <section className="reveal grid gap-px bg-ink/10 md:grid-cols-2">
+        {[
+          {
+            href: "/shop?category=Outerwear",
+            img: "/images/jacket.jpg",
+            alt: "The field jacket in washed brick",
+            index: "Chapter 04.1",
+            title: "Broken in\non arrival.",
+            cta: "See the outerwear",
+          },
+          {
+            href: "/collections",
+            img: "/images/lookbook.jpg",
+            alt: "Chapter 04 lookbook",
+            index: "Chapter 04.2",
+            title: "A little further\nthan yesterday.",
+            cta: "See the lookbook",
+          },
+        ].map((tile) => (
+          <Link
+            key={tile.href}
+            href={tile.href}
+            className="group relative isolate flex min-h-[34rem] flex-col justify-end overflow-hidden md:min-h-[44rem]"
+          >
             <Image
-              src="/images/jacket.jpg"
-              alt="The field jacket in washed brick, worn open over cream"
+              src={tile.img}
+              alt={tile.alt}
               fill
               sizes="(max-width: 768px) 100vw, 50vw"
-              className="object-cover"
+              className="-z-10 object-cover transition-transform duration-[1200ms] ease-out group-hover:scale-[1.05] motion-reduce:transition-none"
             />
+            <div
+              aria-hidden
+              className="absolute inset-0 -z-10 bg-gradient-to-t from-ink/85 via-ink/25 to-transparent"
+            />
+
+            <div className="p-8 text-cream md:p-12">
+              <p className="text-[11px] uppercase tracking-[0.32em] text-cream/70">
+                {tile.index}
+              </p>
+              <h2 className="mt-4 whitespace-pre-line font-serif font-normal leading-[0.92] tracking-[-0.02em] text-[clamp(2rem,4.2vw,3.5rem)]">
+                {tile.title}
+              </h2>
+              <span className="btn-glass mt-8">
+                {tile.cta}
+                <Arrow />
+              </span>
+            </div>
+          </Link>
+        ))}
+      </section>
+
+      {/* ── Studio manifesto: deliberately off-grid ── */}
+      <section className="container-x reveal py-24 md:py-36">
+        <div className="grid items-center gap-12 md:grid-cols-12 md:gap-16">
+          <div className="md:col-span-5 md:col-start-1">
+            <div className="relative aspect-[4/5] w-full">
+              <Image
+                src="/images/editorial.jpg"
+                alt="Inside the Nostalgia studio"
+                fill
+                sizes="(max-width: 768px) 100vw, 40vw"
+                className="object-cover"
+              />
+            </div>
           </div>
-          <div className="flex flex-col justify-center px-6 py-16 md:px-14">
-            <p className="text-xs uppercase tracking-[0.32em] text-sepia-deep">
-              New Chapter
+
+          <div className="md:col-span-6 md:col-start-7">
+            <p className="text-[11px] uppercase tracking-[0.32em] text-sepia-deep">
+              From the studio
             </p>
-            <h2 className="mt-4 font-serif text-4xl font-normal leading-[1.05] tracking-[-0.01em] sm:text-5xl">
-              The outerwear,
-              <br />
-              broken in.
+            <h2 className="mt-5 font-serif font-normal leading-[0.92] tracking-[-0.025em] text-[clamp(2.25rem,5.5vw,4.5rem)]">
+              Why do some pieces feel like they{" "}
+              <span className="italic text-sepia-deep">always belonged</span> to
+              you?
             </h2>
-            <p className="mt-5 max-w-md leading-relaxed text-ink-soft">
-              Cut from washed cotton and heavy melton, our jackets arrive
-              already easy — collars that fall right, hems that settle, colour
-              that softens the more you wear it.
+            <p className="mt-8 max-w-md leading-relaxed text-ink-soft">
+              We make considered uniforms for the in-between hours — the morning
+              record run, the last train, the dinner that runs long. Every fabric
+              is selected for what it becomes, not just what it is on day one.
             </p>
-            <Link href="/shop?category=Outerwear" className="btn-outline mt-9 w-fit">
-              See the outerwear
+            <Link href="/shop" className="btn-primary mt-10">
+              Read our story
             </Link>
           </div>
         </div>
       </section>
 
-      {/* A Note from the Studio — the house voice over editorial photography. */}
-      <section className="container-x grid items-center gap-12 py-24 md:grid-cols-2">
-        <div className="relative order-2 aspect-[4/5] w-full md:order-1">
-          <Image
-            src="/images/editorial.jpg"
-            alt="Inside the Nostalgia studio"
-            fill
-            sizes="(max-width: 768px) 100vw, 50vw"
-            className="object-cover"
-          />
-        </div>
-        <div className="order-1 md:order-2">
-          <p className="text-xs uppercase tracking-[0.32em] text-sepia-deep">
-            A Note from the Studio
+      {/* ── Closing statement: type alone carries it ── */}
+      <section className="border-t border-ink/10 bg-cream-dark">
+        <div className="container-x reveal py-24 text-center md:py-36">
+          <p className="text-[11px] uppercase tracking-[0.32em] text-sepia-deep">
+            Materials
           </p>
-          <h2 className="mt-4 font-serif text-4xl font-normal leading-[1.05] tracking-[-0.01em] sm:text-5xl">
-            Clothes with
-            <br />
-            a point of view.
+          <h2 className="mx-auto mt-6 max-w-5xl font-serif font-normal leading-[0.95] tracking-[-0.025em] text-[clamp(2.25rem,6.5vw,5rem)]">
+            Made to soften, settle,
+            <br className="hidden sm:block" /> and{" "}
+            <span className="italic">look like yours.</span>
           </h2>
-          <p className="mt-6 max-w-md leading-relaxed text-ink-soft">
-            Nostalgia started with a simple question: why do some pieces feel
-            like they have always belonged to you? We make considered uniforms
-            for the in-between hours — the morning record run, the last train,
-            the dinner that runs long.
+          <p className="mx-auto mt-8 max-w-md leading-relaxed text-ink-soft">
+            Washed cottons, dry-handle wools, and yarn-dyed cloth — chosen for
+            how they age, not how they photograph on day one.
           </p>
-          <p className="mt-4 max-w-md leading-relaxed text-ink-soft">
-            Every fabric is selected for what it becomes, not just what it is on
-            day one.
-          </p>
-          <Link
-            href="/shop"
-            className="link-underline mt-8 inline-block text-sm uppercase tracking-[0.2em]"
-          >
-            Read our story
+          <Link href="/shop" className="btn-primary mt-10">
+            See the pieces
           </Link>
         </div>
-      </section>
-
-      {/* Lookbook — a full-bleed editorial moment; scrim guarantees legibility. */}
-      <section className="relative isolate flex min-h-[70vh] items-end overflow-hidden">
-        <Image
-          src="/images/lookbook.jpg"
-          alt="Chapter 04 lookbook"
-          fill
-          sizes="100vw"
-          className="-z-10 object-cover"
-        />
-        <div
-          aria-hidden
-          className="absolute inset-0 -z-10 bg-gradient-to-t from-ink/80 via-ink/25 to-transparent"
-        />
-        <div className="container-x pb-16 pt-32 text-cream">
-          <p className="text-xs uppercase tracking-[0.32em] text-cream/70">
-            The Lookbook
-          </p>
-          <h2 className="mt-4 max-w-xl font-serif text-4xl font-normal leading-[1.05] tracking-[-0.01em] sm:text-5xl">
-            A little further
-            <br />
-            than yesterday.
-          </h2>
-          <Link
-            href="/collections"
-            className="btn-outline mt-8 border-cream text-cream hover:bg-cream hover:text-ink"
-          >
-            See the collection
-          </Link>
-        </div>
-      </section>
-
-      {/* Materials — the closing note on how the clothes age. */}
-      <section className="container-x py-24 text-center">
-        <p className="text-xs uppercase tracking-[0.32em] text-sepia-deep">
-          Materials
-        </p>
-        <h2 className="mx-auto mt-4 max-w-2xl font-serif text-4xl font-normal leading-[1.08] tracking-[-0.01em] sm:text-5xl">
-          The beauty of a thing that wears in.
-        </h2>
-        <p className="mx-auto mt-6 max-w-md leading-relaxed text-ink-soft">
-          Washed cottons, dry-handle wools, and yarn-dyed cloth chosen to soften
-          and settle with time — not to look new forever, but to look yours.
-        </p>
-        <Link
-          href="/shop"
-          className="link-underline mt-8 inline-block text-sm uppercase tracking-[0.2em]"
-        >
-          See the pieces
-        </Link>
       </section>
     </main>
   );

@@ -5,6 +5,7 @@ import { useState } from "react";
 import { useCart } from "@/context/CartContext";
 import { useWishlist } from "@/context/WishlistContext";
 import { useSession, signIn } from "next-auth/react";
+import ThemeToggle from "@/components/ThemeToggle";
 
 const LINKS = [
   { href: "/shop", label: "Shop" },
@@ -90,6 +91,8 @@ export default function Nav() {
               Sign in
             </button>
           )}
+
+          <ThemeToggle />
 
           <Link
             href="/wishlist"

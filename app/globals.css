@@ -2,8 +2,55 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Light — byte-identical to the locked palette, so the Phase 10 contrast
+   measurements still hold exactly. */
 :root {
   --grain-opacity: 0.045;
+
+  --c-cream: 244 238 228; /* #F4EEE4 page surface */
+  --c-cream-dark: 232 223 207; /* #E8DFCF raised surface */
+  --c-ink: 26 26 26; /* #1A1A1A primary content */
+  --c-ink-soft: 58 58 58; /* #3A3A3A secondary content */
+  --c-sepia: 166 85 47; /* #A6552F locked accent */
+  --c-sepia-deep: 138 69 36; /* #8A4524 accent on light ground */
+  --c-sepia-light: 201 122 74; /* #C97A4A accent on dark ground */
+}
+
+/* Dark — the same roles, re-pitched. Not an inversion: the surface is a warm
+   near-black (the brand is warm, and a neutral #000 reads clinical against
+   sepia), and the accent moves LIGHTER because `sepia-deep` is defined by its
+   job — the accent that clears contrast on the page surface — not by its hue. */
+.dark {
+  --grain-opacity: 0.055;
+
+  --c-cream: 20 18 16; /* warm near-black surface */
+  --c-cream-dark: 32 29 26; /* raised surface */
+  --c-ink: 240 234 225; /* primary content — 15.8:1 on surface */
+  --c-ink-soft: 176 168 157; /* secondary content — 8.1:1 */
+  --c-sepia: 201 122 74; /* accent lifted so it survives the dark ground */
+  --c-sepia-deep: 214 145 101; /* 7.4:1 on surface */
+  --c-sepia-light: 201 122 74;
+}
+
+/* Theme changes should feel like a dimmer, not a cut — but never animate the
+   first paint or a reduced-motion preference. */
+.theme-transition,
+.theme-transition *,
+.theme-transition *::before,
+.theme-transition *::after {
+  transition:
+    background-color 0.5s cubic-bezier(0.16, 1, 0.3, 1),
+    border-color 0.5s cubic-bezier(0.16, 1, 0.3, 1),
+    color 0.5s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .theme-transition,
+  .theme-transition *,
+  .theme-transition *::before,
+  .theme-transition *::after {
+    transition: none !important;
+  }
 }
 
 @layer base {
@@ -89,8 +136,59 @@
   }
 
   /* On darker imagery — cream type, light catching the rim. */
+  /* The pointer's specular. A real lens brightens where the light meets it, so
+     the highlight tracks the cursor (and the finger on touch) rather than
+     sitting in a fixed spot. GlassMotion writes --glass-x/--glass-y; the
+     defaults keep it centred if JS never runs. */
+  .btn-glass::after,
+  .btn-glass-ink::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+    background: radial-gradient(
+      10rem circle at var(--glass-x, 50%) var(--glass-y, 50%),
+      rgb(255 255 255 / 0.5),
+      rgb(255 255 255 / 0.14) 42%,
+      transparent 68%
+    );
+  }
+
+  .btn-glass:hover::after,
+  .btn-glass-ink:hover::after,
+  .btn-glass.glass-lit::after,
+  .btn-glass-ink.glass-lit::after {
+    opacity: 1;
+  }
+
+  /* Press: the glass gives slightly and the light blooms. Fast in, eased out —
+     the compression should feel like contact, not like an animation. */
+  .btn-glass:active,
+  .btn-glass-ink:active {
+    transform: scale(0.972);
+    transition-duration: 0.12s;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .btn-glass::after,
+    .btn-glass-ink::after {
+      transition: none;
+    }
+    .btn-glass:hover,
+    .btn-glass-ink:hover,
+    .btn-glass:active,
+    .btn-glass-ink:active {
+      transform: none;
+    }
+  }
+
   .btn-glass {
-    color: #f4eee4;
+    /* Fixed light: this control only ever sits on darkened photography, in
+       both themes. */
+    color: #f6f1e8;
     background: rgb(244 238 228 / 0.1);
     border: 1px solid rgb(244 238 228 / 0.22);
     box-shadow:
@@ -110,16 +208,16 @@
   /* On lighter imagery — ink type; slightly more fill so the type still clears
      contrast over a bright, busy photograph. */
   .btn-glass-ink {
-    color: #1a1a1a;
-    background: rgb(244 238 228 / 0.24);
-    border: 1px solid rgb(26 26 26 / 0.1);
+    color: rgb(var(--c-ink));
+    background: rgb(var(--c-cream) / 0.24);
+    border: 1px solid rgb(var(--c-ink) / 0.1);
     box-shadow:
       inset 0 1px 0 rgb(255 255 255 / 0.7),
       inset 0 -1px 1px rgb(255 255 255 / 0.25),
       0 10px 30px rgb(26 26 26 / 0.12);
   }
   .btn-glass-ink:hover {
-    background: rgb(244 238 228 / 0.4);
+    background: rgb(var(--c-cream) / 0.4);
     box-shadow:
       inset 0 1px 0 rgb(255 255 255 / 0.85),
       inset 0 -1px 1px rgb(255 255 255 / 0.3),
@@ -134,7 +232,7 @@
       background: rgb(26 26 26 / 0.72);
     }
     .btn-glass-ink {
-      background: rgb(244 238 228 / 0.9);
+      background: rgb(var(--c-cream) / 0.9);
     }
   }
 
@@ -146,7 +244,7 @@
       backdrop-filter: none;
     }
     .btn-glass-ink {
-      background: #f4eee4;
+      background: rgb(var(--c-cream));
       -webkit-backdrop-filter: none;
       backdrop-filter: none;
     }
@@ -157,21 +255,58 @@
      hairline is an inset highlight rather than a border, so the panel ends in
      a catch of light instead of a drawn rule. */
   .glass-panel {
-    background: rgb(244 238 228 / 0.5);
+    background: rgb(var(--c-cream) / 0.5);
     -webkit-backdrop-filter: blur(24px) saturate(180%);
     backdrop-filter: blur(24px) saturate(180%);
     box-shadow: inset 0 -1px 0 rgb(255 255 255 / 0.4);
   }
 
+  /* Dark: the specular rim is the one thing that cannot simply carry over. A
+     white hairline at 0.4 reads as a drawn line against a near-black surface —
+     it has to drop to where it still catches light without becoming a border.
+     The fill goes UP, because a 50%-opaque dark panel over dark content stops
+     separating the header from the page behind it. */
+  .dark .glass-panel {
+    background: rgb(var(--c-cream) / 0.62);
+    box-shadow: inset 0 -1px 0 rgb(255 255 255 / 0.1);
+  }
+
+  .dark .btn-glass-ink {
+    background: rgb(var(--c-cream) / 0.34);
+    border-color: rgb(var(--c-ink) / 0.16);
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.16),
+      inset 0 -1px 1px rgb(255 255 255 / 0.06),
+      0 10px 30px rgb(0 0 0 / 0.4);
+  }
+  .dark .btn-glass-ink:hover {
+    background: rgb(var(--c-cream) / 0.5);
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.24),
+      inset 0 -1px 1px rgb(255 255 255 / 0.08),
+      0 16px 40px rgb(0 0 0 / 0.5);
+  }
+
+  /* The tracked highlight is a light source, so it dims with the room rather
+     than blowing out white over a dark control. */
+  .dark .btn-glass-ink::after {
+    background: radial-gradient(
+      10rem circle at var(--glass-x, 50%) var(--glass-y, 50%),
+      rgb(255 255 255 / 0.22),
+      rgb(255 255 255 / 0.07) 42%,
+      transparent 68%
+    );
+  }
+
   @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
     .glass-panel {
-      background: rgb(244 238 228 / 0.94);
+      background: rgb(var(--c-cream) / 0.94);
     }
   }
 
   @media (prefers-reduced-transparency: reduce) {
     .glass-panel {
-      background: #f4eee4;
+      background: rgb(var(--c-cream));
       -webkit-backdrop-filter: none;
       backdrop-filter: none;
     }
@@ -188,27 +323,37 @@
   }
 }
 
-/* Browser surfaces themed from the palette rather than left at defaults. */
+/* Browser surfaces themed from the palette rather than left at defaults.
+   `color-scheme` is what tells the browser to render its OWN chrome — form
+   controls, the spellcheck underline, the overlay scrollbar on macOS — in the
+   right register; without it a dark page still gets light native widgets. */
+:root {
+  color-scheme: light;
+}
+.dark {
+  color-scheme: dark;
+}
+
 html {
-  scrollbar-color: rgb(26 26 26 / 0.28) #f4eee4;
+  scrollbar-color: rgb(var(--c-ink) / 0.28) rgb(var(--c-cream));
 }
 ::-webkit-scrollbar {
   width: 11px;
   height: 11px;
 }
 ::-webkit-scrollbar-track {
-  background: #f4eee4;
+  background: rgb(var(--c-cream));
 }
 ::-webkit-scrollbar-thumb {
-  background: rgb(26 26 26 / 0.22);
-  border: 3px solid #f4eee4;
+  background: rgb(var(--c-ink) / 0.22);
+  border: 3px solid rgb(var(--c-cream));
   border-radius: 999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #a6552f;
+  background: rgb(var(--c-sepia));
 }
 body {
-  caret-color: #a6552f;
+  caret-color: rgb(var(--c-sepia));
 }
 
 /* Scroll-driven reveal. Default state is fully visible, so browsers without

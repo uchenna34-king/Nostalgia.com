@@ -25,13 +25,18 @@ export default function Hero() {
       {/* Floor scrim carries the type. Held to the lower two-thirds and eased
           so the photograph still owns the top of the frame — a full-height
           wash flattens the image to paper on short viewports. */}
+      {/* The scrim is the page surface, so it inverts with the theme — which is
+          right (light type needs a dark ground) but not at the same strength.
+          Cream over a photo tints it; near-black over the same photo erases it,
+          so both washes are pulled back in dark mode to the minimum the display
+          type actually needs. */}
       <div
         aria-hidden
-        className="absolute inset-x-0 bottom-0 -z-10 h-2/3 bg-gradient-to-t from-cream via-cream/60 to-transparent"
+        className="absolute inset-x-0 bottom-0 -z-10 h-2/3 bg-gradient-to-t from-cream via-cream/60 to-transparent dark:from-cream/85 dark:via-cream/35"
       />
       <div
         aria-hidden
-        className="absolute inset-0 -z-10 hidden bg-gradient-to-r from-cream/60 via-transparent to-transparent md:block"
+        className="absolute inset-0 -z-10 hidden bg-gradient-to-r from-cream/60 via-transparent to-transparent md:block dark:from-cream/30"
       />
 
       {/* Index rail — chapter and place as real information, set in the

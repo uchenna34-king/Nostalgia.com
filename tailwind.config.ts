@@ -1,6 +1,7 @@
 import type { Config } from "tailwindcss";
 
 const config: Config = {
+  darkMode: "class",
   content: [
     "./app/**/*.{js,ts,jsx,tsx,mdx}",
     "./components/**/*.{js,ts,jsx,tsx,mdx}",
@@ -9,18 +10,29 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        cream: "#F4EEE4",
-        ink: "#1A1A1A",
-        sepia: "#A6552F",
+        // Semantic, variable-backed. `cream` is the page surface and `ink` the
+        // primary content colour — in dark mode the variables swap, so every
+        // existing `bg-cream` / `text-ink` usage inverts without being rewritten.
+        // Light-mode values are byte-identical to the locked palette, so the
+        // Phase 10 contrast work is preserved exactly.
+        cream: "rgb(var(--c-cream) / <alpha-value>)",
+        ink: "rgb(var(--c-ink) / <alpha-value>)",
+        sepia: "rgb(var(--c-sepia) / <alpha-value>)",
         // AA-passing siblings of the locked sepia accent, for contexts where
         // #A6552F cannot reach 4.5:1 (WCAG 1.4.3). The accent itself is
         // unchanged — these are used only where measurement showed a failure.
         // sepia-deep on cream 6.15:1, on cream-dark 5.37:1 (was 4.59 / 4.01).
         // sepia-light on ink   5.28:1 (was 3.28).
-        "sepia-deep": "#8A4524",
-        "sepia-light": "#C97A4A",
-        "cream-dark": "#E8DFCF",
-        "ink-soft": "#3A3A3A",
+        "sepia-deep": "rgb(var(--c-sepia-deep) / <alpha-value>)",
+        "sepia-light": "rgb(var(--c-sepia-light) / <alpha-value>)",
+        "cream-dark": "rgb(var(--c-cream-dark) / <alpha-value>)",
+        "ink-soft": "rgb(var(--c-ink-soft) / <alpha-value>)",
+
+        // Fixed, non-swapping. Photography must be darkened in BOTH themes, so
+        // scrims over images use these rather than the semantic pair — a scrim
+        // that inverts would wash the photo light in dark mode.
+        shade: "#141210",
+        light: "#F6F1E8",
       },
       fontFamily: {
         serif: ["var(--font-fraunces)", "Georgia", "serif"],

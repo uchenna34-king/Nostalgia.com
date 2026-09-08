@@ -88,11 +88,14 @@ export default async function Home() {
             />
             <div
               aria-hidden
-              className="absolute inset-0 -z-10 bg-gradient-to-t from-ink/85 via-ink/25 to-transparent"
+              className="absolute inset-0 -z-10 bg-gradient-to-t from-shade/85 via-shade/25 to-transparent"
             />
 
-            <div className="p-8 text-cream md:p-12">
-              <p className="text-[11px] uppercase tracking-[0.32em] text-cream/70">
+            {/* shade/light, not ink/cream: a photograph has to be darkened and
+                its caption set light in BOTH themes. Semantic tokens would swap
+                in dark mode and wash the image out. */}
+            <div className="p-8 text-light md:p-12">
+              <p className="text-[11px] uppercase tracking-[0.32em] text-light/70">
                 {tile.index}
               </p>
               <h2 className="mt-4 whitespace-pre-line font-serif font-normal leading-[0.92] tracking-[-0.02em] text-[clamp(2rem,4.2vw,3.5rem)]">

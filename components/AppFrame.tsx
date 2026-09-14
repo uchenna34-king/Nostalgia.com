@@ -3,6 +3,7 @@
 import { usePathname } from "next/navigation";
 import Nav from "@/components/Nav";
 import CartDrawer from "@/components/CartDrawer";
+import AnnouncementBar from "@/components/AnnouncementBar";
 
 /**
  * Chrome gate. The storefront gets the full frame (film-grain overlay, Nav,
@@ -24,6 +25,7 @@ export default function AppFrame({
   }
   return (
     <div className="grain flex min-h-screen flex-col">
+      <AnnouncementBar />
       <Nav />
       <div className="flex-1">{children}</div>
       {footer}

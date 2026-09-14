@@ -84,6 +84,23 @@ export default function Footer() {
         </div>
       </div>
 
+      {/* Payment row — MOVE runs card logos here; the archive keeps them as
+          quiet monochrome chips so the footer stays one material. */}
+      <div className="border-t border-light/12">
+        <div className="container-x flex flex-wrap items-center justify-center gap-2 py-5">
+          {["Visa", "Mastercard", "Amex", "PayPal", "Apple Pay", "Google Pay"].map(
+            (m) => (
+              <span
+                key={m}
+                className="rounded-[3px] border border-light/20 px-2.5 py-1 text-[10px] font-medium uppercase tracking-[0.14em] text-light/55"
+              >
+                {m}
+              </span>
+            ),
+          )}
+        </div>
+      </div>
+
       <div className="border-t border-light/12">
         <div className="container-x flex flex-col items-center justify-between gap-2 py-6 text-[12px] text-light/55 sm:flex-row">
           <span>

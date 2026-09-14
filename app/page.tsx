@@ -4,15 +4,47 @@ import Hero from "@/components/Hero";
 import Marquee from "@/components/Marquee";
 import EditRail from "@/components/EditRail";
 import Wordmark from "@/components/Wordmark";
-import { getFeaturedProducts } from "@/lib/products";
+import TrustStrip from "@/components/home/TrustStrip";
+import CategoryTiles, {
+  type CategoryTile,
+} from "@/components/home/CategoryTiles";
+import Newsletter from "@/components/home/Newsletter";
+import { getFeaturedProducts, getProducts } from "@/lib/products";
 
 export default async function Home() {
-  const featured = await getFeaturedProducts();
+  const [featured, all] = await Promise.all([
+    getFeaturedProducts(),
+    getProducts(),
+  ]);
+
+  // Category tiles built from the live catalogue — first image per category as
+  // the cover, and a real count so the rail reads as an archive, not chrome.
+  const byCategory = new Map<string, { image: string; count: number }>();
+  for (const p of all) {
+    const entry = byCategory.get(p.category) ?? {
+      image: p.images[0] ?? "/images/nostalgia.jpg",
+      count: 0,
+    };
+    entry.count += 1;
+    byCategory.set(p.category, entry);
+  }
+  const tiles: CategoryTile[] = [...byCategory.entries()]
+    .slice(0, 6)
+    .map(([name, v]) => ({
+      name,
+      href: `/shop?category=${encodeURIComponent(name)}`,
+      image: v.image,
+      count: v.count,
+    }));
 
   return (
     <main id="top">
       <Hero />
       <Marquee />
+
+      <TrustStrip />
+
+      <CategoryTiles tiles={tiles} />
 
       {/* ── THE CAMPAIGN — the wordmark laid straight across the image at scale ── */}
       <section className="container-x reveal py-24 md:py-32">
@@ -26,9 +58,6 @@ export default async function Home() {
           ad, and storefront hero is built.
         </p>
 
-        {/* The wordmark over darkened photography — heavily scrimmed so the thin
-            didone strokes clear the image, per the "never on a busy photograph"
-            rule. shade/light keep the treatment identical in both themes. */}
         <figure className="relative mt-12 aspect-[16/9] overflow-hidden rounded-[4px]">
           {/* Portrait source in a 16/9 frame — held high so the crop lands on
               the tailoring and the printed dress rather than the hems. */}
@@ -51,6 +80,26 @@ export default async function Home() {
             <span>One of one</span>
           </figcaption>
         </figure>
+      </section>
+
+      {/* ── THE EDIT — the live archive, scrolled rather than gridded ── */}
+      <section className="container-x reveal pb-24 md:pb-32">
+        <div className="flex flex-wrap items-end justify-between gap-6 pb-10">
+          <div>
+            <p className="kicker">The edit</p>
+            <h2 className="mt-6 font-serif font-normal leading-[1.02] tracking-[-0.02em] text-[clamp(2rem,5vw,3.75rem)]">
+              In the archive now.
+            </h2>
+          </div>
+          <Link
+            href="/shop"
+            className="link-underline pb-2 text-[13px] tracking-[0.01em] text-ink-soft hover:text-ink"
+          >
+            Shop the archive
+          </Link>
+        </div>
+
+        <EditRail products={featured} />
       </section>
 
       {/* ── THE DEVICE — half photograph, half present tense ── */}
@@ -83,25 +132,7 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* ── THE EDIT — the live archive, scrolled rather than gridded ── */}
-      <section className="container-x reveal pb-24 md:pb-32">
-        <div className="flex flex-wrap items-end justify-between gap-6 pb-10">
-          <div>
-            <p className="kicker">The edit</p>
-            <h2 className="mt-6 font-serif font-normal leading-[1.02] tracking-[-0.02em] text-[clamp(2rem,5vw,3.75rem)]">
-              In the archive now.
-            </h2>
-          </div>
-          <Link
-            href="/shop"
-            className="link-underline pb-2 text-[13px] tracking-[0.01em] text-ink-soft hover:text-ink"
-          >
-            Shop the archive
-          </Link>
-        </div>
-
-        <EditRail products={featured} />
-      </section>
+      <Newsletter />
 
       {/* ── THE IDENTITY — reversed on black, the closing statement ── */}
       <section className="reveal bg-shade text-light">

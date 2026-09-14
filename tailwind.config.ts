@@ -35,8 +35,12 @@ const config: Config = {
         light: "#F6F1E8",
       },
       fontFamily: {
+        // One face for the entire site, by direction: Bodoni Moda is used for
+        // body and UI as well as display, so `sans` and `serif` resolve to the
+        // same stack. Every default-body, `font-sans`, and `font-serif` usage
+        // therefore lands on Bodoni — no second typeface anywhere.
         serif: ["var(--font-bodoni)", "Didot", "Georgia", "serif"],
-        sans: ["var(--font-inter)", "system-ui", "sans-serif"],
+        sans: ["var(--font-bodoni)", "Didot", "Georgia", "serif"],
       },
       keyframes: {
         marquee: {

@@ -1,87 +1,80 @@
-import Image from "next/image";
+"use client";
+
 import Link from "next/link";
+import { useState } from "react";
 
 /**
- * Opening frame. Full-viewport photography with the display type set at
- * poster scale — the collision of an editorial serif with that scale is the
- * point: neither the athletic sans of sportswear nor the timid centered
- * wordmark of quiet luxury.
+ * The opening reveal. Per the identity, the wordmark IS the campaign — the word
+ * laid straight across warm off-white at poster scale. It plays automatically
+ * on load in two beats: the N stands alone, then the rest of the letters unfurl
+ * out of it (see .reveal-n / .reveal-rest in globals.css). "Replay the reveal"
+ * re-triggers it; the lockup is keyed so remounting restarts the CSS clocks
+ * cleanly from the first frame.
  *
- * Type is fluid via clamp() rather than breakpoint steps, so it fills the
- * frame identically at 320px and 2560px with no jump and no overflow.
+ * The word is one accessible string via aria-label; the split into two spans is
+ * purely visual, so screen readers hear "Nostalgia", not "N … ostalgia".
  */
 export default function Hero() {
+  const [take, setTake] = useState(0);
+
   return (
-    <section className="relative isolate flex min-h-[100svh] flex-col justify-end overflow-hidden">
-      <Image
-        src="/images/hero.jpg"
-        alt="A record shop in warm afternoon light"
-        fill
-        priority
-        sizes="100vw"
-        className="drift -z-10 object-cover object-[64%_center]"
-      />
+    <section className="relative overflow-hidden">
+      <div className="container-x flex flex-col items-center py-24 text-center md:py-32">
+        <p className="kicker">A luxury resale house · Est. now</p>
 
-      {/* Floor scrim carries the type. Held to the lower two-thirds and eased
-          so the photograph still owns the top of the frame — a full-height
-          wash flattens the image to paper on short viewports. */}
-      {/* The scrim is the page surface, so it inverts with the theme — which is
-          right (light type needs a dark ground) but not at the same strength.
-          Cream over a photo tints it; near-black over the same photo erases it,
-          so both washes are pulled back in dark mode to the minimum the display
-          type actually needs. */}
-      <div
-        aria-hidden
-        className="absolute inset-x-0 bottom-0 -z-10 h-2/3 bg-gradient-to-t from-cream via-cream/60 to-transparent dark:from-cream/85 dark:via-cream/35"
-      />
-      <div
-        aria-hidden
-        className="absolute inset-0 -z-10 hidden bg-gradient-to-r from-cream/60 via-transparent to-transparent md:block dark:from-cream/30"
-      />
-
-      {/* Index rail — chapter and place as real information, set in the
-          technical register against the warmth of the photograph. */}
-      {/* Dropped entirely on very short viewports (landscape phones), where it
-          would otherwise collide with the display type rather than frame it. */}
-      <div className="container-x absolute inset-x-0 top-0 hidden items-baseline justify-between pt-20 text-[11px] uppercase tracking-[0.32em] text-ink-soft [@media(min-height:620px)]:flex sm:pt-24">
-        <span>Chapter 04</span>
-        <span className="hidden tabular-nums sm:block">45°31′N / 122°40′W</span>
-      </div>
-
-      <div className="container-x relative pb-16 md:pb-24">
-        {/* Sized against BOTH axes: min(vw, vh) means a landscape phone or a
-            short laptop window scales the display down instead of overflowing
-            the frame and colliding with the index rail above it. */}
-        <h1 className="font-serif font-normal leading-[0.82] tracking-[-0.035em] text-[clamp(2.75rem,min(12.5vw,17vh),11rem)]">
-          <span className="block">Made for</span>
-          <span className="block pl-[0.05em] italic text-sepia-deep">
-            the long way
+        {/* key remounts the lockup so the reveal restarts from the top. */}
+        <h1
+          key={take}
+          aria-label="Nostalgia"
+          className="mt-10 font-serif font-normal leading-none tracking-[-0.015em] text-[clamp(3.25rem,15vw,10rem)] md:mt-12"
+        >
+          <span aria-hidden className="reveal-n">
+            N
           </span>
-          <span className="block">home.</span>
+          <span aria-hidden className="reveal-rest">
+            ostalgia
+            <sup className="ml-[0.08em] align-top text-[0.32em] tracking-normal">
+              ®
+            </sup>
+          </span>
         </h1>
 
-        <div className="mt-10 flex flex-col gap-7 sm:flex-row sm:items-end sm:justify-between">
-          <p className="max-w-sm text-base leading-relaxed text-ink-soft">
-            A new collection of familiar shapes, washed by light and made to
-            collect a little history.
-          </p>
+        <p className="kicker mt-10">History in the making</p>
 
-          <Link href="/shop" className="btn-glass-ink w-fit shrink-0">
-            Explore Chapter 04
-            <svg
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth={1.6}
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="h-4 w-4"
-              aria-hidden
-            >
-              <path d="M5 12h13M13 6l6 6-6 6" />
-            </svg>
+        <p className="mt-8 max-w-md text-[15px] leading-relaxed text-ink-soft">
+          The past as raw material. A marketplace where one-of-one archive
+          fashion meets the collectors, the enthusiasts, and the next generation
+          discovering it for the first time.
+        </p>
+
+        <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
+          <Link href="/shop" className="btn-primary">
+            Enter the marketplace
+          </Link>
+          <Link href="/account" className="btn-outline">
+            Sell with us
           </Link>
         </div>
+
+        <button
+          type="button"
+          onClick={() => setTake((t) => t + 1)}
+          className="link-underline mt-9 inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.28em] text-sepia-deep transition-colors hover:text-ink"
+        >
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={1.4}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="h-3.5 w-3.5"
+            aria-hidden
+          >
+            <path d="M3 12a9 9 0 1 0 3-6.7M3 4v4h4" />
+          </svg>
+          Replay the reveal
+        </button>
       </div>
     </section>
   );

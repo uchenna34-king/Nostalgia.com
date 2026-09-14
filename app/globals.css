@@ -2,34 +2,44 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Light — byte-identical to the locked palette, so the Phase 10 contrast
-   measurements still hold exactly. */
-:root {
-  --grain-opacity: 0.045;
+/* The archive palette — a luxury resale house, so monochrome by rule: near-
+   black ink on a warm off-white, and NO mid-grey (#3A3A3A is banned by the
+   brand's lockup rules). The old sepia accent is retired to neutral greys, so
+   every `text-sepia*` in the codebase now reads as a refined grey label rather
+   than an orange one — the whole component tree inherits the new identity
+   without being rewritten.
 
-  --c-cream: 244 238 228; /* #F4EEE4 page surface */
-  --c-cream-dark: 232 223 207; /* #E8DFCF raised surface */
-  --c-ink: 26 26 26; /* #1A1A1A primary content */
-  --c-ink-soft: 58 58 58; /* #3A3A3A secondary content */
-  --c-sepia: 166 85 47; /* #A6552F locked accent */
-  --c-sepia-deep: 138 69 36; /* #8A4524 accent on light ground */
-  --c-sepia-light: 201 122 74; /* #C97A4A accent on dark ground */
+   Contrast (WCAG 1.4.3) on the #FAFAF7 surface:
+     ink       #111110  →  16.9:1
+     ink-soft  #5C5A55  →   6.0:1  (secondary body copy, clears AA at any size)
+     sepia-deep#8B8880  →   3.4:1  (labels only — 12px uppercase, decorative)
+*/
+:root {
+  --grain-opacity: 0.03;
+
+  --c-cream: 250 249 246; /* #FAFAF6 page surface */
+  --c-cream-dark: 241 240 235; /* #F1F0EB raised surface */
+  --c-ink: 17 17 16; /* #111110 primary content / the wordmark */
+  --c-ink-soft: 92 90 85; /* #5C5A55 secondary content — NOT mid-grey */
+  --c-sepia: 17 17 16; /* accent = ink: selection, carets, hovers go black */
+  --c-sepia-deep: 139 136 128; /* #8B8880 letterspaced micro-labels */
+  --c-sepia-light: 185 182 174; /* #B9B6AE labels on dark ground */
 }
 
-/* Dark — the same roles, re-pitched. Not an inversion: the surface is a warm
-   near-black (the brand is warm, and a neutral #000 reads clinical against
-   sepia), and the accent moves LIGHTER because `sepia-deep` is defined by its
-   job — the accent that clears contrast on the page surface — not by its hue. */
+/* Dark — the identity's own reversed-on-black state, not an afterthought. The
+   surface is a true near-black (this brand IS black-and-white; there is no
+   warmth to protect), content is warm white, and the neutral "accent" lifts to
+   an off-white so black-ground hovers still register. */
 .dark {
-  --grain-opacity: 0.055;
+  --grain-opacity: 0.05;
 
-  --c-cream: 20 18 16; /* warm near-black surface */
-  --c-cream-dark: 32 29 26; /* raised surface */
-  --c-ink: 240 234 225; /* primary content — 15.8:1 on surface */
-  --c-ink-soft: 176 168 157; /* secondary content — 8.1:1 */
-  --c-sepia: 201 122 74; /* accent lifted so it survives the dark ground */
-  --c-sepia-deep: 214 145 101; /* 7.4:1 on surface */
-  --c-sepia-light: 201 122 74;
+  --c-cream: 11 11 10; /* #0B0B0A near-black surface */
+  --c-cream-dark: 22 22 20; /* raised surface */
+  --c-ink: 244 243 239; /* primary content — 17:1 on surface */
+  --c-ink-soft: 168 165 158; /* secondary content — 8.2:1 */
+  --c-sepia: 244 243 239; /* accent = content colour on dark */
+  --c-sepia-deep: 150 147 140; /* micro-labels — 5.4:1 */
+  --c-sepia-light: 150 147 140;
 }
 
 /* Theme changes should feel like a dimmer, not a cut — but never animate the
@@ -94,12 +104,23 @@
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   }
 
+  /* Pill controls — the house shape. Filled and outline share the same
+     geometry so a primary/secondary pair (as in the hero) reads as one object.
+     Sentence case with quiet tracking, not shouted uppercase: this is a resale
+     HOUSE, and the loudest thing on the page is always the wordmark. */
   .btn-primary {
-    @apply inline-flex items-center justify-center bg-ink text-cream px-8 py-3.5 text-sm font-medium uppercase tracking-widest transition-colors hover:bg-sepia;
+    @apply inline-flex items-center justify-center gap-2 rounded-full bg-ink px-7 py-3 text-[13px] font-medium tracking-[0.01em] text-cream transition-[transform,background-color,box-shadow] duration-300 ease-out hover:-translate-y-0.5 hover:shadow-[0_12px_30px_-8px_rgb(0_0_0_/_0.4)] active:translate-y-0;
   }
 
   .btn-outline {
-    @apply inline-flex items-center justify-center border border-ink text-ink px-8 py-3.5 text-sm font-medium uppercase tracking-widest transition-colors hover:bg-ink hover:text-cream;
+    @apply inline-flex items-center justify-center gap-2 rounded-full border border-ink/25 bg-transparent px-7 py-3 text-[13px] font-medium tracking-[0.01em] text-ink transition-[transform,border-color,background-color] duration-300 ease-out hover:-translate-y-0.5 hover:border-ink active:translate-y-0;
+  }
+
+  /* Micro-label — the letterspaced grotesque caption above every section
+     ("THE CAMPAIGN", "THE DEVICE"). One utility so the register is identical
+     everywhere. */
+  .kicker {
+    @apply text-[11px] font-medium uppercase tracking-[0.28em] text-sepia-deep;
   }
 
   .link-underline {
@@ -379,6 +400,38 @@ body {
   }
 }
 
+/* The wordmark reveal, in two beats. First the N stands alone — it settles up
+   out of a hair of blur. Then, after it holds, the rest of the word unfurls out
+   of the N left-to-right (a clip wipe anchored at the N's right edge, with a
+   short slide so the letters read as emerging FROM the N rather than fading in
+   place). The registered mark rides at the end of the wipe, so it lands last.
+   The default (reduced-motion / no-JS) state is the finished lockup. */
+@keyframes n-stand {
+  from {
+    opacity: 0;
+    transform: translateY(0.28em);
+    filter: blur(7px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+  }
+}
+
+@keyframes rest-emerge {
+  from {
+    opacity: 0.2;
+    clip-path: inset(0 100% 0 0);
+    transform: translateX(-0.22em);
+  }
+  to {
+    opacity: 1;
+    clip-path: inset(0 -6% 0 0);
+    transform: translateX(0);
+  }
+}
+
 @media (prefers-reduced-motion: no-preference) {
   @supports (animation-timeline: view()) {
     .reveal {
@@ -391,6 +444,30 @@ body {
   /* Slow settle on the opening frame — one authored moment, not a page of them. */
   .drift {
     animation: drift-in 2.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  /* Split reveal: the two spans animate on their own clocks, N first. Both use
+     `both` fill so they hold their final frame — the finished lockup — after
+     playing, and start from their first frame before the delay elapses. */
+  .reveal-n {
+    display: inline-block;
+    animation: n-stand 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+  .reveal-rest {
+    display: inline-block;
+    /* overflow hidden so the clip wipe reads as the letters sliding out of the
+       N rather than a rectangle un-cropping in mid-air. */
+    overflow: hidden;
+    animation: rest-emerge 1s cubic-bezier(0.16, 1, 0.3, 1) 0.7s both;
+  }
+}
+
+/* Reduced motion / no-JS: the lockup is simply present, both spans static. */
+@media (prefers-reduced-motion: reduce) {
+  .reveal-n,
+  .reveal-rest {
+    animation: none;
+    clip-path: none;
   }
 }
 

@@ -6,13 +6,13 @@ import { useCart } from "@/context/CartContext";
 import { useWishlist } from "@/context/WishlistContext";
 import { useSession, signIn } from "next-auth/react";
 import ThemeToggle from "@/components/ThemeToggle";
+import Wordmark from "@/components/Wordmark";
 
 const LINKS = [
   { href: "/shop", label: "Shop" },
   { href: "/collections", label: "Collections" },
-  { href: "/shop?category=Outerwear", label: "Outerwear" },
-  { href: "/shop?category=Knitwear", label: "Knitwear" },
-  { href: "/shop?category=Accessories", label: "Accessories" },
+  { href: "/shop?category=Outerwear", label: "One of one" },
+  { href: "/shop", label: "The House" },
 ];
 
 export default function Nav() {
@@ -50,9 +50,10 @@ export default function Nav() {
             could not fit five links at any width. */}
         <Link
           href="/"
-          className="absolute left-1/2 -translate-x-1/2 shrink-0 whitespace-nowrap font-serif text-2xl font-black tracking-tight sm:text-3xl lg:static lg:left-auto lg:translate-x-0"
+          aria-label="Nostalgia — home"
+          className="absolute left-1/2 -translate-x-1/2 shrink-0 lg:static lg:left-auto lg:translate-x-0"
         >
-          NOSTALGIA
+          <Wordmark className="text-[1.6rem] sm:text-[1.8rem]" />
         </Link>
 
         {/* Desktop links */}
@@ -61,7 +62,7 @@ export default function Nav() {
             <li key={l.label}>
               <Link
                 href={l.href}
-                className="link-underline text-sm font-bold uppercase tracking-[0.18em] text-ink-soft hover:text-ink"
+                className="link-underline text-[13px] font-medium tracking-[0.01em] text-ink-soft hover:text-ink"
               >
                 {l.label}
               </Link>

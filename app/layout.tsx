@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { fraunces, inter } from "@/lib/fonts";
+import { bodoni, inter } from "@/lib/fonts";
 import Providers from "@/components/Providers";
 import Footer from "@/components/Footer";
 import AppFrame from "@/components/AppFrame";
@@ -33,7 +33,7 @@ export default function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className={`${fraunces.variable} ${inter.variable}`}
+      className={`${bodoni.variable} ${inter.variable}`}
     >
       <head>
         <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />

@@ -35,7 +35,7 @@ const config: Config = {
         light: "#F6F1E8",
       },
       fontFamily: {
-        serif: ["var(--font-fraunces)", "Georgia", "serif"],
+        serif: ["var(--font-bodoni)", "Didot", "Georgia", "serif"],
         sans: ["var(--font-inter)", "system-ui", "sans-serif"],
       },
       keyframes: {

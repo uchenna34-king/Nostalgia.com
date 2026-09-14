@@ -237,7 +237,7 @@ export default async function ProductPage({
 
       {related.length > 0 && (
         <section className="mt-24">
-          <h2 className="mb-8 font-serif text-3xl font-black">
+          <h2 className="mb-8 font-serif text-3xl font-normal tracking-[-0.02em]">
             More from {product.category}
           </h2>
           <div className="grid grid-cols-2 gap-x-5 gap-y-10 md:grid-cols-4">
@@ -249,7 +249,7 @@ export default async function ProductPage({
       )}
 
       <section id="reviews" className="mt-24">
-        <h2 className="font-serif text-3xl font-black">Reviews</h2>
+        <h2 className="font-serif text-3xl font-normal tracking-[-0.02em]">Reviews</h2>
         {reviews.length > 0 ? (
           <ReviewList reviews={reviews} />
         ) : (

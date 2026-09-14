@@ -18,13 +18,13 @@ export default function ShippingPage() {
     <main className="container-x py-16">
       <div className="max-w-2xl">
         <p className="eyebrow">Customer Care</p>
-        <h1 className="mt-3 font-serif text-5xl font-black">Shipping</h1>
+        <h1 className="mt-3 font-serif text-5xl font-normal">Shipping</h1>
         <p className="mt-4 text-ink-soft leading-relaxed">
           Every Nostalgia piece is made in limited runs and sent with care. Here
           is how your order travels from our studio to your door.
         </p>
 
-        <h2 className="font-serif text-2xl font-black mt-12">
+        <h2 className="font-serif text-2xl font-normal mt-12">
           Processing &amp; dispatch
         </h2>
         <p className="mt-4 text-ink-soft leading-relaxed">
@@ -33,7 +33,7 @@ export default function ShippingPage() {
           receive a confirmation the moment your order is on its way.
         </p>
 
-        <h2 className="font-serif text-2xl font-black mt-12">
+        <h2 className="font-serif text-2xl font-normal mt-12">
           Domestic shipping
         </h2>
         <p className="mt-4 text-ink-soft leading-relaxed">
@@ -42,7 +42,7 @@ export default function ShippingPage() {
           orders over $200. Expedited options are offered where available.
         </p>
 
-        <h2 className="font-serif text-2xl font-black mt-12">
+        <h2 className="font-serif text-2xl font-normal mt-12">
           International shipping
         </h2>
         <p className="mt-4 text-ink-soft leading-relaxed">
@@ -56,7 +56,7 @@ export default function ShippingPage() {
           and are not included in the order total.
         </p>
 
-        <h2 className="font-serif text-2xl font-black mt-12">Order tracking</h2>
+        <h2 className="font-serif text-2xl font-normal mt-12">Order tracking</h2>
         <p className="mt-4 text-ink-soft leading-relaxed">
           Once your order ships, a tracking reference is included with your
           confirmation so you can follow its journey. If tracking has not updated

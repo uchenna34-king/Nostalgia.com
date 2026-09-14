@@ -13,7 +13,7 @@ import { signIn, signOut } from "next-auth/react";
 export function AccountSignedOut() {
   return (
     <div className="container-x flex min-h-[50vh] flex-col items-center justify-center gap-5 py-20 text-center">
-      <h1 className="font-serif text-4xl font-black">You&apos;re signed out</h1>
+      <h1 className="font-serif text-4xl font-normal tracking-[-0.02em]">You&apos;re signed out</h1>
       <button onClick={() => signIn()} className="btn-primary">
         Sign in
       </button>

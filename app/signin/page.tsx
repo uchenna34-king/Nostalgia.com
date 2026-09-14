@@ -13,7 +13,7 @@ export default function SignInPage({
   return (
     <main className="container-x flex min-h-[70vh] flex-col items-center justify-center py-16 text-center">
       <p className="eyebrow">The House of Nostalgia</p>
-      <h1 className="mt-3 font-serif text-5xl font-black">Welcome back</h1>
+      <h1 className="mt-3 font-serif text-5xl font-normal">Welcome back</h1>
       <p className="mt-3 max-w-sm text-ink-soft">
         Sign in to keep your bag, track orders, and check out.
       </p>

@@ -57,7 +57,7 @@ export default async function CollectionDetailPage({
     <main className="container-x py-14">
       <header className="mb-10 text-center">
         <p className="eyebrow">Collection</p>
-        <h1 className="mt-2 font-serif text-5xl font-black sm:text-6xl">
+        <h1 className="mt-2 font-serif text-5xl font-normal sm:text-6xl">
           {collection.name}
         </h1>
         {collection.description && (

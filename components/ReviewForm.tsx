@@ -138,7 +138,7 @@ export default function ReviewForm({
       onSubmit={handleSubmit}
       className="mt-10 border border-ink/10 bg-cream-dark/40 p-6"
     >
-      <h3 className="font-serif text-2xl font-black">Write a review</h3>
+      <h3 className="font-serif text-2xl font-normal">Write a review</h3>
 
       {status === "error" && (
         <p

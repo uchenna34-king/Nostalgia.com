@@ -46,7 +46,7 @@ export default async function AccountPage() {
   return (
     <main className="container-x py-16">
       <p className="eyebrow">Account</p>
-      <h1 className="mt-2 font-serif text-5xl font-black">
+      <h1 className="mt-2 font-serif text-5xl font-normal tracking-[-0.02em]">
         Hello, {session.user.name?.split(" ")[0] ?? "friend"}
       </h1>
       <p className="mt-3 text-ink-soft">{session.user.email}</p>

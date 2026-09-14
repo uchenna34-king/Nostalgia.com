@@ -96,7 +96,7 @@ export default function SizeGuideModal({
           className="w-full max-w-lg translate-y-0 border border-ink/10 bg-cream shadow-xl transition-transform motion-reduce:transition-none max-h-[85vh] overflow-y-auto rounded-t-xl sm:rounded-xl"
         >
           <div className="flex items-center justify-between border-b border-ink/10 px-6 py-4">
-            <h2 id={headingId} className="font-serif text-2xl font-black">
+            <h2 id={headingId} className="font-serif text-2xl font-normal">
               Size guide — {sizeGuide.category}
             </h2>
             <button

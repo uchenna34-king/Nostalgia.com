@@ -15,7 +15,7 @@ export default async function CollectionsPage() {
     <main className="container-x py-14">
       <header className="mb-10 text-center">
         <p className="eyebrow">Curated</p>
-        <h1 className="mt-2 font-serif text-5xl font-black sm:text-6xl">
+        <h1 className="mt-2 font-serif text-5xl font-normal sm:text-6xl">
           Collections
         </h1>
       </header>
@@ -32,7 +32,7 @@ export default async function CollectionsPage() {
               href={`/collections/${c.slug}`}
               className="group border border-ink/15 p-8 transition-colors hover:border-ink"
             >
-              <h2 className="font-serif text-2xl font-black transition-colors group-hover:text-sepia">
+              <h2 className="font-serif text-2xl font-normal transition-colors group-hover:text-sepia">
                 {c.name}
               </h2>
               {c.description && (

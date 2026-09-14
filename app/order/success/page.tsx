@@ -37,7 +37,7 @@ function SuccessInner() {
         ✓
       </div>
       <p className="eyebrow mt-6">Order confirmed</p>
-      <h1 className="mt-3 font-serif text-5xl font-black">Thank you.</h1>
+      <h1 className="mt-3 font-serif text-5xl font-normal">Thank you.</h1>
       <p className="mt-4 max-w-md text-ink-soft">
         Your Nostalgia order is in. We&apos;ll send a confirmation shortly and let
         you know when it ships.

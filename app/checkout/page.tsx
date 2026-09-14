@@ -45,7 +45,7 @@ export default function CheckoutPage() {
   if (items.length === 0) {
     return (
       <main className="container-x flex min-h-[50vh] flex-col items-center justify-center gap-5 py-20 text-center">
-        <h1 className="font-serif text-4xl font-black">Nothing to check out</h1>
+        <h1 className="font-serif text-4xl font-normal">Nothing to check out</h1>
         <Link href="/shop" className="btn-primary">
           Browse the collection
         </Link>
@@ -83,7 +83,7 @@ export default function CheckoutPage() {
 
   return (
     <main className="container-x py-14">
-      <h1 className="mb-10 font-serif text-5xl font-black">Checkout</h1>
+      <h1 className="mb-10 font-serif text-5xl font-normal">Checkout</h1>
 
       <div className="grid gap-12 lg:grid-cols-3">
         <div className="lg:col-span-2">

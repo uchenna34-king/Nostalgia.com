@@ -40,7 +40,7 @@ paid purchase.
 - [x] **Phase 8: Merchandising & Discovery** - Search, filter/sort, scalable collections, wishlist, richer PDPs, catalog built for thousands (completed 2026-07-16)
 - [x] **Phase 9: Store Operations / Admin** - No-code admin for product CRUD, inventory, and order/fulfillment management (completed 2026-07-22)
 - [x] **Phase 10: Trust & Polish** - Reviews, size guides, shipping/returns, SEO, performance, accessibility, analytics (completed 2026-07-29)
-- [ ] **Phase 11: Go Live** - Real Google OAuth + real Stripe, confirmation emails, order history, Postgres, deployment
+- [x] **Phase 11: Go Live** - Real Google OAuth + real Stripe, confirmation emails, order history, Postgres, deployment
 
 ## Phase Details
 
@@ -209,7 +209,7 @@ paid purchase.
   3. Signed-in customer can view their order history on the account page.
   4. The app runs on a hosted Node platform against hosted Postgres (migrated from SQLite) and is publicly reachable.
 
-**Plans**: 7/8 plans executed
+**Plans**: 8/8 plans executed
 
 - [x] 11-01-PLAN.md
 - [x] 11-02-PLAN.md
@@ -218,7 +218,7 @@ paid purchase.
 - [x] 11-05-PLAN.md
 - [x] 11-06-PLAN.md
 - [x] 11-07-PLAN.md
-- [ ] 11-08-PLAN.md
+- [x] 11-08-PLAN.md
 
 ## Progress
 
@@ -237,4 +237,4 @@ Phases execute in numeric order: 1 → … → 7 (done) → 8 → 9 → 10 → 1
 | 8. Merchandising & Discovery | M2 | 8/8 | Complete    | 2026-07-16 |
 | 9. Store Operations / Admin | M2 | 6/6 | Complete | 2026-07-22 |
 | 10. Trust & Polish | M2 | 12/12 | Complete | 2026-07-29 |
-| 11. Go Live | M2 | 7/8 | In Progress|  |
+| 11. Go Live | M2 | 8/8 | Complete | 2026-09-02 |

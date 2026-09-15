@@ -13,8 +13,7 @@
 //     Tailwind's generated CSS does not exist in the rendered email HTML)
 //   - web-safe fallback font stacks only (Fraunces/Inter will not load in
 //     Gmail or Outlook)
-//   - locked hex palette, sepia-deep (#8A4524) as the accent, never raw
-//     sepia
+//   - black-and-white palette only; the one "accent" is a neutral grey
 //   - status rendered as bold colored text, never a background-tinted pill
 //   - fixed 600px max content width, centered
 //   - every value interpolated as plain React children (escaped) — no raw-
@@ -41,10 +40,10 @@ const BODY_FONT =
   "-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif";
 
 const COLORS = {
-  cream: "#F4EEE4",
-  ink: "#1A1A1A",
-  inkSoft: "#3A3A3A",
-  sepiaDeep: "#8A4524",
+  cream: "#F5F5F5",
+  ink: "#000000",
+  inkSoft: "#595959",
+  sepiaDeep: "#8A8A8A",
 };
 
 export type OrderConfirmationEmailProps = {
@@ -117,7 +116,7 @@ export default function OrderConfirmationEmail({
             </span>
           </Text>
 
-          <Hr style={{ borderColor: "#E8DFCF", margin: "24px 0" }} />
+          <Hr style={{ borderColor: "#E5E5E5", margin: "24px 0" }} />
 
           <Section>
             {lines.map((line, i) => (
@@ -171,7 +170,7 @@ export default function OrderConfirmationEmail({
             ))}
           </Section>
 
-          <Hr style={{ borderColor: "#E8DFCF", margin: "24px 0" }} />
+          <Hr style={{ borderColor: "#E5E5E5", margin: "24px 0" }} />
 
           <Row>
             <Column>
@@ -209,7 +208,7 @@ export default function OrderConfirmationEmail({
                 style={{
                   fontFamily: BODY_FONT,
                   fontSize: "14px",
-                  color: COLORS.sepiaDeep,
+                  color: COLORS.ink,
                   textDecoration: "underline",
                 }}
               >

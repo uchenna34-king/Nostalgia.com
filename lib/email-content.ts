@@ -60,12 +60,12 @@ export function formatCents(cents: number): string {
 // Four-state status presentation (UI-SPEC "Specific Contracts" section 2 /
 // section 6), rendered here as plain colored text (no pill background — see
 // UI-SPEC Contract 6, email clients render inline background-color
-// inconsistently). `paid` uses sepia-deep, not raw sepia, per the locked AA
-// rule — email composites on plain white far more often than on cream.
+// inconsistently). Palette is black and white only, so the states are told
+// apart by weight of grey; `cancelled` keeps a functional red.
 const STATUS_META: Record<string, { label: string; color: string }> = {
-  pending: { label: "Pending", color: "#3A3A3A" },
-  paid: { label: "Paid", color: "#8A4524" },
-  fulfilled: { label: "Fulfilled", color: "#1A1A1A" },
+  pending: { label: "Pending", color: "#595959" },
+  paid: { label: "Paid", color: "#000000" },
+  fulfilled: { label: "Fulfilled", color: "#000000" },
   cancelled: { label: "Cancelled", color: "#9B2C2C" },
 };
 
@@ -77,7 +77,7 @@ function statusMeta(status: string): { label: string; color: string } {
   // rather than throwing or rendering blank.
   return {
     label: status.charAt(0).toUpperCase() + status.slice(1),
-    color: "#3A3A3A",
+    color: "#595959",
   };
 }
 

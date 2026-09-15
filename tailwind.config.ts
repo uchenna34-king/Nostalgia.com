@@ -18,11 +18,9 @@ const config: Config = {
         cream: "rgb(var(--c-cream) / <alpha-value>)",
         ink: "rgb(var(--c-ink) / <alpha-value>)",
         sepia: "rgb(var(--c-sepia) / <alpha-value>)",
-        // AA-passing siblings of the locked sepia accent, for contexts where
-        // #A6552F cannot reach 4.5:1 (WCAG 1.4.3). The accent itself is
-        // unchanged — these are used only where measurement showed a failure.
-        // sepia-deep on cream 6.15:1, on cream-dark 5.37:1 (was 4.59 / 4.01).
-        // sepia-light on ink   5.28:1 (was 3.28).
+        // Legacy names from the retired sepia accent — they now resolve to
+        // neutral greys (see globals.css) so the palette is black and white
+        // only. Kept so the component tree needs no rewrite.
         "sepia-deep": "rgb(var(--c-sepia-deep) / <alpha-value>)",
         "sepia-light": "rgb(var(--c-sepia-light) / <alpha-value>)",
         "cream-dark": "rgb(var(--c-cream-dark) / <alpha-value>)",
@@ -31,8 +29,8 @@ const config: Config = {
         // Fixed, non-swapping. Photography must be darkened in BOTH themes, so
         // scrims over images use these rather than the semantic pair — a scrim
         // that inverts would wash the photo light in dark mode.
-        shade: "#141210",
-        light: "#F6F1E8",
+        shade: "#000000",
+        light: "#FFFFFF",
       },
       fontFamily: {
         // One face for the entire site, by direction: Bodoni Moda is used for

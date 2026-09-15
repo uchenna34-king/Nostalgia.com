@@ -2,44 +2,40 @@
 @tailwind components;
 @tailwind utilities;
 
-/* The archive palette — a luxury resale house, so monochrome by rule: near-
-   black ink on a warm off-white, and NO mid-grey (#3A3A3A is banned by the
-   brand's lockup rules). The old sepia accent is retired to neutral greys, so
-   every `text-sepia*` in the codebase now reads as a refined grey label rather
-   than an orange one — the whole component tree inherits the new identity
-   without being rewritten.
+/* The palette — black and white, nothing else. Every value is a pure neutral
+   (R = G = B): no warm cream, no sepia, no tinted grey. The `sepia*` token
+   names survive from the earlier identity so the component tree needs no
+   rewrite, but they resolve to neutral greys / the ink colour.
 
-   Contrast (WCAG 1.4.3) on the #FAFAF7 surface:
-     ink       #111110  →  16.9:1
-     ink-soft  #5C5A55  →   6.0:1  (secondary body copy, clears AA at any size)
-     sepia-deep#8B8880  →   3.4:1  (labels only — 12px uppercase, decorative)
+   Contrast (WCAG 1.4.3) on the #FFFFFF surface:
+     ink       #000000  →  21:1
+     ink-soft  #595959  →   7.0:1  (secondary body copy, clears AA at any size)
+     sepia-deep#8A8A8A  →   3.5:1  (labels only — 12px uppercase, decorative)
 */
 :root {
   --grain-opacity: 0.03;
 
-  --c-cream: 250 249 246; /* #FAFAF6 page surface */
-  --c-cream-dark: 241 240 235; /* #F1F0EB raised surface */
-  --c-ink: 17 17 16; /* #111110 primary content / the wordmark */
-  --c-ink-soft: 92 90 85; /* #5C5A55 secondary content — NOT mid-grey */
-  --c-sepia: 17 17 16; /* accent = ink: selection, carets, hovers go black */
-  --c-sepia-deep: 139 136 128; /* #8B8880 letterspaced micro-labels */
-  --c-sepia-light: 185 182 174; /* #B9B6AE labels on dark ground */
+  --c-cream: 255 255 255; /* #FFFFFF page surface */
+  --c-cream-dark: 245 245 245; /* #F5F5F5 raised surface */
+  --c-ink: 0 0 0; /* #000000 primary content / the wordmark */
+  --c-ink-soft: 89 89 89; /* #595959 secondary content */
+  --c-sepia: 0 0 0; /* accent = ink: selection, carets, hovers go black */
+  --c-sepia-deep: 138 138 138; /* #8A8A8A letterspaced micro-labels */
+  --c-sepia-light: 179 179 179; /* #B3B3B3 labels on dark ground */
 }
 
-/* Dark — the identity's own reversed-on-black state, not an afterthought. The
-   surface is a true near-black (this brand IS black-and-white; there is no
-   warmth to protect), content is warm white, and the neutral "accent" lifts to
-   an off-white so black-ground hovers still register. */
+/* Dark — the identity reversed: true black surface, pure white content, and
+   the neutral "accent" lifts to white so black-ground hovers still register. */
 .dark {
   --grain-opacity: 0.05;
 
-  --c-cream: 11 11 10; /* #0B0B0A near-black surface */
-  --c-cream-dark: 22 22 20; /* raised surface */
-  --c-ink: 244 243 239; /* primary content — 17:1 on surface */
-  --c-ink-soft: 168 165 158; /* secondary content — 8.2:1 */
-  --c-sepia: 244 243 239; /* accent = content colour on dark */
-  --c-sepia-deep: 150 147 140; /* micro-labels — 5.4:1 */
-  --c-sepia-light: 150 147 140;
+  --c-cream: 0 0 0; /* #000000 surface */
+  --c-cream-dark: 20 20 20; /* raised surface */
+  --c-ink: 255 255 255; /* primary content — 21:1 on surface */
+  --c-ink-soft: 166 166 166; /* secondary content — 8.6:1 */
+  --c-sepia: 255 255 255; /* accent = content colour on dark */
+  --c-sepia-deep: 150 150 150; /* micro-labels — 6.1:1 */
+  --c-sepia-light: 150 150 150;
 }
 
 /* Theme changes should feel like a dimmer, not a cut — but never animate the
@@ -131,9 +127,7 @@
     @apply mx-auto w-full max-w-7xl px-5 sm:px-8;
   }
 
-  /* sepia-deep (not the sepia accent): the eyebrow is 12px text, and #A6552F
-     measures 4.01:1 on cream-dark (footer) — below the 4.5:1 AA floor — and a
-     marginal 4.59:1 on cream. sepia-deep clears both (5.37 / 6.15). */
+  /* 12px letterspaced label in the neutral label grey. */
   .eyebrow {
     @apply text-xs uppercase tracking-[0.25em] text-sepia-deep;
   }
@@ -209,20 +203,20 @@
   .btn-glass {
     /* Fixed light: this control only ever sits on darkened photography, in
        both themes. */
-    color: #f6f1e8;
-    background: rgb(244 238 228 / 0.1);
-    border: 1px solid rgb(244 238 228 / 0.22);
+    color: #ffffff;
+    background: rgb(255 255 255 / 0.1);
+    border: 1px solid rgb(255 255 255 / 0.22);
     box-shadow:
       inset 0 1px 0 rgb(255 255 255 / 0.42),
       inset 0 -1px 1px rgb(255 255 255 / 0.1),
-      0 10px 30px rgb(26 26 26 / 0.22);
+      0 10px 30px rgb(0 0 0 / 0.22);
   }
   .btn-glass:hover {
-    background: rgb(244 238 228 / 0.19);
+    background: rgb(255 255 255 / 0.19);
     box-shadow:
       inset 0 1px 0 rgb(255 255 255 / 0.58),
       inset 0 -1px 1px rgb(255 255 255 / 0.14),
-      0 16px 40px rgb(26 26 26 / 0.3);
+      0 16px 40px rgb(0 0 0 / 0.3);
     transform: translateY(-2px);
   }
 
@@ -235,14 +229,14 @@
     box-shadow:
       inset 0 1px 0 rgb(255 255 255 / 0.7),
       inset 0 -1px 1px rgb(255 255 255 / 0.25),
-      0 10px 30px rgb(26 26 26 / 0.12);
+      0 10px 30px rgb(0 0 0 / 0.12);
   }
   .btn-glass-ink:hover {
     background: rgb(var(--c-cream) / 0.4);
     box-shadow:
       inset 0 1px 0 rgb(255 255 255 / 0.85),
       inset 0 -1px 1px rgb(255 255 255 / 0.3),
-      0 16px 40px rgb(26 26 26 / 0.18);
+      0 16px 40px rgb(0 0 0 / 0.18);
     transform: translateY(-2px);
   }
 
@@ -250,7 +244,7 @@
      than shipping unreadable type over a photograph. */
   @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
     .btn-glass {
-      background: rgb(26 26 26 / 0.72);
+      background: rgb(0 0 0 / 0.72);
     }
     .btn-glass-ink {
       background: rgb(var(--c-cream) / 0.9);
@@ -260,7 +254,7 @@
   /* Respect a stated preference for less transparency (iOS/macOS expose this). */
   @media (prefers-reduced-transparency: reduce) {
     .btn-glass {
-      background: rgb(26 26 26 / 0.82);
+      background: rgb(0 0 0 / 0.82);
       -webkit-backdrop-filter: none;
       backdrop-filter: none;
     }

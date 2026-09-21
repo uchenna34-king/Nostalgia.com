@@ -73,10 +73,12 @@ describe("buildOrderConfirmationContent", () => {
   });
 
   it("maps each ORDER_STATUSES value to its label and color", () => {
+    // Black-and-white palette: states are told apart by weight of grey,
+    // and only `cancelled` keeps a functional red (lib/email-content.ts).
     const expected: Record<string, { label: string; color: string }> = {
-      pending: { label: "Pending", color: "#3A3A3A" },
-      paid: { label: "Paid", color: "#8A4524" },
-      fulfilled: { label: "Fulfilled", color: "#1A1A1A" },
+      pending: { label: "Pending", color: "#595959" },
+      paid: { label: "Paid", color: "#000000" },
+      fulfilled: { label: "Fulfilled", color: "#000000" },
       cancelled: { label: "Cancelled", color: "#9B2C2C" },
     };
     for (const status of ORDER_STATUSES) {

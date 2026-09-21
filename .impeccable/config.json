@@ -1,0 +1,20 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "design-system-font-size",
+        "value": "12px",
+        "createdAt": "2026-09-21T07:02:29.444Z",
+        "reason": "Claude: app/global-error.tsx is the root-layout boundary and must not import globals.css or the house font (they are what may have failed), so tokens are unavailable; 12px is the literal equivalent of the .eyebrow step already on the ramp."
+      },
+      {
+        "rule": "design-system-font-size",
+        "value": "2.5rem",
+        "createdAt": "2026-09-21T07:02:29.880Z",
+        "reason": "Claude: same boundary constraint in app/global-error.tsx; 2.5rem is the floor of a clamp() mirroring the documented hero display step, written inline because Tailwind is unavailable there."
+      }
+    ]
+  }
+}

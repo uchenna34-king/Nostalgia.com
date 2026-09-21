@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Wordmark from "@/components/Wordmark";
+import PaymentMarks from "@/components/PaymentMarks";
 
 const COLUMNS: { heading: string; links: { label: string; href: string }[] }[] = [
   {
@@ -40,13 +41,31 @@ const COLUMNS: { heading: string; links: { label: string; href: string }[] }[] =
 ];
 
 /**
- * The identity's reversed-on-black state, at full width. Uses the fixed
- * shade/light tokens rather than ink/cream so it stays black in BOTH themes —
- * the footer is a brand surface, not a themed one.
+ * The footer sits on the PAGE GROUND and follows the theme: `cream` is
+ * #FFFFFF in light and #000000 in dark, with `ink` as the content colour
+ * inverting alongside it — the same pair every other themed section uses, so
+ * the footer is never a different shade from the page above it in either
+ * mode. (It was briefly on `cream-dark`, the raised #F5F5F5/#141414 surface,
+ * which in dark mode read as an off-black block sitting on true black; the
+ * owner asked for it to match the rest of the page instead.)
+ *
+ * It deliberately does NOT use the fixed `shade`/`light` tokens. Those two
+ * never change between themes, which is right for surfaces that are always a
+ * black band — the announcement bar, the marquee, captions sitting on
+ * photography — but wrong here: a permanently black footer under a white page
+ * is fine, while the same black footer under an already-black dark-mode page
+ * loses the edge between page and footer entirely.
+ *
+ * Hierarchy inside the footer comes from case and tracking, not from colour:
+ * the column headings and their links share one tone (`ink-soft`) exactly as
+ * they did on the old black ground, and links resolve to full `ink` on hover.
+ *
+ * Because the footer ground now equals the page ground, the top hairline is
+ * the ONLY thing marking where the page ends and the footer begins. Keep it.
  */
 export default function Footer() {
   return (
-    <footer className="mt-28 bg-shade text-light">
+    <footer className="mt-28 border-t border-ink/12 bg-cream text-ink">
       <div className="container-x py-16 md:py-20">
         <div className="flex flex-wrap items-start justify-between gap-8">
           <Link href="/" aria-label="Nostalgia — home">
@@ -54,7 +73,7 @@ export default function Footer() {
           </Link>
           <Link
             href="#top"
-            className="inline-flex items-center gap-2 rounded-full border border-light/25 px-5 py-2.5 text-[12px] font-medium tracking-[0.02em] text-light transition-colors hover:border-light/60"
+            className="inline-flex items-center gap-2 rounded-full border border-ink/25 px-5 py-2.5 text-[12px] font-medium tracking-[0.02em] text-ink transition-colors hover:border-ink/60"
           >
             Back to top
             <span aria-hidden>↑</span>
@@ -64,15 +83,15 @@ export default function Footer() {
         <div className="mt-16 grid grid-cols-2 gap-x-8 gap-y-12 md:grid-cols-4">
           {COLUMNS.map((col) => (
             <div key={col.heading}>
-              <p className="text-[11px] font-medium uppercase tracking-[0.28em] text-sepia-light">
+              <p className="text-xs font-semibold uppercase tracking-[0.28em] text-ink-soft">
                 {col.heading}
               </p>
-              <ul className="mt-5 space-y-3 text-[13px] text-light/70">
+              <ul className="mt-5 space-y-3 text-[13px] font-medium text-ink-soft">
                 {col.links.map((l) => (
                   <li key={l.label}>
                     <Link
                       href={l.href}
-                      className="link-underline transition-colors hover:text-light"
+                      className="link-underline transition-colors hover:text-ink"
                     >
                       {l.label}
                     </Link>
@@ -84,25 +103,19 @@ export default function Footer() {
         </div>
       </div>
 
-      {/* Payment row — MOVE runs card logos here; the archive keeps them as
-          quiet monochrome chips so the footer stays one material. */}
-      <div className="border-t border-light/12">
-        <div className="container-x flex flex-wrap items-center justify-center gap-2 py-5">
-          {["Visa", "Mastercard", "Amex", "PayPal", "Apple Pay", "Google Pay"].map(
-            (m) => (
-              <span
-                key={m}
-                className="rounded-[3px] border border-light/20 px-2.5 py-1 text-[10px] font-medium uppercase tracking-[0.14em] text-light/55"
-              >
-                {m}
-              </span>
-            ),
-          )}
+      {/* Payment row — the real network marks, monochrome so the footer stays
+          one material (see components/PaymentMarks.tsx for why they are not
+          full-colour). The bordered chips that used to sit here existed only
+          to give the *text* labels a container; drawn marks read cleanly on
+          the bare ground and drop a stray 3px radius the system doesn't use. */}
+      <div className="border-t border-ink/12">
+        <div className="container-x py-6">
+          <PaymentMarks />
         </div>
       </div>
 
-      <div className="border-t border-light/12">
-        <div className="container-x flex flex-col items-center justify-between gap-2 py-6 text-[12px] text-light/55 sm:flex-row">
+      <div className="border-t border-ink/12">
+        <div className="container-x flex flex-col items-center justify-between gap-2 py-6 text-[12px] font-medium text-ink-soft sm:flex-row">
           <span>
             © {new Date().getFullYear()} Nostalgia®. A combination of the past
             and the present with the future.

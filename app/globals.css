@@ -9,8 +9,16 @@
 
    Contrast (WCAG 1.4.3) on the #FFFFFF surface:
      ink       #000000  →  21:1
-     ink-soft  #595959  →   7.0:1  (secondary body copy, clears AA at any size)
-     sepia-deep#8A8A8A  →   3.5:1  (labels only — 12px uppercase, decorative)
+     ink-soft  #4D4D4D  →   8.5:1  (secondary body copy)
+     sepia-deep#595959  →   7.0:1  (letterspaced micro-labels)
+
+   Why the greys sit this dark: Bodoni Moda is the body face as well as the
+   display face, and a didone's hairline strokes are sub-pixel at 11–13px. A
+   mid-grey that would be fine in a grotesque reads as faint in Bodoni, so the
+   secondary tiers run darker than a sans-serif system would need, and the
+   .kicker/.eyebrow utilities below add weight (600) for the same reason. The
+   label tier is kept distinct from body copy by case and tracking, not by a
+   lighter tone.
 */
 :root {
   --grain-opacity: 0.03;
@@ -18,10 +26,10 @@
   --c-cream: 255 255 255; /* #FFFFFF page surface */
   --c-cream-dark: 245 245 245; /* #F5F5F5 raised surface */
   --c-ink: 0 0 0; /* #000000 primary content / the wordmark */
-  --c-ink-soft: 89 89 89; /* #595959 secondary content */
+  --c-ink-soft: 77 77 77; /* #4D4D4D secondary content — 8.5:1 */
   --c-sepia: 0 0 0; /* accent = ink: selection, carets, hovers go black */
-  --c-sepia-deep: 138 138 138; /* #8A8A8A letterspaced micro-labels */
-  --c-sepia-light: 179 179 179; /* #B3B3B3 labels on dark ground */
+  --c-sepia-deep: 89 89 89; /* #595959 letterspaced micro-labels — 7.0:1 */
+  --c-sepia-light: 191 191 191; /* #BFBFBF labels on dark ground — 11.4:1 */
 }
 
 /* Dark — the identity reversed: true black surface, pure white content, and
@@ -32,10 +40,10 @@
   --c-cream: 0 0 0; /* #000000 surface */
   --c-cream-dark: 20 20 20; /* raised surface */
   --c-ink: 255 255 255; /* primary content — 21:1 on surface */
-  --c-ink-soft: 166 166 166; /* secondary content — 8.6:1 */
+  --c-ink-soft: 191 191 191; /* #BFBFBF secondary content — 11.4:1 */
   --c-sepia: 255 255 255; /* accent = content colour on dark */
-  --c-sepia-deep: 150 150 150; /* micro-labels — 6.1:1 */
-  --c-sepia-light: 150 150 150;
+  --c-sepia-deep: 179 179 179; /* #B3B3B3 micro-labels — 10.0:1 */
+  --c-sepia-light: 191 191 191; /* #BFBFBF */
 }
 
 /* Theme changes should feel like a dimmer, not a cut — but never animate the
@@ -116,7 +124,7 @@
      ("THE CAMPAIGN", "THE DEVICE"). One utility so the register is identical
      everywhere. */
   .kicker {
-    @apply text-[11px] font-medium uppercase tracking-[0.28em] text-sepia-deep;
+    @apply text-xs font-semibold uppercase tracking-[0.28em] text-sepia-deep;
   }
 
   .link-underline {
@@ -127,9 +135,10 @@
     @apply mx-auto w-full max-w-7xl px-5 sm:px-8;
   }
 
-  /* 12px letterspaced label in the neutral label grey. */
+  /* 12px letterspaced label in the neutral label grey. Semibold for the same
+     reason as .kicker — Bodoni's hairlines need the weight at this size. */
   .eyebrow {
-    @apply text-xs uppercase tracking-[0.25em] text-sepia-deep;
+    @apply text-xs font-semibold uppercase tracking-[0.25em] text-sepia-deep;
   }
 
   /* Liquid glass. Deliberately scoped to controls that sit ON photography,

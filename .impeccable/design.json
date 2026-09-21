@@ -1,0 +1,169 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-09-02T00:00:00Z",
+  "title": "Design System: Nostalgia",
+  "extensions": {
+    "colorMeta": {
+      "thread-sepia": {
+        "role": "primary",
+        "displayName": "Thread Sepia",
+        "canonical": "#A6552F",
+        "tonalRamp": ["#5C2E15", "#6F3A1B", "#8A4524", "#A6552F", "#C97A4A", "#DB9A70", "#EABE9E", "#F5DCC8"]
+      },
+      "waxed-thread": {
+        "role": "primary",
+        "displayName": "Waxed Thread",
+        "canonical": "#8A4524",
+        "tonalRamp": ["#3D1C0D", "#5C2E15", "#8A4524", "#A6552F", "#C97A4A", "#DB9A70", "#EABE9E", "#F5DCC8"]
+      },
+      "raw-thread": {
+        "role": "primary",
+        "displayName": "Raw Thread",
+        "canonical": "#C97A4A",
+        "tonalRamp": ["#5C2E15", "#8A4524", "#A6552F", "#C97A4A", "#DB9A70", "#EABE9E", "#F5DCC8", "#FBEDE1"]
+      },
+      "bolt-cream": {
+        "role": "neutral",
+        "displayName": "Bolt Cream",
+        "canonical": "#F4EEE4",
+        "tonalRamp": ["#6B6151", "#8C806C", "#AFA189", "#C9BCA5", "#E0D5C1", "#E8DFCF", "#F4EEE4", "#FAF7F2"]
+      },
+      "aged-bolt-cream": {
+        "role": "neutral",
+        "displayName": "Aged Bolt Cream",
+        "canonical": "#E8DFCF",
+        "tonalRamp": ["#6B6151", "#8C806C", "#AFA189", "#C9BCA5", "#DBCEB5", "#E8DFCF", "#F1EADD", "#FAF7F2"]
+      },
+      "ledger-ink": {
+        "role": "neutral",
+        "displayName": "Ledger Ink",
+        "canonical": "#1A1A1A",
+        "tonalRamp": ["#0D0D0D", "#1A1A1A", "#2E2E2E", "#3A3A3A", "#595959", "#7A7A7A", "#A6A6A6", "#D4D4D4"]
+      },
+      "pencil-ink": {
+        "role": "neutral",
+        "displayName": "Pencil Ink",
+        "canonical": "#3A3A3A",
+        "tonalRamp": ["#0D0D0D", "#1A1A1A", "#2E2E2E", "#3A3A3A", "#595959", "#7A7A7A", "#A6A6A6", "#D4D4D4"]
+      }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display", "purpose": "Hero headline only — large, black-weight, cramped leading." },
+      "headline": { "displayName": "Headline", "purpose": "Wordmark and section-level headings." },
+      "title": { "displayName": "Title", "purpose": "Product names, cart/modal headings — regular weight, supports rather than competes with Display." },
+      "body": { "displayName": "Body", "purpose": "Descriptive copy, product details, prose." },
+      "label": { "displayName": "Label", "purpose": "Nav links, eyebrows, button text, marquee, badges — always uppercase and wide-tracked." }
+    },
+    "shadows": [
+      { "name": "overlay-ambient", "value": "0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)", "purpose": "The system's only shadow. Reserved exclusively for floating overlay panels (cart drawer, size-guide sheet); never used on cards, buttons, or product imagery." }
+    ],
+    "motion": [
+      { "name": "ease-standard", "value": "cubic-bezier(0.4, 0, 0.2, 1)", "purpose": "Default transition easing (color/opacity/border shifts, panel slide)." },
+      { "name": "ease-image", "value": "ease-out", "purpose": "Product image hover scale (700ms) and crossfade (500ms) — deliberately slower and softer than UI transitions." },
+      { "name": "duration-fast", "value": "200ms", "purpose": "Color/border-color state changes (buttons, links, inputs)." },
+      { "name": "duration-panel", "value": "300ms", "purpose": "Cart drawer / backdrop slide and fade." },
+      { "name": "duration-marquee", "value": "24s", "purpose": "Full loop of the marquee scroll; linear, infinite, disabled under prefers-reduced-motion." }
+    ],
+    "breakpoints": [
+      { "name": "sm", "value": "640px" },
+      { "name": "md", "value": "768px" },
+      { "name": "lg", "value": "1024px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "The system's default call-to-action — full Ledger Ink fill, hovers straight to Thread Sepia.",
+      "html": "<button class=\"ds-btn-primary\">Shop the drop</button>",
+      "css": ".ds-btn-primary { display: inline-flex; align-items: center; justify-content: center; background: #1A1A1A; color: #F4EEE4; padding: 14px 32px; font-family: Inter, system-ui, sans-serif; font-size: 14px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.18em; border: none; border-radius: 0; cursor: pointer; transition: background-color 0.2s cubic-bezier(0.4, 0, 0.2, 1); } .ds-btn-primary:hover { background: #A6552F; } .ds-btn-primary:focus-visible { outline: 2px solid #A6552F; outline-offset: 2px; }"
+    },
+    {
+      "name": "Outline Button",
+      "kind": "button",
+      "refersTo": "button-outline",
+      "description": "Secondary action — transparent with an Ledger Ink border, becomes the primary button on hover.",
+      "html": "<button class=\"ds-btn-outline\">Outerwear</button>",
+      "css": ".ds-btn-outline { display: inline-flex; align-items: center; justify-content: center; background: transparent; color: #1A1A1A; border: 1px solid #1A1A1A; padding: 14px 32px; font-family: Inter, system-ui, sans-serif; font-size: 14px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.18em; border-radius: 0; cursor: pointer; transition: background-color 0.2s cubic-bezier(0.4, 0, 0.2, 1), color 0.2s cubic-bezier(0.4, 0, 0.2, 1); } .ds-btn-outline:hover { background: #1A1A1A; color: #F4EEE4; } .ds-btn-outline:focus-visible { outline: 2px solid #A6552F; outline-offset: 2px; }"
+    },
+    {
+      "name": "Product Card",
+      "kind": "card",
+      "refersTo": "product-card",
+      "description": "Edge-to-edge product image with a category badge and wishlist trigger overlaid; caption below carries name and price.",
+      "html": "<a class=\"ds-product-card\" href=\"#\"><div class=\"ds-product-card-media\"><img src=\"/products/sepia-wool-overcoat-1.svg\" alt=\"Sepia Wool Overcoat\" /><span class=\"ds-product-card-badge\">Outerwear</span></div><div class=\"ds-product-card-meta\"><h3 class=\"ds-product-card-name\">Sepia Wool Overcoat</h3><span class=\"ds-product-card-price\">$420</span></div></a>",
+      "css": ".ds-product-card { display: block; text-decoration: none; color: inherit; } .ds-product-card-media { position: relative; aspect-ratio: 3 / 4; overflow: hidden; background: #E8DFCF; } .ds-product-card-media img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.7s ease-out; } .ds-product-card:hover .ds-product-card-media img { transform: scale(1.04); } .ds-product-card-badge { position: absolute; top: 12px; left: 12px; background: rgba(244, 238, 228, 0.85); color: #1A1A1A; font-family: Inter, system-ui, sans-serif; font-size: 10px; text-transform: uppercase; letter-spacing: 0.2em; padding: 4px 8px; } .ds-product-card-meta { margin-top: 12px; display: flex; align-items: baseline; justify-content: space-between; } .ds-product-card-name { font-family: Fraunces, Georgia, serif; font-size: 18px; line-height: 1.2; margin: 0; font-weight: 400; } .ds-product-card-price { font-family: Inter, system-ui, sans-serif; font-size: 14px; color: #3A3A3A; }"
+    },
+    {
+      "name": "Text Input",
+      "kind": "input",
+      "refersTo": "input-text",
+      "description": "Zero-radius bordered field; the only focus treatment is a border-color shift plus the standard focus-visible outline.",
+      "html": "<input class=\"ds-input\" type=\"text\" placeholder=\"Search the collection...\" />",
+      "css": ".ds-input { width: 100%; border: 1px solid rgba(26, 26, 26, 0.25); background: #F4EEE4; color: #1A1A1A; padding: 12px 16px; font-family: Inter, system-ui, sans-serif; font-size: 14px; border-radius: 0; outline: none; transition: border-color 0.2s cubic-bezier(0.4, 0, 0.2, 1); } .ds-input::placeholder { color: rgba(58, 58, 58, 0.6); } .ds-input:focus-visible { border-color: #A6552F; outline: 2px solid #A6552F; outline-offset: 2px; }"
+    },
+    {
+      "name": "Count Badge",
+      "kind": "chip",
+      "refersTo": "badge-count",
+      "description": "Circular cart/wishlist item-count indicator — the system's only default use of full radius.",
+      "html": "<span class=\"ds-badge-count\">3</span>",
+      "css": ".ds-badge-count { display: inline-flex; min-width: 20px; height: 20px; align-items: center; justify-content: center; border-radius: 9999px; background: #1A1A1A; color: #F4EEE4; padding: 0 5px; font-family: Inter, system-ui, sans-serif; font-size: 10px; line-height: 1; }"
+    },
+    {
+      "name": "Status Pill",
+      "kind": "chip",
+      "refersTo": "status-pill",
+      "description": "Order/fulfillment status indicator — color reinforces the text label, never replaces it.",
+      "html": "<span class=\"ds-status-pill ds-status-pill--paid\">Paid</span>",
+      "css": ".ds-status-pill { display: inline-block; border-radius: 2px; padding: 4px 8px; font-family: Inter, system-ui, sans-serif; font-size: 12px; font-weight: 500; } .ds-status-pill--paid { background: #E8DFCF; color: #1A1A1A; } .ds-status-pill--pending { background: rgba(166, 85, 47, 0.15); color: #8A4524; }"
+    },
+    {
+      "name": "Navigation Bar",
+      "kind": "nav",
+      "refersTo": "nav",
+      "description": "Sticky, translucent header with a centered wordmark and label-type links.",
+      "html": "<header class=\"ds-nav\"><nav class=\"ds-nav-inner\"><ul class=\"ds-nav-links\"><li><a class=\"ds-nav-link\" href=\"#\">Shop</a></li><li><a class=\"ds-nav-link\" href=\"#\">Collections</a></li></ul><a class=\"ds-nav-wordmark\" href=\"#\">NOSTALGIA</a><div class=\"ds-nav-actions\"><a class=\"ds-nav-action\" href=\"#\">Wishlist <span class=\"ds-badge-count\">2</span></a><a class=\"ds-nav-action\" href=\"#\">Cart <span class=\"ds-badge-count\">3</span></a></div></nav></header>",
+      "css": ".ds-nav { position: sticky; top: 0; z-index: 50; border-bottom: 1px solid rgba(26, 26, 26, 0.1); background: rgba(244, 238, 228, 0.85); backdrop-filter: blur(8px); } .ds-nav-inner { max-width: 1280px; margin: 0 auto; padding: 0 20px; height: 64px; display: flex; align-items: center; justify-content: space-between; } .ds-nav-links { display: flex; gap: 24px; list-style: none; margin: 0; padding: 0; } .ds-nav-link { font-family: Inter, system-ui, sans-serif; font-size: 14px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.18em; color: #3A3A3A; text-decoration: none; transition: color 0.2s cubic-bezier(0.4, 0, 0.2, 1); } .ds-nav-link:hover, .ds-nav-link:focus-visible { color: #1A1A1A; } .ds-nav-wordmark { font-family: Fraunces, Georgia, serif; font-size: 24px; font-weight: 900; color: #1A1A1A; text-decoration: none; } .ds-nav-actions { display: flex; align-items: center; gap: 20px; } .ds-nav-action { display: inline-flex; align-items: center; gap: 4px; font-family: Inter, system-ui, sans-serif; font-size: 14px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.18em; color: #1A1A1A; text-decoration: none; }"
+    },
+    {
+      "name": "Marquee",
+      "kind": "custom",
+      "refersTo": "marquee",
+      "description": "Signature component — an infinitely scrolling Ledger Ink band of tracked phrases separated by a Thread Sepia divider glyph. The one place the accent color appears purely as a mark, not a state.",
+      "html": "<div class=\"ds-marquee\"><div class=\"ds-marquee-track\"><span class=\"ds-marquee-item\">FREE SHIPPING OVER $200 <span class=\"ds-marquee-dot\">✦</span></span><span class=\"ds-marquee-item\">THE ARCHIVE DROP IS LIVE <span class=\"ds-marquee-dot\">✦</span></span></div></div>",
+      "css": ".ds-marquee { overflow: hidden; border-top: 1px solid rgba(26, 26, 26, 0.15); border-bottom: 1px solid rgba(26, 26, 26, 0.15); background: #1A1A1A; padding: 10px 0; color: #F4EEE4; } .ds-marquee-track { display: flex; width: max-content; white-space: nowrap; animation: ds-marquee 24s linear infinite; } .ds-marquee-item { margin: 0 32px; font-family: Inter, system-ui, sans-serif; font-size: 12px; text-transform: uppercase; letter-spacing: 0.3em; opacity: 0.9; } .ds-marquee-dot { margin: 0 16px; color: #A6552F; } @keyframes ds-marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } } @media (prefers-reduced-motion: reduce) { .ds-marquee-track { animation: none; } }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Tailor's Archive",
+    "overview": "Nostalgia is a tailor's ledger, not a costume box. Every surface behaves like it was cut, not decorated: sharp corners, flat planes, restrained ornament, and a single accent color spent as rarely and precisely as a maker signs their work. The \"nostalgic\" half of the brand lives in the editorial serif display and the film-grain atmosphere over the page — the memory of an era. The \"luxury\" half lives in what the system refuses to do: no gradients, no soft shadows, no rounded-card softness, no ornament that isn't load-bearing. Craft and materials are the claim; nostalgia is the mood the craft is presented in, never the other way around.\n\nThe system is confident and tactile rather than shy — buttons commit to full-block color and an assertive hover shift to the accent, type runs large and black-weight at the display size, and the marquee band never apologizes for taking up space. But that confidence is expressed through precision (alignment, tracking, exact padding), not through decoration. Anti-reference: this system explicitly does not look like loud streetwear graphics, hype-logo drop culture, or graphic-tee visual noise — the claim is craft and materials, not costume.",
+    "keyCharacteristics": [
+      "Zero-radius, flat-by-default surfaces; shadow is a rare, ambient exception, never a default treatment.",
+      "One accent color (Thread Sepia), spent almost exclusively on hover states and rare emphasis — never as a resting decoration.",
+      "Display type is large, black-weight, and serif; everything navigational or categorical is small, uppercase, and wide-tracked.",
+      "Atmosphere comes from a fixed film-grain overlay and photographic hover crossfades, not from gradients or drop shadows."
+    ],
+    "rules": [
+      { "name": "The One Accent Rule", "body": "Thread Sepia is the only color in the system that means \"interactive\" or \"emphasis.\" It never appears as a resting background, a decorative block, or a second accent alongside itself — its rarity is what makes it register.", "section": "colors" },
+      { "name": "The Eyebrow Rule", "body": "Any label that categorizes or contextualizes content (section eyebrows, category badges, the marquee) is uppercase, wide-tracked (≥0.18em), and small — never the accent color at rest, only Pencil Ink or the AA-safe Waxed Thread.", "section": "typography" },
+      { "name": "The Flat-by-Default Rule", "body": "Nothing gets a shadow simply for being a \"card\" or a button. Depth is earned only by panels that visually float above the entire page.", "section": "elevation" },
+      { "name": "The Sharp-Cut Rule", "body": "Any surface that is structural — a button, a product image, a card, an input, a page section border — carries zero radius. If something needs a curve, it must be a badge, a pill, or one of the two named overlay panels; there is no in-between \"slightly rounded\" surface anywhere in the system.", "section": "shapes" }
+    ],
+    "dos": [
+      "Do keep every structural surface — buttons, product imagery, cards, inputs, section borders — at zero radius (The Sharp-Cut Rule).",
+      "Do spend Thread Sepia only on hover states, focus outlines, ratings, and the marquee divider — never as a resting decorative fill (The One Accent Rule).",
+      "Do set anything navigational or categorical (nav links, eyebrows, button labels, the marquee) in uppercase, wide-tracked label type (The Eyebrow Rule).",
+      "Do let the film-grain overlay and the product-image hover crossfade carry texture and motion interest instead of gradients or shadows.",
+      "Do pair the Thread Sepia :focus-visible outline with an input's border-color shift as the only focus treatments — never a box-shadow ring or glow."
+    ],
+    "donts": [
+      "Don't add a drop shadow to a button, card, or product image — shadow-xl is reserved for the cart drawer and size-guide sheet only, and even there it's ambient, not structural (The Flat-by-Default Rule).",
+      "Don't round the corners of a structural surface — radius is reserved for circular badges/pills and the size-guide bottom sheet, nothing in between.",
+      "Don't reach for loud streetwear graphics, hype-logo treatments, or drop-culture visual noise — confirmed anti-reference; the brand claim is craft and materials.",
+      "Don't invent specific fabric, construction, or material claims in copy near these components — PRODUCT.md records those as undecided, owner-supplied facts.",
+      "Don't drift the locked palette, type pairing, grain, or marquee device — they are durable brand identity, not a page-level styling choice."
+    ]
+  }
+}

@@ -134,23 +134,20 @@ export default async function Home() {
 
       <Newsletter />
 
-      {/* ── THE IDENTITY — reversed on black, the closing statement ── */}
-      <section className="reveal bg-shade text-light">
+      {/* ── THE IDENTITY — the closing statement. No fixed black band here:
+          it sits on the page ground (`cream`/`ink`) so it follows the theme
+          and hands off cleanly to the themed footer beneath it. ── */}
+      <section className="reveal bg-cream text-ink">
         <div className="container-x py-24 text-center md:py-36">
-          <p className="text-[11px] font-medium uppercase tracking-[0.28em] text-sepia-light">
-            History in the making
-          </p>
+          <p className="kicker">History in the making</p>
           <h2 className="mx-auto mt-8 max-w-4xl font-serif font-normal leading-[1.05] tracking-[-0.02em] text-[clamp(2.25rem,6vw,5rem)]">
             One wordmark, every place it lives.
           </h2>
-          <p className="mx-auto mt-8 max-w-md text-[15px] leading-relaxed text-light/65">
+          <p className="mx-auto mt-8 max-w-md text-[15px] leading-relaxed text-ink-soft">
             Reversed on black, framed on white, shrunk to an avatar. The past as
             raw material — worn, resold, and carried forward.
           </p>
-          <Link
-            href="/shop"
-            className="mt-10 inline-flex items-center justify-center gap-2 rounded-full bg-light px-7 py-3 text-[13px] font-medium tracking-[0.01em] text-shade transition-transform duration-300 ease-out hover:-translate-y-0.5"
-          >
+          <Link href="/shop" className="btn-primary mt-10">
             Enter the marketplace
           </Link>
         </div>

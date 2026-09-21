@@ -59,15 +59,22 @@ const ITEMS: Item[] = [
 export default function TrustStrip() {
   return (
     <section className="border-y border-ink/10">
-      <div className="container-x grid grid-cols-2 gap-x-6 gap-y-8 py-10 md:grid-cols-4 md:py-12">
+      {/* Two columns on phones, four from md. On a 360–375px phone each text
+          column is only ~105–115px wide, so two things matter: the text
+          wrapper must be allowed to shrink (`min-w-0` — flex items default to
+          min-width:auto and would otherwise push a long word like
+          "Authenticated" out of the cell instead of wrapping it), and the
+          icon must top-align so a note that wraps to two lines doesn't drag
+          it down. Gaps tighten on phones to buy the text a little more room. */}
+      <div className="container-x grid grid-cols-2 gap-x-4 gap-y-7 py-9 sm:gap-x-6 sm:gap-y-8 sm:py-10 md:grid-cols-4 md:py-12">
         {ITEMS.map((item) => (
-          <div key={item.title} className="flex items-center gap-4">
-            <span className="shrink-0 text-ink">{item.icon}</span>
-            <div>
-              <p className="text-[13px] font-medium tracking-[0.01em] text-ink">
+          <div key={item.title} className="flex items-start gap-3 sm:gap-4">
+            <span className="mt-0.5 shrink-0 text-ink">{item.icon}</span>
+            <div className="min-w-0">
+              <p className="text-[13px] font-semibold tracking-[0.01em] text-ink">
                 {item.title}
               </p>
-              <p className="mt-1 text-[12px] leading-snug text-ink-soft">
+              <p className="mt-1 text-[12px] font-medium leading-snug text-ink-soft">
                 {item.note}
               </p>
             </div>

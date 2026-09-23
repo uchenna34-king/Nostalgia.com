@@ -20,6 +20,16 @@
         "value": "1.7rem",
         "createdAt": "2026-09-21T12:40:32.176Z",
         "reason": "User asked to resolve this flag: the footer wordmark size is set on the wrapper by the Wordmark component's own contract (size inherits from parent font-size), and 1.7rem is its deliberate footer scale between the nav mark and the hero."
+      },
+      {
+        "rule": "design-system-font-size",
+        "value": "1.6rem",
+        "createdAt": "2026-09-23T11:22:29.231Z"
+      },
+      {
+        "rule": "design-system-font-size",
+        "value": "1.8rem",
+        "createdAt": "2026-09-23T11:22:29.439Z"
       }
     ]
   }

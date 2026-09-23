@@ -15,15 +15,13 @@ export default function Newsletter() {
 
   return (
     <section className="reveal border-t border-ink/10 bg-cream text-ink">
-      <div className="container-x grid gap-10 py-20 md:grid-cols-2 md:items-center md:py-28">
+      <div className="container-x grid gap-12 py-24 md:grid-cols-2 md:items-center md:py-32">
         <div>
-          <p className="text-[11px] font-medium uppercase tracking-[0.28em] text-sepia-deep">
-            The register
-          </p>
-          <h2 className="mt-6 max-w-md font-serif font-normal leading-[1.03] tracking-[-0.02em] text-[clamp(2rem,4.5vw,3.5rem)]">
+          <p className="kicker">The register</p>
+          <h2 className="mt-5 max-w-md text-balance font-serif font-normal leading-[1.03] text-[clamp(2rem,4.5vw,3.5rem)]">
             First to the one-of-ones.
           </h2>
-          <p className="mt-5 max-w-sm text-[14px] leading-relaxed text-ink/65">
+          <p className="measure mt-7 max-w-[46ch]">
             New drops are single pieces. Join the register for early access,
             authentication notes, and the occasional letter from the house.
           </p>
@@ -33,7 +31,7 @@ export default function Newsletter() {
           {done ? (
             <p
               role="status"
-              className="rounded-[4px] border border-ink/20 px-5 py-6 text-[14px] leading-relaxed text-ink/85"
+              className="border border-ink/25 px-6 py-7 text-[16px] leading-[1.7] text-ink"
             >
               You&rsquo;re on the register. Watch your inbox for the next
               one-of-one.
@@ -57,7 +55,7 @@ export default function Newsletter() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="Enter your email"
-                  className="min-w-0 flex-1 bg-transparent px-5 py-3 text-[14px] text-ink placeholder:text-ink/45 focus:outline-none"
+                  className="min-w-0 flex-1 bg-transparent px-6 py-3.5 text-[16px] text-ink placeholder:text-ink-soft focus:outline-none"
                 />
                 <button
                   type="submit"
@@ -66,7 +64,7 @@ export default function Newsletter() {
                   Join
                 </button>
               </div>
-              <p className="text-[11px] text-ink/45">
+              <p className="text-[12px] text-ink-soft">
                 One or two letters a month. Unsubscribe anytime.
               </p>
             </form>

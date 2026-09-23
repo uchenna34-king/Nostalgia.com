@@ -1,11 +1,11 @@
 import localFont from "next/font/local";
 
 /**
- * The single house face. Per the brand direction, Bodoni Moda is used for
- * EVERYTHING — display, body, and UI — so there is no second typeface loaded.
- * The 400–700 range carries body, labels, emphasis, and the wordmark. It is a
- * high-contrast didone: thin at small sizes, so body copy leans on the 400
- * weight and a comfortable line-height.
+ * The display face — the house voice. Bodoni Moda carries the wordmark, every
+ * section headline, and product names, and nothing else. It is a high-contrast
+ * didone, which is exactly why it is confined to display sizes: the thin/thick
+ * stroke split that makes it read as a fashion house is the same thing that
+ * makes it fall apart under ~20px. See `inter` below for the reading face.
  *
  * The files are vendored in app/fonts rather than pulled with
  * next/font/google ON PURPOSE. next/font/google downloads the face from
@@ -41,4 +41,48 @@ export const bodoni = localFont({
   display: "swap",
   adjustFontFallback: false,
   fallback: ["Didot", "Bodoni MT", "Georgia", "serif"],
+});
+
+/**
+ * The reading face. Bodoni is a didone: its identity IS the hairline/stem
+ * contrast, and at 11–16px those hairlines fall below one device pixel and
+ * drop out — which is why the house style sheet already said "a didone at
+ * body size is unreadable" while the code was setting every paragraph, label,
+ * nav link and price in it. Inter is the correction: a neutral grotesque with
+ * a tall x-height and open apertures, which is the same structural choice the
+ * resale houses make (The RealReal sets Suisse Int'l, Farfetch a Nimbus Sans
+ * cut) — an editorial serif for the voice, a quiet grotesque for the reading.
+ *
+ * Bodoni keeps everything it was good at: the wordmark, display, and every
+ * section headline. Inter takes body, controls, labels, and data.
+ *
+ * Vendored for the same reason as Bodoni — next/font/google resolves at
+ * COMPILE time, so a networkless `npm run dev` fails while building the root
+ * layout and takes every route down with it. This is the variable latin
+ * subset (opsz 14..32, wght 400..700) from the Google release; to refresh it,
+ * re-download the latin block of:
+ * https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400..700
+ *
+ * No italic file is shipped: nothing in the product sets body italic, and an
+ * unused 70KB face is 70KB of preload. Add the italic src here if that changes.
+ */
+export const inter = localFont({
+  src: [
+    {
+      path: "../app/fonts/Inter-latin-normal.woff2",
+      weight: "400 700",
+      style: "normal",
+    },
+  ],
+  variable: "--font-inter",
+  display: "swap",
+  fallback: [
+    "ui-sans-serif",
+    "system-ui",
+    "-apple-system",
+    "Segoe UI",
+    "Helvetica Neue",
+    "Arial",
+    "sans-serif",
+  ],
 });

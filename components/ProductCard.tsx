@@ -27,7 +27,7 @@ export default function ProductCard({ product }: { product: Product }) {
             className="object-cover opacity-0 transition-opacity duration-500 group-hover:opacity-100 motion-reduce:transition-none"
           />
         )}
-        <span className="absolute left-3 top-3 bg-cream/85 px-2 py-1 text-[10px] uppercase tracking-[0.2em] text-ink">
+        <span className="absolute left-3 top-3 bg-cream/90 px-2.5 py-1.5 text-[10px] uppercase tracking-[0.2em] text-ink backdrop-blur-sm">
           {product.category}
         </span>
         <WishlistButton
@@ -40,12 +40,14 @@ export default function ProductCard({ product }: { product: Product }) {
           className="absolute right-3 top-3"
         />
       </div>
-      <div className="mt-3 flex items-baseline justify-between">
+      <div className="mt-4 flex items-baseline justify-between gap-4">
         <h3 className="font-serif text-lg leading-tight">{product.name}</h3>
-        <span className="text-sm text-ink-soft">{formatPrice(product.price)}</span>
+        <span className="shrink-0 tabular-nums text-sm text-ink-soft">
+          {formatPrice(product.price)}
+        </span>
       </div>
       {reviewCount > 0 && (
-        <div className="mt-1 flex items-center gap-1 text-[11px] text-ink-soft">
+        <div className="mt-2 flex items-center gap-1 text-[11px] text-ink-soft">
           <RatingStars value={product.rating.avg} size={16} count={reviewCount} />
           <span>({reviewCount})</span>
         </div>

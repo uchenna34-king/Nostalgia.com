@@ -65,8 +65,8 @@ const COLUMNS: { heading: string; links: { label: string; href: string }[] }[] =
  */
 export default function Footer() {
   return (
-    <footer className="mt-28 border-t border-ink/12 bg-cream text-ink">
-      <div className="container-x py-16 md:py-20">
+    <footer className="mt-20 border-t border-ink/12 bg-cream text-ink">
+      <div className="container-x py-20 md:py-28">
         <div className="flex flex-wrap items-start justify-between gap-8">
           <Link href="/" aria-label="Nostalgia — home">
             <Wordmark className="text-[1.7rem]" withLine />
@@ -80,13 +80,13 @@ export default function Footer() {
           </Link>
         </div>
 
-        <div className="mt-16 grid grid-cols-2 gap-x-8 gap-y-12 md:grid-cols-4">
+        <div className="mt-20 grid grid-cols-2 gap-x-8 gap-y-14 md:grid-cols-4">
           {COLUMNS.map((col) => (
             <div key={col.heading}>
-              <p className="text-xs font-semibold uppercase tracking-[0.28em] text-ink-soft">
+              <p className="text-[11px] font-medium uppercase tracking-[0.28em] text-sepia-deep">
                 {col.heading}
               </p>
-              <ul className="mt-5 space-y-3 text-[13px] font-medium text-ink-soft">
+              <ul className="mt-6 space-y-3.5 text-[13.5px] text-ink-soft">
                 {col.links.map((l) => (
                   <li key={l.label}>
                     <Link
@@ -115,7 +115,7 @@ export default function Footer() {
       </div>
 
       <div className="border-t border-ink/12">
-        <div className="container-x flex flex-col items-center justify-between gap-2 py-6 text-[12px] font-medium text-ink-soft sm:flex-row">
+        <div className="container-x flex flex-col items-center justify-between gap-3 py-7 text-[12.5px] text-ink-soft sm:flex-row">
           <span>
             © {new Date().getFullYear()} Nostalgia®. A combination of the past
             and the present with the future.

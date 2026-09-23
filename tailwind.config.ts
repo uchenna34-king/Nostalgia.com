@@ -33,12 +33,27 @@ const config: Config = {
         light: "#FFFFFF",
       },
       fontFamily: {
-        // One face for the entire site, by direction: Bodoni Moda is used for
-        // body and UI as well as display, so `sans` and `serif` resolve to the
-        // same stack. Every default-body, `font-sans`, and `font-serif` usage
-        // therefore lands on Bodoni — no second typeface anywhere.
-        serif: ["var(--font-bodoni)", "Didot", "Georgia", "serif"],
-        sans: ["var(--font-bodoni)", "Didot", "Georgia", "serif"],
+        // Two faces, split by job. `serif` (Bodoni Moda) is the VOICE — the
+        // wordmark, section headlines, product names. `sans` (Inter) is the
+        // READING face and the default on <body>, so every paragraph, label,
+        // control, price and nav link lands on it without being marked up.
+        //
+        // They were briefly the same stack, with Bodoni doing body text too.
+        // A didone sets its identity in the contrast between hairline and
+        // stem, and at 11–16px the hairline is under a device pixel and
+        // vanishes — the type went faint and had to be propped up with
+        // semibold weights and near-black greys that a grotesque never needs.
+        serif: ["var(--font-bodoni)", "Didot", "Bodoni MT", "Georgia", "serif"],
+        sans: [
+          "var(--font-inter)",
+          "ui-sans-serif",
+          "system-ui",
+          "-apple-system",
+          "Segoe UI",
+          "Helvetica Neue",
+          "Arial",
+          "sans-serif",
+        ],
       },
       keyframes: {
         marquee: {

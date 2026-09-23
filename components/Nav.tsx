@@ -23,7 +23,7 @@ export default function Nav() {
 
   return (
     <header className="glass-panel sticky top-0 z-50 relative">
-      <nav className="container-x relative flex h-16 items-center gap-4">
+      <nav className="container-x relative flex h-16 items-center gap-4 lg:h-20">
         {/* Mobile / tablet toggle */}
         <button
           className="-ml-1 p-1 text-ink lg:hidden"
@@ -57,7 +57,7 @@ export default function Nav() {
         </Link>
 
         {/* Desktop links */}
-        <ul className="hidden items-center gap-6 lg:ml-4 lg:flex">
+        <ul className="hidden items-center gap-8 lg:ml-10 lg:flex">
           {LINKS.map((l) => (
             <li key={l.label}>
               <Link
@@ -80,14 +80,14 @@ export default function Nav() {
           {session?.user ? (
             <Link
               href="/account"
-              className="hidden text-sm font-bold uppercase tracking-[0.18em] text-ink-soft hover:text-ink sm:block"
+              className="link-underline hidden text-[13px] font-medium tracking-[0.01em] text-ink-soft hover:text-ink sm:block"
             >
               {session.user.name?.split(" ")[0] ?? "Account"}
             </Link>
           ) : (
             <button
               onClick={() => signIn()}
-              className="hidden text-sm font-bold uppercase tracking-[0.18em] text-ink-soft hover:text-ink sm:block"
+              className="link-underline hidden text-[13px] font-medium tracking-[0.01em] text-ink-soft hover:text-ink sm:block"
             >
               Sign in
             </button>
@@ -98,7 +98,7 @@ export default function Nav() {
           <Link
             href="/wishlist"
             aria-label={`Wishlist, ${wishlistCount} saved`}
-            className="relative flex items-center text-ink hover:text-sepia"
+            className="relative flex items-center text-ink transition-opacity hover:opacity-65"
           >
             <svg
               viewBox="0 0 24 24"
@@ -111,7 +111,7 @@ export default function Nav() {
             >
               <path d="M12 20s-7-4.35-9.5-8.5C1 8.5 2.4 5 6 5c2.1 0 3.2 1.25 4 2.6C10.8 6.25 11.9 5 14 5c3.6 0 5 3.5 3.5 6.5C19 15.65 12 20 12 20Z" />
             </svg>
-            <span className="hidden text-sm font-bold uppercase tracking-[0.18em] lg:inline">
+            <span className="hidden text-[13px] font-medium tracking-[0.01em] lg:inline">
               Wishlist
             </span>
             <span
@@ -125,7 +125,7 @@ export default function Nav() {
           <button
             onClick={openDrawer}
             aria-label={`Cart, ${count} items`}
-            className="relative flex items-center text-ink hover:text-sepia"
+            className="relative flex items-center text-ink transition-opacity hover:opacity-65"
           >
             <svg
               viewBox="0 0 24 24"
@@ -140,7 +140,7 @@ export default function Nav() {
               <path d="M6 8h12l-1 12H7L6 8Z" />
               <path d="M9 8V6a3 3 0 0 1 6 0v2" />
             </svg>
-            <span className="hidden text-sm font-bold uppercase tracking-[0.18em] lg:inline">
+            <span className="hidden text-[13px] font-medium tracking-[0.01em] lg:inline">
               Cart
             </span>
             <span
@@ -166,14 +166,14 @@ export default function Nav() {
             : "pointer-events-none -translate-y-3 opacity-0"
         }`}
       >
-        <ul className="container-x flex flex-col py-2">
+        <ul className="container-x flex flex-col py-3">
           {LINKS.map((l) => (
             <li key={l.label} className="border-b border-ink/10 last:border-0">
               <Link
                 href={l.href}
                 onClick={() => setMobileOpen(false)}
                 tabIndex={mobileOpen ? 0 : -1}
-                className="block py-4 text-sm font-bold uppercase tracking-[0.2em] text-ink transition-colors hover:text-sepia"
+                className="block py-[18px] text-[16px] font-medium tracking-[0.01em] text-ink transition-colors hover:text-ink-soft"
               >
                 {l.label}
               </Link>

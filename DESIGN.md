@@ -32,10 +32,10 @@ typography:
     letterSpacing: "normal"
   body:
     fontFamily: "Inter, system-ui, sans-serif"
-    fontSize: "15px"
+    fontSize: "16px"
     fontWeight: 400
-    lineHeight: 1.6
-    letterSpacing: "normal"
+    lineHeight: 1.75
+    letterSpacing: "-0.006em"
   control:
     fontFamily: "Inter, system-ui, sans-serif"
     fontSize: "13px"
@@ -48,6 +48,18 @@ typography:
     fontWeight: 500
     lineHeight: 1
     letterSpacing: "0.28em"
+  micro:
+    fontFamily: "Inter, system-ui, sans-serif"
+    fontSize: "10px"
+    fontWeight: 500
+    lineHeight: 1
+    letterSpacing: "0.2em"
+  micro-tight:
+    fontFamily: "Inter, system-ui, sans-serif"
+    fontSize: "9px"
+    fontWeight: 500
+    lineHeight: 1
+    letterSpacing: "normal"
 rounded:
   none: "0px"
   sm: "2px"
@@ -164,6 +176,25 @@ display scale; a didone at body size is unreadable. Inter carries everything the
 didone does not, kept deliberately quiet so the wordmark is the only thing with a
 voice.
 
+Both faces are **vendored** in `app/fonts` and loaded through `next/font/local`
+in `lib/fonts.ts`, never `next/font/google`: the Google loader resolves at compile
+time, so a networkless `npm run dev` fails while building the root layout and
+takes every route down with it.
+
+> **Corrected (typography pass).** The code had collapsed both stacks onto
+> Bodoni, so `font-sans` resolved to the didone and every paragraph, label,
+> price and nav link was set in it. Below ~16px its hairlines fall under a
+> device pixel and drop out — which is why the secondary greys had drifted
+> near-black and the `.kicker`/`.eyebrow` utilities had been pushed to 600.
+> Those were props under a face doing a job it was never drawn for. `sans` is
+> Inter again and the props are gone (both utilities back to 500).
+
+**Reading defaults**, set once on `body` rather than retyped per component:
+`font-optical-sizing: auto` so Inter's opsz axis picks the right cut per size,
+`line-height: 1.7`, `letter-spacing: -0.006em`. Body copy is capped by the
+`.measure` utility at **62ch / 16px / 1.75** — past roughly 75 characters the eye
+loses the line return, which is the other half of "hard to read".
+
 > **Superseded:** this system previously specified Fraunces at weight 900. The
 > wordmark redesign replaced it. Anything still referencing Fraunces or
 > `--font-fraunces` is stale.
@@ -175,11 +206,21 @@ voice.
 - **Headline** (400, `clamp(2rem, 5vw, 3.75rem)`, line-height 1.02, tracking -0.02em):
   Section headings. Negative tracking tightens the didone's natural looseness at scale.
 - **Title** (400, 1.125–1.5rem, line-height 1.2): Product names, cart/modal headings.
-- **Body** (400, 15px, line-height 1.6): Descriptive copy, product details. Max ~65ch
+- **Body** (400, **16px**, line-height **1.75**, tracking -0.006em): Descriptive
+  copy, product details, and every lede. Capped at **62ch** by `.measure`. Max ~65ch
   where prose runs long (shipping/returns pages).
 - **Control** (500, 13px, tracking 0.01em, **sentence case**): Buttons and links.
 - **Label / kicker** (500, 11px, tracking 0.28em, uppercase): Section kickers
   ("THE CAMPAIGN"), the marquee, status and category badges.
+- **Micro** (500, 9–10px, tracking 0–0.2em): The tier below Label, for type that
+  rides *inside* another element rather than sitting in the layout — the cart and
+  wishlist count badges (9px on phones, 10px from `md:`) and the category badge
+  laid over a product image. Never used for anything read as a sentence.
+
+**Wordmark sizing is not a ramp step.** `components/Wordmark.tsx` is sized per
+context through its `className` (1.6–1.8rem in the nav, 1.7rem in the footer,
+`clamp()` at display scale) because the lockup has to optically match whatever
+surface it sits on. Literal sizes on the Wordmark are correct by design.
 
 ### Named Rules
 **The Wordmark Rule.** "Nostalgia" is always set through `components/Wordmark.tsx`,
@@ -195,10 +236,16 @@ sits on an image it gets a heavy scrim (≥55% shade) so the hairlines survive.
 
 ## Layout
 
-A centered `max-w-7xl` container (`container-x`, horizontal padding 20px mobile /
-32px `sm:`) governs nearly every page. Sections breathe generously — vertical rhythm
-runs in large steps (`py-16` to `py-24`, `mt-24` between major blocks) rather than a
-tight utility grid, reinforcing the editorial, unhurried pace.
+A centered `max-w-7xl` container (`container-x`, horizontal padding **24px mobile
+/ 40px `sm:` / 64px `lg:`**) governs nearly every page. The gutter is part of the
+composition, not a safety margin: at 20/32 the content ran to the edge of a large
+display and the page had no margin to sit in.
+
+Sections breathe generously. The step between chapters is the `.section-y` utility
+(**`py-28` / `md:py-40`**), so the rhythm is decided once rather than retyped as
+`py-24 md:py-32` in eight places. The hero is a full **stage** (`min-h-[92svh]`),
+not a banner — at `py-24` the photograph was a squeezed strip with the entire
+lockup crammed into it.
 
 Grids are simple and content-driven: two-column at `md:` for hero copy/image and
 footer link groups (expanding to four columns), a responsive product grid elsewhere.
@@ -293,9 +340,17 @@ uppercase labels that make even small controls feel deliberate rather than defau
 - **Placeholder:** Pencil Ink at reduced opacity (60%).
 
 ### Navigation
-Sticky, translucent (`bg-cream/85` + backdrop blur), `h-16`, thin bottom border
-(`border-ink/10`). Links are label typography (uppercase, bold, 0.18em tracking) in
-Pencil Ink, shifting to Ledger Ink on hover with an animated underline
+Sticky, translucent (`.glass-panel` — **0.72 fill** light, 0.70 dark, plus backdrop
+blur and saturate), `h-16` rising to `lg:h-20`. The fill sits where it does because
+the header now meets the hero photograph directly: at 0.50 the 13px links measured
+~4.3:1 against the lit part of the sky, under AA.
+
+Every control in the bar speaks in **one register** — 13px, medium, sentence case,
+0.01em tracking. It used to carry two at once: sentence-case section links beside
+14px BOLD UPPERCASE 0.18em account/wishlist/cart controls inches away. The wordmark
+is the only loud thing in the bar, and that is exactly what licenses the quiet
+controls under it. Links are Pencil Ink, shifting to Ledger Ink on hover with an
+animated underline
 (`link-underline` — a bottom border that grows from 0 to full width). The wordmark is
 center-anchored, Display-family, black-weight. Cart and wishlist sit right-aligned
 with `rounded-full` Ledger Ink count badges. Below `md:`, the link list collapses

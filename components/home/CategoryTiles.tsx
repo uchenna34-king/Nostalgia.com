@@ -19,11 +19,11 @@ export default function CategoryTiles({ tiles }: { tiles: CategoryTile[] }) {
   if (tiles.length === 0) return null;
 
   return (
-    <section className="container-x reveal py-20 md:py-28">
-      <div className="flex flex-wrap items-end justify-between gap-6 pb-10">
+    <section className="container-x reveal section-y">
+      <div className="flex flex-col items-start gap-5 pb-14 sm:flex-row sm:flex-wrap sm:items-end sm:justify-between sm:gap-6">
         <div>
           <p className="kicker">Shop by category</p>
-          <h2 className="mt-6 font-serif font-normal leading-[1.02] tracking-[-0.02em] text-[clamp(2rem,5vw,3.75rem)]">
+          <h2 className="mt-5 font-serif font-normal leading-[1.02] text-[clamp(2rem,5vw,3.75rem)]">
             Enter the archive.
           </h2>
         </div>
@@ -35,12 +35,12 @@ export default function CategoryTiles({ tiles }: { tiles: CategoryTile[] }) {
         </Link>
       </div>
 
-      <div className="grid grid-cols-2 gap-3 md:grid-cols-3 md:gap-4">
+      <div className="grid grid-cols-2 gap-4 md:grid-cols-3 md:gap-6">
         {tiles.map((tile, i) => (
           <Link
             key={tile.name}
             href={tile.href}
-            className="group relative isolate flex aspect-[4/5] flex-col justify-end overflow-hidden rounded-[4px]"
+            className="group relative isolate flex aspect-[4/5] flex-col justify-end overflow-hidden"
           >
             <Image
               src={tile.image}
@@ -54,12 +54,12 @@ export default function CategoryTiles({ tiles }: { tiles: CategoryTile[] }) {
               aria-hidden
               className="absolute inset-0 -z-10 bg-gradient-to-t from-shade/90 via-shade/25 to-shade/10 transition-opacity duration-500 group-hover:from-shade/95"
             />
-            <div className="flex items-end justify-between gap-3 p-5 md:p-6">
-              <div>
-                <h3 className="font-serif text-[clamp(1.35rem,2.4vw,2rem)] font-normal leading-none tracking-[-0.01em] text-light">
+            <div className="flex items-end justify-between gap-3 p-4 sm:p-6 md:p-8">
+              <div className="min-w-0">
+                <h3 className="font-serif text-[clamp(1.2rem,2.4vw,2rem)] font-normal leading-[1.1] tracking-[-0.01em] text-light">
                   {tile.name}
                 </h3>
-                <p className="mt-2 text-[10.5px] uppercase tracking-[0.24em] text-light/60">
+                <p className="mt-2.5 text-[10.5px] uppercase tracking-[0.24em] text-light/75">
                   {tile.count} {tile.count === 1 ? "piece" : "pieces"}
                 </p>
               </div>

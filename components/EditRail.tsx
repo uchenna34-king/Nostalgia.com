@@ -17,7 +17,7 @@ export default function EditRail({ products }: { products: Product[] }) {
 
   return (
     <div
-      className="no-scrollbar -mx-5 flex snap-x snap-mandatory gap-5 overflow-x-auto scroll-smooth px-5 pb-2 sm:-mx-8 sm:gap-7 sm:px-8"
+      className="no-scrollbar -mx-6 flex snap-x snap-mandatory gap-6 overflow-x-auto scroll-smooth px-6 pb-2 sm:-mx-10 sm:gap-8 sm:px-10 lg:-mx-16 lg:px-16"
       // A horizontally scrollable region needs to be reachable and announced.
       tabIndex={0}
       role="region"
@@ -47,7 +47,7 @@ export default function EditRail({ products }: { products: Product[] }) {
               </span>
             </div>
 
-            <div className="mt-5 flex items-baseline justify-between gap-4">
+            <div className="mt-6 flex items-baseline justify-between gap-4">
               <h3 className="font-serif text-xl leading-tight">
                 {product.name}
               </h3>
@@ -55,7 +55,7 @@ export default function EditRail({ products }: { products: Product[] }) {
                 {formatPrice(product.price)}
               </span>
             </div>
-            <p className="mt-1.5 text-[11px] uppercase tracking-[0.28em] text-ink-soft">
+            <p className="mt-2 text-[11px] uppercase tracking-[0.28em] text-sepia-deep">
               {product.category}
             </p>
           </Link>

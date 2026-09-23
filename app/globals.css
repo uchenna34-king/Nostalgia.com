@@ -12,13 +12,13 @@
      ink-soft  #4D4D4D  →   8.5:1  (secondary body copy)
      sepia-deep#595959  →   7.0:1  (letterspaced micro-labels)
 
-   Why the greys sit this dark: Bodoni Moda is the body face as well as the
-   display face, and a didone's hairline strokes are sub-pixel at 11–13px. A
-   mid-grey that would be fine in a grotesque reads as faint in Bodoni, so the
-   secondary tiers run darker than a sans-serif system would need, and the
-   .kicker/.eyebrow utilities below add weight (600) for the same reason. The
-   label tier is kept distinct from body copy by case and tracking, not by a
-   lighter tone.
+   These tiers were pushed unusually dark to compensate for Bodoni being the
+   body face: a didone's hairlines are sub-pixel at 11-13px, so secondary copy
+   read faint at greys a grotesque handles easily. Inter sets body now, so the
+   values hold their contrast honestly rather than by brute force, and the
+   .kicker/.eyebrow utilities drop back to 500 — semibold was propping up the
+   didone, and in a grotesque it just reads loud. The label tier stays distinct
+   from body copy by case and tracking, not by a lighter tone.
 */
 :root {
   --grain-opacity: 0.03;
@@ -72,9 +72,23 @@
     scroll-behavior: smooth;
   }
 
+  /* Inter carries an optical-size axis (14..32); `auto` lets the browser pick
+     the right cut per size, so 11px labels get the open, wider-spaced design
+     and 20px+ gets the tighter one. The slight negative tracking is Inter's
+     own guidance at text sizes — it is drawn a touch loose for UI by default.
+     1.7 leading is where the page finally gets some air between lines. */
   body {
     @apply bg-cream text-ink font-sans antialiased;
+    font-optical-sizing: auto;
+    line-height: 1.7;
+    letter-spacing: -0.006em;
     text-rendering: optimizeLegibility;
+  }
+
+  /* The didone runs loose by default — it was fitted for metal, not screens.
+     Pulling tracking in at display size is what makes it read as a mark. */
+  h1, h2, h3 {
+    letter-spacing: -0.02em;
   }
 
   ::selection {
@@ -124,7 +138,7 @@
      ("THE CAMPAIGN", "THE DEVICE"). One utility so the register is identical
      everywhere. */
   .kicker {
-    @apply text-xs font-semibold uppercase tracking-[0.28em] text-sepia-deep;
+    @apply text-[11px] font-medium uppercase tracking-[0.3em] text-sepia-deep;
   }
 
   .link-underline {
@@ -132,13 +146,26 @@
   }
 
   .container-x {
-    @apply mx-auto w-full max-w-7xl px-5 sm:px-8;
+    @apply mx-auto w-full max-w-7xl px-6 sm:px-10 lg:px-16;
+  }
+
+  /* Body copy measure. Long lines are the other half of "hard to read" — past
+     roughly 75 characters the eye starts losing the line return. Paired with
+     the 1.7 leading above, this is the reading block for every lede on site. */
+  .measure {
+    @apply max-w-[62ch] text-[16px] leading-[1.75] text-ink-soft;
+  }
+
+  /* Section rhythm. One utility, so the vertical step between chapters is a
+     decision made once instead of py-24 md:py-32 retyped in eight places. */
+  .section-y {
+    @apply py-24 md:py-32;
   }
 
   /* 12px letterspaced label in the neutral label grey. Semibold for the same
      reason as .kicker — Bodoni's hairlines need the weight at this size. */
   .eyebrow {
-    @apply text-xs font-semibold uppercase tracking-[0.25em] text-sepia-deep;
+    @apply text-[11px] font-medium uppercase tracking-[0.28em] text-sepia-deep;
   }
 
   /* Liquid glass. Deliberately scoped to controls that sit ON photography,
@@ -279,7 +306,7 @@
      hairline is an inset highlight rather than a border, so the panel ends in
      a catch of light instead of a drawn rule. */
   .glass-panel {
-    background: rgb(var(--c-cream) / 0.5);
+    background: rgb(var(--c-cream) / 0.72);
     -webkit-backdrop-filter: blur(24px) saturate(180%);
     backdrop-filter: blur(24px) saturate(180%);
     box-shadow: inset 0 -1px 0 rgb(255 255 255 / 0.4);
@@ -291,7 +318,7 @@
      The fill goes UP, because a 50%-opaque dark panel over dark content stops
      separating the header from the page behind it. */
   .dark .glass-panel {
-    background: rgb(var(--c-cream) / 0.62);
+    background: rgb(var(--c-cream) / 0.7);
     box-shadow: inset 0 -1px 0 rgb(255 255 255 / 0.1);
   }
 
@@ -394,6 +421,16 @@ body {
   }
 }
 
+/* The hero's scroll cue. A hairline that draws down, holds, and releases —
+   scaleY from the top edge so it grows rather than slides. The long tail of
+   the cycle is the point: it should read as a breath, not a blinking arrow. */
+@keyframes scroll-cue {
+  0%   { transform: scaleY(0);   opacity: 0; }
+  28%  { transform: scaleY(1);   opacity: 1; }
+  62%  { transform: scaleY(1);   opacity: 1; }
+  100% { transform: scaleY(0.18); opacity: 0; }
+}
+
 @keyframes drift-in {
   from {
     transform: scale(1.09);
@@ -476,8 +513,16 @@ body {
 
 @media (prefers-reduced-motion: reduce) {
   .animate-marquee,
-  .animate-fade-up {
+  .animate-fade-up,
+  .drift {
     animation: none !important;
+  }
+  /* The cue keeps its drawn state rather than vanishing — it is the only
+     signal that the full-height stage continues below the fold. */
+  [class*="scroll-cue"] {
+    animation: none !important;
+    transform: none !important;
+    opacity: 0.7;
   }
   * {
     scroll-behavior: auto !important;

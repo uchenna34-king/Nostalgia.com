@@ -66,15 +66,15 @@ export default function TrustStrip() {
           "Authenticated" out of the cell instead of wrapping it), and the
           icon must top-align so a note that wraps to two lines doesn't drag
           it down. Gaps tighten on phones to buy the text a little more room. */}
-      <div className="container-x grid grid-cols-2 gap-x-4 gap-y-7 py-9 sm:gap-x-6 sm:gap-y-8 sm:py-10 md:grid-cols-4 md:py-12">
+      <div className="container-x grid grid-cols-2 gap-x-5 gap-y-10 py-14 sm:gap-x-8 sm:gap-y-12 sm:py-16 md:grid-cols-4 md:py-20">
         {ITEMS.map((item) => (
           <div key={item.title} className="flex items-start gap-3 sm:gap-4">
             <span className="mt-0.5 shrink-0 text-ink">{item.icon}</span>
             <div className="min-w-0">
-              <p className="text-[13px] font-semibold tracking-[0.01em] text-ink">
+              <p className="text-[13.5px] font-medium tracking-[0.01em] text-ink">
                 {item.title}
               </p>
-              <p className="mt-1 text-[12px] font-medium leading-snug text-ink-soft">
+              <p className="mt-1.5 text-[12.5px] leading-[1.5] text-ink-soft">
                 {item.note}
               </p>
             </div>

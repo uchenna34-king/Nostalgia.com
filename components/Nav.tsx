@@ -23,10 +23,13 @@ export default function Nav() {
 
   return (
     <header className="glass-panel sticky top-0 z-50 relative">
-      <nav className="container-x relative flex h-16 items-center gap-4 lg:h-20">
-        {/* Mobile / tablet toggle */}
+      <nav className="container-x relative flex h-16 items-center gap-2 sm:gap-3 lg:h-20 lg:gap-4">
+        {/* Left group — equal basis with the right group, so the wordmark
+            between them sits on the true centre line. Empty from lg, where the
+            bar switches to the left-anchored wordmark + links layout. */}
+        <div className="flex min-w-0 flex-1 basis-0 items-center lg:hidden">
         <button
-          className="-ml-1 p-1 text-ink lg:hidden"
+          className="-ml-1 p-1 text-ink"
           aria-label="Menu"
           aria-expanded={mobileOpen}
           aria-controls="mobile-nav"
@@ -44,16 +47,23 @@ export default function Nav() {
             <path d="M4 7h16M4 12h16M4 17h16" />
           </svg>
         </button>
+          <ThemeToggle />
+        </div>
 
-        {/* Wordmark — floats centered on mobile, sits left on desktop so the
-            links flow after it without colliding. The centered-logo layout
-            could not fit five links at any width. */}
+        {/* Wordmark — centred between the two equal groups on mobile, anchored
+            left from lg so the links flow after it (the centred-logo layout
+            could not fit five links at any width). It steps down in size on
+            the narrowest phones: at 1.6rem the lockup plus the icon cluster
+            did not fit a 320–375px row, which is what produced the overlap. */}
         <Link
           href="/"
           aria-label="Nostalgia — home"
-          className="absolute left-1/2 -translate-x-1/2 shrink-0 lg:static lg:left-auto lg:translate-x-0"
+          className="shrink-0"
         >
-          <Wordmark className="text-[1.6rem] sm:text-[1.8rem]" />
+          <Wordmark
+            opticalCenter
+            className="text-[1.2rem] sm:text-[1.5rem] lg:text-[1.8rem]"
+          />
         </Link>
 
         {/* Desktop links */}
@@ -76,7 +86,7 @@ export default function Nav() {
             state has an accessible name and the text state still satisfies WCAG
             2.5.3 Label in Name (visible "Wishlist"/"Cart" ⊂ the label). The count
             badge is aria-hidden — the count already rides in the label. */}
-        <div className="ml-auto flex items-center gap-4 sm:gap-5">
+        <div className="flex min-w-0 flex-1 basis-0 items-center justify-end gap-2.5 sm:gap-4 lg:ml-auto lg:flex-none lg:basis-auto lg:gap-5">
           {session?.user ? (
             <Link
               href="/account"
@@ -93,7 +103,9 @@ export default function Nav() {
             </button>
           )}
 
-          <ThemeToggle />
+          <span className="hidden lg:flex">
+            <ThemeToggle />
+          </span>
 
           <Link
             href="/wishlist"

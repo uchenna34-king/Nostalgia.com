@@ -62,7 +62,7 @@ export default function Hero() {
       />
 
       <div className="container-x flex flex-1 flex-col items-center justify-center py-28 text-center md:py-32">
-        <p className="text-[11px] font-medium uppercase tracking-[0.3em] text-light/75">
+        <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-light/75 sm:tracking-[0.3em]">
           A luxury resale house · Est. 2025
         </p>
 
@@ -70,7 +70,7 @@ export default function Hero() {
         <h1
           key={take}
           aria-label="Nostalgia"
-          className="mt-8 font-serif font-normal leading-none tracking-[-0.015em] text-light text-[clamp(3.25rem,15vw,10rem)] md:mt-10"
+          className="mt-8 translate-x-[0.14em] font-serif font-normal leading-none tracking-[-0.015em] text-light text-[clamp(3.25rem,15vw,10rem)] md:mt-10"
         >
           <span aria-hidden className="reveal-n">
             N
@@ -87,7 +87,7 @@ export default function Hero() {
           History in the making
         </p>
 
-        <p className="mt-9 max-w-[52ch] text-[16px] leading-[1.75] text-light/90">
+        <p className="mt-9 max-w-[52ch] text-pretty text-[16px] leading-[1.75] text-light/90">
           The past as raw material. A marketplace where one-of-one archive
           fashion meets the collectors, the enthusiasts, and the next generation
           discovering it for the first time.

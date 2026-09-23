@@ -74,7 +74,7 @@ export default async function Home() {
             className="absolute inset-0 bg-gradient-to-t from-shade/85 via-shade/10 to-shade/50"
           />
           <div className="absolute inset-0 flex items-center justify-center">
-            <Wordmark className="text-light text-[clamp(2.25rem,9vw,6.5rem)]" />
+            <Wordmark opticalCenter className="text-light text-[clamp(2.25rem,9vw,6.5rem)]" />
           </div>
           <figcaption className="absolute inset-x-0 bottom-0 flex items-center justify-between gap-4 px-6 py-6 text-[11px] uppercase tracking-[0.28em] text-light/80 md:px-8">
             <span>Autumn archive — 2026</span>
@@ -128,7 +128,7 @@ export default async function Home() {
           </div>
           <div className="bg-shade" />
           <div className="absolute inset-0 flex items-center justify-center">
-            <Wordmark className="text-light text-[clamp(2.25rem,9vw,6.5rem)]" />
+            <Wordmark opticalCenter className="text-light text-[clamp(2.25rem,9vw,6.5rem)]" />
           </div>
         </div>
       </section>

@@ -65,8 +65,8 @@ const COLUMNS: { heading: string; links: { label: string; href: string }[] }[] =
  */
 export default function Footer() {
   return (
-    <footer className="mt-20 border-t border-ink/12 bg-cream text-ink">
-      <div className="container-x py-20 md:py-28">
+    <footer className="mt-16 border-t border-ink/12 bg-cream text-ink">
+      <div className="container-x py-10 md:py-14">
         <div className="flex flex-wrap items-start justify-between gap-8">
           <Link href="/" aria-label="Nostalgia — home">
             <Wordmark className="text-[1.7rem]" withLine />
@@ -80,13 +80,13 @@ export default function Footer() {
           </Link>
         </div>
 
-        <div className="mt-20 grid grid-cols-2 gap-x-8 gap-y-14 md:grid-cols-4">
+        <div className="mt-10 grid grid-cols-2 gap-x-8 gap-y-9 md:mt-12 md:grid-cols-4">
           {COLUMNS.map((col) => (
             <div key={col.heading}>
               <p className="text-[11px] font-medium uppercase tracking-[0.28em] text-sepia-deep">
                 {col.heading}
               </p>
-              <ul className="mt-6 space-y-3.5 text-[13.5px] text-ink-soft">
+              <ul className="mt-4 space-y-2.5 text-[13.5px] text-ink-soft">
                 {col.links.map((l) => (
                   <li key={l.label}>
                     <Link
@@ -109,13 +109,13 @@ export default function Footer() {
           to give the *text* labels a container; drawn marks read cleanly on
           the bare ground and drop a stray 3px radius the system doesn't use. */}
       <div className="border-t border-ink/12">
-        <div className="container-x py-6">
+        <div className="container-x py-4">
           <PaymentMarks />
         </div>
       </div>
 
       <div className="border-t border-ink/12">
-        <div className="container-x flex flex-col items-center justify-between gap-3 py-7 text-[12.5px] text-ink-soft sm:flex-row">
+        <div className="container-x flex flex-col items-center justify-between gap-2 py-4 text-[12.5px] text-ink-soft sm:flex-row">
           <span>
             © {new Date().getFullYear()} Nostalgia®. A combination of the past
             and the present with the future.

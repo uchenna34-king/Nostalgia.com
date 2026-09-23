@@ -218,7 +218,9 @@ loses the line return, which is the other half of "hard to read".
   laid over a product image. Never used for anything read as a sentence.
 
 **Wordmark sizing is not a ramp step.** `components/Wordmark.tsx` is sized per
-context through its `className` (1.6–1.8rem in the nav, 1.7rem in the footer,
+context through its `className` (1.2–1.8rem in the nav, stepping down on the
+narrowest phones so the lockup and the icon cluster both fit a 320px row;
+1.7rem in the footer,
 `clamp()` at display scale) because the lockup has to optically match whatever
 surface it sits on. Literal sizes on the Wordmark are correct by design.
 

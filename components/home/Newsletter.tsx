@@ -27,7 +27,7 @@ export default function Newsletter() {
           </p>
         </div>
 
-        <div className="md:justify-self-end md:w-full md:max-w-sm">
+        <div className="min-w-0 md:justify-self-end md:w-full md:max-w-sm">
           {done ? (
             <p
               role="status"
@@ -47,10 +47,11 @@ export default function Newsletter() {
               <label htmlFor="nl-email" className="sr-only">
                 Email address
               </label>
-              <div className="flex overflow-hidden rounded-full border border-ink/25 focus-within:border-ink/60">
+              <div className="flex min-w-0 overflow-hidden rounded-full border border-ink/25 focus-within:border-ink/60">
                 <input
                   id="nl-email"
                   type="email"
+                  size={1}
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}

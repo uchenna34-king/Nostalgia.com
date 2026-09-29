@@ -1,15 +1,18 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { usePathname } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
 import { useCart } from "@/context/CartContext";
 import { useWishlist } from "@/context/WishlistContext";
 import { useSession, signIn } from "next-auth/react";
 import ThemeToggle from "@/components/ThemeToggle";
 import Wordmark from "@/components/Wordmark";
+import { MegaPanel, MobileShopMenu } from "@/components/ShopMenu";
+import { DEPARTMENTS, type DepartmentSlug } from "@/lib/taxonomy";
 
+// Women and Men lead the bar (they open the shop menus); these follow.
 const LINKS = [
-  { href: "/shop", label: "Shop" },
   { href: "/collections", label: "Collections" },
   { href: "/shop?category=Outerwear", label: "One of one" },
   { href: "/shop", label: "The House" },
@@ -20,54 +23,113 @@ export default function Nav() {
   const { count: wishlistCount } = useWishlist();
   const { data: session } = useSession();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [openDept, setOpenDept] = useState<DepartmentSlug | null>(null);
+  const closeTimer = useRef<ReturnType<typeof setTimeout>>();
+  const pathname = usePathname();
+  const pathDept: DepartmentSlug = pathname.startsWith("/shop/men")
+    ? "men"
+    : "women";
+
+  // Hover intent: leaving the trigger or the panel waits a beat before
+  // closing, so the pointer can cross the gap between them.
+  const holdOpen = (d: DepartmentSlug) => {
+    clearTimeout(closeTimer.current);
+    setOpenDept(d);
+  };
+  const closeSoon = () => {
+    clearTimeout(closeTimer.current);
+    closeTimer.current = setTimeout(() => setOpenDept(null), 140);
+  };
+  const closeAll = () => {
+    clearTimeout(closeTimer.current);
+    setOpenDept(null);
+    setMobileOpen(false);
+  };
+
+  // Any navigation closes every menu.
+  useEffect(closeAll, [pathname]);
+
+  // Escape closes the desktop panel and hands focus back to its trigger.
+  useEffect(() => {
+    if (!openDept) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== "Escape") return;
+      const d = openDept;
+      setOpenDept(null);
+      document.getElementById(`trigger-${d}`)?.focus();
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [openDept]);
 
   return (
     <header className="glass-panel sticky top-0 z-50 relative">
       <nav className="container-x relative flex h-16 items-center gap-2 sm:gap-3 lg:h-20 lg:gap-4">
-        {/* Left group — equal basis with the right group, so the wordmark
-            between them sits on the true centre line. Empty from lg, where the
+        {/* Left group — the menu button alone. It keeps an equal basis with the
+            right group, so the wordmark between them sits on the true centre
+            line however wide the right cluster grows. Empty from lg, where the
             bar switches to the left-anchored wordmark + links layout. */}
         <div className="flex min-w-0 flex-1 basis-0 items-center lg:hidden">
-        <button
-          className="-ml-1 p-1 text-ink"
-          aria-label="Menu"
-          aria-expanded={mobileOpen}
-          aria-controls="mobile-nav"
-          onClick={() => setMobileOpen((v) => !v)}
-        >
-          <svg
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth={1.6}
-            strokeLinecap="round"
-            className="h-6 w-6"
-            aria-hidden
+          <button
+            className="-ml-1 p-1 text-ink"
+            aria-label="Menu"
+            aria-expanded={mobileOpen}
+            aria-controls="mobile-nav"
+            onClick={() => setMobileOpen((v) => !v)}
           >
-            <path d="M4 7h16M4 12h16M4 17h16" />
-          </svg>
-        </button>
-          <ThemeToggle />
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={1.6}
+              strokeLinecap="round"
+              className="h-6 w-6"
+              aria-hidden
+            >
+              <path d="M4 7h16M4 12h16M4 17h16" />
+            </svg>
+          </button>
         </div>
 
         {/* Wordmark — centred between the two equal groups on mobile, anchored
             left from lg so the links flow after it (the centred-logo layout
             could not fit five links at any width). It steps down in size on
             the narrowest phones: at 1.6rem the lockup plus the icon cluster
-            did not fit a 320–375px row, which is what produced the overlap. */}
-        <Link
-          href="/"
-          aria-label="Nostalgia — home"
-          className="shrink-0"
-        >
+            did not fit a 320–375px row, which is what produced the overlap. The
+            extra step below 360px buys clearance from the theme switch, which
+            now sits in the right cluster — at 1.2rem the ® all but touched it. */}
+        <Link href="/" aria-label="Nostalgia — home" className="shrink-0">
           <Wordmark
             opticalCenter
-            className="text-[1.2rem] sm:text-[1.5rem] lg:text-[1.8rem]"
+            className="text-[1.05rem] min-[360px]:text-[1.2rem] sm:text-[1.5rem] lg:text-[1.8rem]"
           />
         </Link>
 
-        {/* Desktop links */}
+        {/* Desktop links. Women / Men are disclosure buttons: hover opens
+            them for a pointer, click / Enter / Space for everyone else, and the
+            panel itself carries a "Shop all" link to the department page. */}
         <ul className="hidden items-center gap-8 lg:ml-10 lg:flex">
+          {DEPARTMENTS.map((d) => (
+            <li
+              key={d.slug}
+              onMouseEnter={() => holdOpen(d.slug)}
+              onMouseLeave={closeSoon}
+            >
+              <button
+                id={`trigger-${d.slug}`}
+                aria-expanded={openDept === d.slug}
+                aria-controls={`menu-${d.slug}`}
+                onClick={() => setOpenDept(openDept === d.slug ? null : d.slug)}
+                className={`link-underline text-[13px] font-medium tracking-[0.01em] hover:text-ink ${
+                  openDept === d.slug || pathname.startsWith(`/shop/${d.slug}`)
+                    ? "text-ink"
+                    : "text-ink-soft"
+                }`}
+              >
+                {d.label}
+              </button>
+            </li>
+          ))}
           {LINKS.map((l) => (
             <li key={l.label}>
               <Link
@@ -80,7 +142,8 @@ export default function Nav() {
           ))}
         </ul>
 
-        {/* Right: account + wishlist + cart. Wishlist/Cart render as icons on
+        {/* Right: account + theme + wishlist + cart. The theme switch belongs
+            with the commerce controls at every width, not with the menu button. Wishlist/Cart render as icons on
             mobile (to fit the narrowest phones) and as text on md+. Each control
             carries an aria-label that *contains* its visible word, so the icon
             state has an accessible name and the text state still satisfies WCAG
@@ -103,9 +166,7 @@ export default function Nav() {
             </button>
           )}
 
-          <span className="hidden lg:flex">
-            <ThemeToggle />
-          </span>
+          <ThemeToggle />
 
           <Link
             href="/wishlist"
@@ -165,33 +226,55 @@ export default function Nav() {
         </div>
       </nav>
 
-      {/* Mobile / tablet menu — a glass panel that overlays the hero rather than
-          a solid bar. Always in the DOM so it can animate both ways; the hero
-          reads through the translucent cream + backdrop-blur. `pointer-events`
-          and `aria-hidden` track the open state so the closed panel is inert. */}
+      {openDept && (
+        <MegaPanel
+          dept={openDept}
+          onNavigate={closeAll}
+          onMouseEnter={() => holdOpen(openDept)}
+          onMouseLeave={closeSoon}
+        />
+      )}
+
+      {/* Mobile / tablet menu — a full-height solid sheet under the bar. It
+          used to be frosted glass over the hero, which worked for four short
+          links; with the whole shop tree in it, page copy showed through the
+          menu text. Always in the DOM so it can animate both ways;
+          `pointer-events` and `tabIndex` track the open state so the closed
+          sheet is inert. */}
       <div
         id="mobile-nav"
         aria-hidden={!mobileOpen}
-        className={`glass-panel absolute inset-x-0 top-full origin-top transition-all duration-300 ease-out lg:hidden ${
+        className={`absolute inset-x-0 top-full h-[calc(100svh-4rem)] origin-top border-t border-ink/10 bg-cream overflow-y-auto overscroll-contain transition-all duration-300 ease-out lg:hidden ${
           mobileOpen
             ? "translate-y-0 opacity-100"
             : "pointer-events-none -translate-y-3 opacity-0"
         }`}
       >
-        <ul className="container-x flex flex-col py-3">
-          {LINKS.map((l) => (
-            <li key={l.label} className="border-b border-ink/10 last:border-0">
-              <Link
-                href={l.href}
-                onClick={() => setMobileOpen(false)}
-                tabIndex={mobileOpen ? 0 : -1}
-                className="block py-[18px] text-[16px] font-medium tracking-[0.01em] text-ink transition-colors hover:text-ink-soft"
+        <div className="container-x pb-3">
+          <MobileShopMenu
+            key={pathDept}
+            open={mobileOpen}
+            initialDept={pathDept}
+            onNavigate={closeAll}
+          />
+          <ul className="flex flex-col">
+            {LINKS.map((l) => (
+              <li
+                key={l.label}
+                className="border-b border-ink/10 last:border-0"
               >
-                {l.label}
-              </Link>
-            </li>
-          ))}
-        </ul>
+                <Link
+                  href={l.href}
+                  onClick={() => setMobileOpen(false)}
+                  tabIndex={mobileOpen ? 0 : -1}
+                  className="block py-[18px] text-[16px] font-medium tracking-[0.01em] text-ink transition-colors hover:text-ink-soft"
+                >
+                  {l.label}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </div>
       </div>
     </header>
   );

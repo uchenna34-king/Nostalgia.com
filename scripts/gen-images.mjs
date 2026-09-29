@@ -20,12 +20,31 @@ const items = [
   ["pleated-trouser", "TROUSER", "#4C4A42", "#E8DFCF"],
   ["corduroy-cap", "CAP", "#A6552F", "#F4EEE4"],
   ["leather-tote", "TOTE", "#6E4A2E", "#F4EEE4"],
+  ["tempo-road-runner", "RUNNER", "#2F3B45", "#E8DFCF"],
+  ["stride-mesh-trainer", "TRAINER", "#B9B2A6", "#221E1A"],
+  ["archive-oxford", "OXFORD", "#3B2A1E", "#F4EEE4"],
+  ["city-penny-loafer", "LOAFER", "#6B4226", "#F4EEE4"],
+  ["washed-canvas-low", "CANVAS", "#CFC6B4", "#221E1A"],
+  ["loopback-crewneck", "CREWNECK", "#8C8C84", "#F4EEE4"],
+  ["brushed-fleece-hoodie", "HOODIE", "#B7A99A", "#221E1A"],
+  ["varsity-graphic-crew", "VARSITY", "#1F3A2E", "#E8DFCF"],
+  ["selvedge-straight-jean", "SELVEDGE", "#1E2A44", "#E8DFCF"],
+  ["high-rise-wide-jean", "WIDE LEG", "#4A6283", "#F4EEE4"],
+  ["cord-five-pocket", "CORD", "#7A5230", "#F4EEE4"],
+  ["twill-carpenter-jean", "CARPENTER", "#D9CFBC", "#221E1A"],
+  ["oxford-button-down", "OXFORD CLOTH", "#9FB3C8", "#221E1A"],
+  ["poplin-tunic-shirt", "POPLIN", "#EDE7DC", "#221E1A"],
+  ["atelier-crest-tee", "CREST TEE", "#2A2A2A", "#E8DFCF"],
+  ["monogram-jersey-tee", "MONOGRAM", "#5C4B3B", "#F4EEE4"],
 ];
 
 function svg(label, base, accent, variant) {
   const angle = variant === 1 ? 25 : 145;
   const shade = variant === 1 ? base : shadeColor(base, -18);
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="900" height="1200" viewBox="0 0 900 1200">
+  // The XML prolog is load-bearing: next/image's optimizer sniffs for it and
+  // rejects an SVG without one as "not a valid image" (400).
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="1200" viewBox="0 0 900 1200">
   <defs>
     <linearGradient id="g" x1="0" y1="0" x2="1" y2="1" gradientTransform="rotate(${angle} .5 .5)">
       <stop offset="0" stop-color="${shade}"/>

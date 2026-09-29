@@ -13,7 +13,13 @@ model Product {
   slug        String             @unique
   name        String
   price       Int // stored in cents
+  // Display label of a lib/taxonomy.ts category ("Shoes", "Shirts & T-shirts").
   category    String
+  // lib/taxonomy.ts slugs. "unisex" pieces are listed under both Women and Men;
+  // subcategory is a section slug within the category, or null for the category
+  // at large (and always null for categories without sections).
+  department  String             @default("unisex")
+  subcategory String?
   description String
   materials   String?
   care        String?
@@ -26,6 +32,7 @@ model Product {
   reviews     Review[]
 
   @@index([category])
+  @@index([department, category, subcategory])
   @@index([price])
   @@index([createdAt])
 }

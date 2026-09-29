@@ -18,6 +18,12 @@ import {
   formatPrice,
 } from "@/lib/products";
 import { getReviewsForProduct, hasPurchased } from "@/lib/reviews";
+import {
+  categoryByLabel,
+  getDepartment,
+  getSection,
+  shopHref,
+} from "@/lib/taxonomy";
 import { buildProductJsonLd, serializeJsonLd } from "@/lib/seo";
 
 export const dynamic = "force-dynamic";
@@ -69,12 +75,42 @@ export default async function ProductPage({
   const product = await getProductBySlug(params.slug);
   if (!product) notFound();
 
-  const relatedResult = await getCatalog({
+  // Where this piece sits in the shop tree. A unisex piece belongs to both
+  // departments, so its trail stops at the category and links the flat filter.
+  const dept = getDepartment(product.department);
+  const cat = categoryByLabel(product.category);
+  const section = cat ? getSection(cat, product.subcategory ?? undefined) : undefined;
+  const trail: { label: string; href?: string }[] = [{ label: "Shop", href: "/shop" }];
+  if (dept) trail.push({ label: dept.label, href: shopHref(dept.slug) });
+  trail.push({
+    label: cat?.label ?? product.category,
+    href: dept && cat
+      ? shopHref(dept.slug, cat.slug)
+      : `/shop?category=${encodeURIComponent(product.category)}`,
+  });
+  if (section) {
+    trail.push({
+      label: section.label,
+      href: dept && cat ? shopHref(dept.slug, cat.slug, section.slug) : undefined,
+    });
+  }
+
+  // Related: same section first (a running shoe suggests running shoes), then
+  // the wider category, within the shopper's department where there is one.
+  const relatedScope = {
+    department: dept?.slug,
     category: product.category,
     page: 1,
-  });
-  const related = relatedResult.products
-    .filter((p) => p.slug !== product.slug)
+  };
+  const [sameSection, sameCategory] = await Promise.all([
+    section
+      ? getCatalog({ ...relatedScope, subcategory: section.slug })
+      : Promise.resolve({ products: [] as Awaited<ReturnType<typeof getCatalog>>["products"] }),
+    getCatalog(relatedScope),
+  ]);
+  const seen = new Set([product.slug]);
+  const related = [...sameSection.products, ...sameCategory.products]
+    .filter((p) => (seen.has(p.slug) ? false : (seen.add(p.slug), true)))
     .slice(0, 4);
 
   const hasDetails = Boolean(product.materials || product.care);
@@ -139,12 +175,21 @@ export default async function ProductPage({
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: jsonLd }}
       />
-      <nav className="mb-8 text-xs uppercase tracking-[0.18em] text-ink-soft">
-        <Link href="/shop" className="link-underline">
-          Shop
-        </Link>
-        <span className="mx-2">/</span>
-        <span>{product.category}</span>
+      <nav aria-label="Breadcrumb" className="mb-8">
+        <ol className="flex flex-wrap items-center gap-x-2 text-xs uppercase tracking-[0.18em] text-ink-soft">
+          {trail.map((t, i) => (
+            <li key={t.label} className="flex items-center gap-x-2">
+              {i > 0 && <span aria-hidden>/</span>}
+              {t.href ? (
+                <Link href={t.href} className="link-underline hover:text-ink">
+                  {t.label}
+                </Link>
+              ) : (
+                <span>{t.label}</span>
+              )}
+            </li>
+          ))}
+        </ol>
       </nav>
 
       <div className="grid gap-10 lg:grid-cols-2">
@@ -238,7 +283,7 @@ export default async function ProductPage({
       {related.length > 0 && (
         <section className="mt-24">
           <h2 className="mb-8 font-serif text-3xl font-normal tracking-[-0.02em]">
-            More from {product.category}
+            More from {section?.label ?? product.category}
           </h2>
           <div className="grid grid-cols-2 gap-x-5 gap-y-10 md:grid-cols-4">
             {related.map((p) => (

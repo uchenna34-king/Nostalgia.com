@@ -17,17 +17,79 @@ export type SizeGuide = {
   rows: SizeGuideRow[];
 };
 
-/** The four size-guide categories, in D-05 order. */
+/** One guide per lib/taxonomy.ts category, in menu order. Keys are the
+ * category *labels*, because that is what `Product.category` stores. */
 export const SIZE_GUIDE_CATEGORIES = [
+  "Shoes",
+  "Sweatshirts",
+  "Jeans",
+  "Shirts & T-shirts",
   "Outerwear",
   "Knitwear",
-  "Tees",
+  "Trousers",
   "Accessories",
 ] as const;
 
+/** Guide shown when a product's category has none of its own. */
+export const FALLBACK_SIZE_GUIDE = "Shirts & T-shirts";
+
 const APPAREL_COLUMNS = ["Size", "Chest", "Length", "Sleeve"];
+const WAIST_COLUMNS = ["Size", "Waist", "Hip", "Inseam"];
+
+// Tops share one chest/length scale; tees drop the sleeve column.
+const TOP_ROWS = (sleeve: boolean): SizeGuideRow[] =>
+  [
+    ["XS", "34 (86)", "26 (66)", "23 (58.5)"],
+    ["S", "36 (91.5)", "27 (68.5)", "23.5 (60)"],
+    ["M", "38 (96.5)", "28 (71)", "24 (61)"],
+    ["L", "41 (104)", "29 (73.5)", "24.5 (62)"],
+    ["XL", "44 (112)", "30 (76)", "25 (63.5)"],
+  ].map(([size, chest, length, sl]) => ({
+    size,
+    cells: sleeve ? [size, chest, length, sl] : [size, chest, length],
+  }));
+
+const WAIST_ROWS: SizeGuideRow[] = [
+  ["28", "28 (71)", "36 (91.5)", "32 (81)"],
+  ["30", "30 (76)", "38 (96.5)", "32 (81)"],
+  ["32", "32 (81)", "40 (101.5)", "32 (81)"],
+  ["34", "34 (86)", "42 (106.5)", "32 (81)"],
+  ["36", "36 (91.5)", "44 (112)", "32 (81)"],
+].map(([size, ...rest]) => ({ size, cells: [size, ...rest] }));
 
 export const SIZE_GUIDES: Record<string, SizeGuide> = {
+  Shoes: {
+    category: "Shoes",
+    caption: "Shoes size guide",
+    columns: ["Size", "EU", "US men", "US women", "Foot length"],
+    rows: [
+      ["UK 5", "38", "6", "7", "9.4 (24)"],
+      ["UK 6", "39", "7", "8", "9.8 (24.8)"],
+      ["UK 7", "41", "8", "9", "10.1 (25.7)"],
+      ["UK 8", "42", "9", "10", "10.4 (26.5)"],
+      ["UK 9", "43", "10", "11", "10.8 (27.3)"],
+      ["UK 10", "44.5", "11", "12", "11.1 (28.2)"],
+      ["UK 11", "46", "12", "13", "11.4 (29)"],
+    ].map(([size, ...rest]) => ({ size, cells: [size, ...rest] })),
+  },
+  Sweatshirts: {
+    category: "Sweatshirts",
+    caption: "Sweatshirts size guide",
+    columns: APPAREL_COLUMNS,
+    rows: TOP_ROWS(true),
+  },
+  Jeans: {
+    category: "Jeans",
+    caption: "Jeans size guide",
+    columns: WAIST_COLUMNS,
+    rows: WAIST_ROWS,
+  },
+  "Shirts & T-shirts": {
+    category: "Shirts & T-shirts",
+    caption: "Shirts & T-shirts size guide",
+    columns: APPAREL_COLUMNS,
+    rows: TOP_ROWS(true),
+  },
   Outerwear: {
     category: "Outerwear",
     caption: "Outerwear size guide",
@@ -52,17 +114,11 @@ export const SIZE_GUIDES: Record<string, SizeGuide> = {
       { size: "XL", cells: ["XL", "44 (112)", "29 (73.5)", "25 (63.5)"] },
     ],
   },
-  Tees: {
-    category: "Tees",
-    caption: "Tees size guide",
-    columns: ["Size", "Chest", "Length"],
-    rows: [
-      { size: "XS", cells: ["XS", "34 (86)", "26 (66)"] },
-      { size: "S", cells: ["S", "36 (91.5)", "27 (68.5)"] },
-      { size: "M", cells: ["M", "38 (96.5)", "28 (71)"] },
-      { size: "L", cells: ["L", "41 (104)", "29 (73.5)"] },
-      { size: "XL", cells: ["XL", "44 (112)", "30 (76)"] },
-    ],
+  Trousers: {
+    category: "Trousers",
+    caption: "Trousers size guide",
+    columns: WAIST_COLUMNS,
+    rows: WAIST_ROWS,
   },
   Accessories: {
     category: "Accessories",
@@ -77,7 +133,7 @@ export const SIZE_GUIDES: Record<string, SizeGuide> = {
 };
 
 /**
- * Trim + case-insensitively match `category` against the four known guides.
+ * Trim + case-insensitively match `category` against the known guides.
  * Returns the matching guide, or `undefined` for an unrecognized/empty category
  * (the call site decides the fallback). Never throws.
  */

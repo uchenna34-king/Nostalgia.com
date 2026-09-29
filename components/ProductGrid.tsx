@@ -6,12 +6,21 @@ import type { Product } from "@/lib/products";
  * former inline shop-page markup). Shows a friendly empty state when there
  * are no matches for the current search/filter combination.
  */
-export default function ProductGrid({ products }: { products: Product[] }) {
+export default function ProductGrid({
+  products,
+  empty,
+}: {
+  products: Product[];
+  /** Replaces the default no-matches copy — e.g. a section not yet stocked. */
+  empty?: React.ReactNode;
+}) {
   if (products.length === 0) {
     return (
-      <p className="py-20 text-center text-ink-soft">
-        No pieces match your search yet — try adjusting your filters.
-      </p>
+      empty ?? (
+        <p className="py-20 text-center text-ink-soft">
+          No pieces match your search yet — try adjusting your filters.
+        </p>
+      )
     );
   }
 

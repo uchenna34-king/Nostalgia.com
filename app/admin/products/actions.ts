@@ -3,6 +3,11 @@
 import { requireOwner } from "@/lib/admin";
 import { prisma } from "@/lib/db";
 import { revalidatePath } from "next/cache";
+import {
+  categoryByLabel,
+  getSection,
+  isProductDepartment,
+} from "@/lib/taxonomy";
 
 export type ProductActionResult = { ok: true } | { ok: false; error: string };
 
@@ -10,6 +15,8 @@ type ParsedProduct = {
   name: string;
   slug: string;
   category: string;
+  department: string;
+  subcategory: string | null;
   description: string;
   materials: string | null;
   care: string | null;
@@ -51,7 +58,7 @@ function isUniqueViolation(e: unknown): boolean {
 function revalidateStorefront() {
   revalidatePath("/admin/products");
   revalidatePath("/");
-  revalidatePath("/shop");
+  revalidatePath("/shop/[[...slug]]", "page");
   revalidatePath("/product/[slug]", "page");
   revalidatePath("/collections/[slug]", "page");
 }
@@ -61,9 +68,19 @@ function revalidateStorefront() {
 function parseProductInput(fd: FormData): ParsedProduct | null {
   const name = field(fd, "name");
   const slug = field(fd, "slug");
-  const category = field(fd, "category");
   const description = field(fd, "description");
-  if (!name || !slug || !category || !description) return null;
+  if (!name || !slug || !description) return null;
+
+  // Placement must be a real place in lib/taxonomy.ts — the storefront routes
+  // only render what the tree knows, so a typo here would hide the product.
+  const cat = categoryByLabel(field(fd, "category"));
+  if (!cat) return null;
+  const category = cat.label; // canonical casing
+  const department = field(fd, "department") || "unisex";
+  if (!isProductDepartment(department)) return null;
+  const sectionSlug = field(fd, "subcategory");
+  if (sectionSlug && !getSection(cat, sectionSlug)) return null;
+  const subcategory = sectionSlug || null;
 
   const priceNum = Number(field(fd, "price"));
   if (!Number.isFinite(priceNum) || priceNum < 0) return null;
@@ -102,6 +119,8 @@ function parseProductInput(fd: FormData): ParsedProduct | null {
     name,
     slug,
     category,
+    department,
+    subcategory,
     description,
     materials,
     care,
@@ -127,6 +146,8 @@ export async function createProduct(
         slug: input.slug,
         price: input.price,
         category: input.category,
+        department: input.department,
+        subcategory: input.subcategory,
         description: input.description,
         materials: input.materials,
         care: input.care,
@@ -172,6 +193,8 @@ export async function updateProduct(
         slug: input.slug,
         price: input.price,
         category: input.category,
+        department: input.department,
+        subcategory: input.subcategory,
         description: input.description,
         materials: input.materials,
         care: input.care,

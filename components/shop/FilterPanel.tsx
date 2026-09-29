@@ -4,24 +4,29 @@ import { useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { SORT_OPTIONS } from "@/lib/catalog";
 
-/** Standard apparel sizes reused across the catalog (D-04). Products using
- * numeric or "One Size" sizing simply won't match a size filter selection —
- * consistent with "a known size set" rather than a full dynamic facet. */
-const SIZES = ["XS", "S", "M", "L", "XL"];
-
 /**
- * Category/size/price/sort filter controls (D-04), writing live to the URL
- * on every change with no Apply button (D-02) and always resetting `?page=1`
+ * Size/price/sort filter controls (D-04), writing live to the URL on every
+ * change with no Apply button (D-02) and always resetting `?page=1`
  * (Pitfall 5). Sidebar on desktop, collapsible panel on mobile (D-05). Reads
  * `useSearchParams`, so the page wraps this in <Suspense> (Pitfall 1).
+ *
+ * Where you are in the tree (department / category / section) is the URL path,
+ * not a filter — see components/shop/ShopNav.tsx. `sizes` is the in-stock size
+ * facet for that place, so shoes offer UK sizes and jeans offer waists.
+ * `children` renders above the filters (the category tree on desktop).
  */
-export default function FilterPanel({ categories }: { categories: string[] }) {
+export default function FilterPanel({
+  sizes,
+  children,
+}: {
+  sizes: string[];
+  children?: React.ReactNode;
+}) {
   const searchParams = useSearchParams();
   const { replace } = useRouter();
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
 
-  const activeCategory = searchParams.get("category") ?? "All";
   const activeSize = searchParams.get("size") ?? "";
   const activeSort = searchParams.get("sort") ?? "newest";
   const priceParam = searchParams.get("price") ?? "";
@@ -49,10 +54,10 @@ export default function FilterPanel({ categories }: { categories: string[] }) {
   }
 
   const hasActiveFilters = Boolean(
-    (searchParams.get("category") && activeCategory !== "All") ||
-      activeSize ||
-      searchParams.get("price") ||
-      searchParams.get("q"),
+    searchParams.get("category") ||
+    activeSize ||
+    searchParams.get("price") ||
+    searchParams.get("q"),
   );
 
   function clearFilters() {
@@ -67,44 +72,27 @@ export default function FilterPanel({ categories }: { categories: string[] }) {
 
   const body = (
     <div className="space-y-8">
-      <div>
-        <p className="eyebrow mb-3">Category</p>
-        <div className="flex flex-col gap-1.5">
-          {categories.map((c) => (
-            <button
-              key={c}
-              onClick={() => setParam("category", c === "All" ? null : c)}
-              className={`w-fit text-left text-sm transition-colors ${
-                c === activeCategory
-                  ? "font-medium text-ink underline decoration-sepia decoration-2 underline-offset-4"
-                  : "text-ink-soft hover:text-ink"
-              }`}
-            >
-              {c}
-            </button>
-          ))}
+      {sizes.length > 0 && (
+        <div>
+          <p className="eyebrow mb-3">Size</p>
+          <div className="flex flex-wrap gap-2">
+            {sizes.map((s) => (
+              <button
+                key={s}
+                onClick={() => setParam("size", activeSize === s ? null : s)}
+                aria-pressed={activeSize === s}
+                className={`min-w-11 border px-3 py-2 text-sm transition-colors ${
+                  activeSize === s
+                    ? "border-ink bg-ink text-cream"
+                    : "border-ink/25 text-ink hover:border-ink"
+                }`}
+              >
+                {s}
+              </button>
+            ))}
+          </div>
         </div>
-      </div>
-
-      <div>
-        <p className="eyebrow mb-3">Size</p>
-        <div className="flex flex-wrap gap-2">
-          {SIZES.map((s) => (
-            <button
-              key={s}
-              onClick={() => setParam("size", activeSize === s ? null : s)}
-              aria-pressed={activeSize === s}
-              className={`min-w-11 border px-3 py-2 text-sm transition-colors ${
-                activeSize === s
-                  ? "border-ink bg-ink text-cream"
-                  : "border-ink/25 text-ink hover:border-ink"
-              }`}
-            >
-              {s}
-            </button>
-          ))}
-        </div>
-      </div>
+      )}
 
       <div>
         <p className="eyebrow mb-3">Price</p>
@@ -178,7 +166,10 @@ export default function FilterPanel({ categories }: { categories: string[] }) {
       </div>
 
       {/* Desktop sidebar */}
-      <aside className="hidden w-56 shrink-0 lg:block">{body}</aside>
+      <aside className="hidden w-56 shrink-0 space-y-12 lg:block">
+        {children}
+        {body}
+      </aside>
     </>
   );
 }

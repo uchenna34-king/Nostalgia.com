@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useCart } from "@/context/CartContext";
 import type { Product } from "@/lib/products";
-import { getSizeGuide } from "@/lib/size-guides";
+import { FALLBACK_SIZE_GUIDE, getSizeGuide } from "@/lib/size-guides";
 import SizeGuideModal from "@/components/SizeGuideModal";
 import { trackEvent } from "@/lib/analytics";
 
@@ -12,7 +12,7 @@ export default function AddToCart({ product }: { product: Product }) {
 
   // Always resolve a renderable guide (D-07 safe fallback): unknown categories
   // fall back to the Tees chart rather than hiding the trigger or crashing.
-  const sizeGuide = getSizeGuide(product.category) ?? getSizeGuide("Tees")!;
+  const sizeGuide = getSizeGuide(product.category) ?? getSizeGuide(FALLBACK_SIZE_GUIDE)!;
   const [guideOpen, setGuideOpen] = useState(false);
 
   const allSoldOut =

@@ -218,13 +218,37 @@ loses the line return, which is the other half of "hard to read".
   laid over a product image. Never used for anything read as a sentence.
 
 **Wordmark sizing is not a ramp step.** `components/Wordmark.tsx` is sized per
-context through its `className` (1.2–1.8rem in the nav, stepping down on the
+context through its `className` (1.05–1.8rem in the nav, stepping down on the
 narrowest phones so the lockup and the icon cluster both fit a 320px row;
 1.7rem in the footer,
 `clamp()` at display scale) because the lockup has to optically match whatever
 surface it sits on. Literal sizes on the Wordmark are correct by design.
 
 ### Named Rules
+**The Single-Cluster Rule.** On phones the bar carries the menu button on the
+left, the wordmark on the true centre line, and every other control — account,
+theme, wishlist, cart — in one cluster on the right. The theme switch belongs
+with the commerce controls, not beside the menu button: a visitor reaches for
+the right-hand cluster when they want to *do* something, and the left button
+only opens navigation. The two flanking groups share `flex-1 basis-0`, so the
+wordmark stays geometrically centred however wide the right cluster grows; the
+cost is more visible air on the left than the right, which is accepted because
+true centring beats equal air for a mark this prominent.
+
+**The Department-First Rule.** The shop is a tree, not a filter list:
+Women / Men, then category, then section (`/shop/men/shoes/running`), defined
+once in `lib/taxonomy.ts` and read by the header menus, the shop pages, the
+admin form and the sitemap. This follows ASOS and SSENSE, both of which split by
+department before anything else, and Baymard's finding that trees deeper than
+three levels drive abandonment. Size, price and sort stay filters on whichever
+page you are on; they never become branches. Unisex pieces appear in both
+departments.
+
+**The Solid Menu Rule.** The header bar is frosted glass; anything that opens
+out of it (the Women / Men panels, the phone menu) is solid `bg-cream`. A long
+list of links over page copy turns into text-on-text, which fails the Contrast
+Rule however good the blur looks.
+
 **The Wordmark Rule.** "Nostalgia" is always set through `components/Wordmark.tsx`,
 never as loose text. It is the loudest element on any page, and nothing competes with
 it — which is what licenses the quiet, sentence-case controls below.

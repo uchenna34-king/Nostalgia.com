@@ -1,5 +1,15 @@
 import type { MetadataRoute } from "next";
 import { prisma } from "@/lib/db";
+import { CATEGORIES, DEPARTMENTS, shopHref } from "@/lib/taxonomy";
+
+// Every place in the shop tree: departments, their categories, and sections.
+const SHOP_PATHS = DEPARTMENTS.flatMap((d) => [
+  shopHref(d.slug),
+  ...CATEGORIES.flatMap((c) => [
+    shopHref(d.slug, c.slug),
+    ...c.sections.map((s) => shopHref(d.slug, c.slug, s.slug)),
+  ]),
+]);
 
 // Absolute base resolved from NEXTAUTH_URL (never the request Origin, so crawl
 // URLs can't be poisoned via a forged Host header) — matches the checkout route.
@@ -14,6 +24,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   return [
     { url: BASE, changeFrequency: "weekly", priority: 1 },
     { url: `${BASE}/shop`, changeFrequency: "weekly", priority: 0.9 },
+    ...SHOP_PATHS.map((path) => ({
+      url: `${BASE}${path}`,
+      changeFrequency: "weekly" as const,
+      priority: 0.7,
+    })),
     { url: `${BASE}/shipping`, changeFrequency: "yearly", priority: 0.4 },
     { url: `${BASE}/returns`, changeFrequency: "yearly", priority: 0.4 },
     ...products.map((p) => ({

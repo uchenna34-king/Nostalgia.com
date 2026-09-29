@@ -10,7 +10,9 @@ type Seed = {
   slug: string;
   name: string;
   price: number; // cents
-  category: string;
+  category: string; // a lib/taxonomy.ts category label
+  department?: "women" | "men" | "unisex"; // defaults to unisex
+  subcategory?: string; // a section slug within the category
   description: string;
   sizes: string[];
   featured?: boolean;
@@ -79,7 +81,8 @@ const products: Seed[] = [
     slug: "vintage-box-tee",
     name: "Vintage Box Tee",
     price: 6000,
-    category: "Tees",
+    category: "Shirts & T-shirts",
+    subcategory: "t-shirts",
     description:
       "Heavyweight box-cut tee, garment-dyed to a lived-in sand. The everyday foundation of the house.",
     sizes: ["XS", "S", "M", "L", "XL"],
@@ -91,7 +94,8 @@ const products: Seed[] = [
     slug: "grain-logo-tee",
     name: "Grain Logo Tee",
     price: 6500,
-    category: "Tees",
+    category: "Shirts & T-shirts",
+    subcategory: "t-shirts",
     description:
       "Ink-black tee with a grain-textured Nostalgia serif logo. Screen-printed by hand.",
     sizes: ["XS", "S", "M", "L", "XL"],
@@ -100,7 +104,8 @@ const products: Seed[] = [
     slug: "nostalgia-hoodie",
     name: "Nostalgia Hoodie",
     price: 13000,
-    category: "Tees",
+    category: "Sweatshirts",
+    subcategory: "graphic",
     description:
       "Heavyweight loopback hoodie in cocoa. Oversized hood, embroidered wordmark, brushed interior.",
     sizes: ["S", "M", "L", "XL"],
@@ -112,7 +117,7 @@ const products: Seed[] = [
     slug: "pleated-trouser",
     name: "Pleated Trouser",
     price: 15000,
-    category: "Bottoms",
+    category: "Trousers",
     description:
       "Single-pleat wool-blend trouser with a tapered leg. Sits high, drapes clean, dresses either way.",
     sizes: ["28", "30", "32", "34", "36"],
@@ -138,6 +143,198 @@ const products: Seed[] = [
     featured: true,
     materials: "Vegetable-tanned full-grain leather.",
     care: "Wipe clean with a dry cloth. Condition leather occasionally.",
+  },
+
+  // --- Shoes ---------------------------------------------------------------
+  {
+    slug: "tempo-road-runner",
+    name: "Tempo Road Runner",
+    price: 18000,
+    category: "Shoes",
+    department: "men",
+    subcategory: "running",
+    description:
+      "A neutral daily trainer with a responsive foam midsole and an engineered-mesh upper that breathes over long miles.",
+    sizes: ["UK 7", "UK 8", "UK 9", "UK 10", "UK 11"],
+    featured: true,
+    materials: "Engineered mesh upper, EVA-blend midsole, carbon rubber outsole.",
+    care: "Wipe clean. Air dry away from direct heat; never machine wash.",
+  },
+  {
+    slug: "stride-mesh-trainer",
+    name: "Stride Mesh Trainer",
+    price: 16500,
+    category: "Shoes",
+    department: "women",
+    subcategory: "running",
+    description:
+      "Lightweight tempo shoe with a rocker sole and a sock-fit collar. Quick underfoot, cushioned where it counts.",
+    sizes: ["UK 5", "UK 6", "UK 7", "UK 8"],
+  },
+  {
+    slug: "archive-oxford",
+    name: "Archive Oxford",
+    price: 32000,
+    category: "Shoes",
+    department: "men",
+    subcategory: "corporate",
+    description:
+      "Closed-lace oxford in polished calf on a Goodyear-welted leather sole. The shoe the suit was cut for.",
+    sizes: ["UK 7", "UK 8", "UK 9", "UK 10", "UK 11"],
+    materials: "Full-grain calf upper, leather lining, Goodyear-welted leather sole.",
+    care: "Polish regularly. Rest a day between wears; store with cedar trees.",
+  },
+  {
+    slug: "city-penny-loafer",
+    name: "City Penny Loafer",
+    price: 28000,
+    category: "Shoes",
+    department: "women",
+    subcategory: "corporate",
+    description:
+      "A hand-sewn penny loafer in burnished brown with a stacked heel. Office in the week, everywhere at the weekend.",
+    sizes: ["UK 5", "UK 6", "UK 7", "UK 8"],
+  },
+  {
+    slug: "washed-canvas-low",
+    name: "Washed Canvas Low",
+    price: 9500,
+    category: "Shoes",
+    subcategory: "canvas",
+    description:
+      "Vulcanised low-top in stone-washed canvas with a gum sole. Softens and fades like a favourite pair of jeans.",
+    sizes: ["UK 5", "UK 6", "UK 7", "UK 8", "UK 9", "UK 10"],
+  },
+
+  // --- Sweatshirts ---------------------------------------------------------
+  {
+    slug: "loopback-crewneck",
+    name: "Loopback Crewneck",
+    price: 12000,
+    category: "Sweatshirts",
+    subcategory: "plain",
+    description:
+      "Heavyweight loopback crew with a raglan sleeve and ribbed side panels. No branding, nothing to date it.",
+    sizes: ["XS", "S", "M", "L", "XL"],
+    materials: "Heavyweight 100% loopback cotton, 440gsm.",
+    care: "Machine wash cold, inside out. Dry flat.",
+  },
+  {
+    slug: "brushed-fleece-hoodie",
+    name: "Brushed Fleece Hoodie",
+    price: 13000,
+    category: "Sweatshirts",
+    department: "women",
+    subcategory: "plain",
+    description:
+      "A cropped, double-lined hood on brushed fleece. Clean front, kangaroo pocket, dropped shoulder.",
+    sizes: ["XS", "S", "M", "L"],
+  },
+  {
+    slug: "varsity-graphic-crew",
+    name: "Varsity Graphic Crew",
+    price: 14000,
+    category: "Sweatshirts",
+    department: "men",
+    subcategory: "graphic",
+    description:
+      "Collegiate crewneck with a cracked flock-print crest across the chest, garment-washed for a worn-in hand.",
+    sizes: ["S", "M", "L", "XL"],
+  },
+
+  // --- Jeans ---------------------------------------------------------------
+  {
+    slug: "selvedge-straight-jean",
+    name: "Selvedge Straight Jean",
+    price: 21000,
+    category: "Jeans",
+    department: "men",
+    subcategory: "denim",
+    description:
+      "Raw Japanese selvedge in a straight, mid-rise cut. Fades to your life; the first soak is the only rule.",
+    sizes: ["28", "30", "32", "34", "36"],
+    featured: true,
+    materials: "14oz raw selvedge denim, copper rivets, button fly.",
+    care: "Wear hard, wash rarely. Cold soak inside out; hang dry.",
+  },
+  {
+    slug: "high-rise-wide-jean",
+    name: "High-Rise Wide Jean",
+    price: 19000,
+    category: "Jeans",
+    department: "women",
+    subcategory: "denim",
+    description:
+      "High waist, wide leg, full length in a mid-blue rinse. Rigid cotton that moulds to you within a week.",
+    sizes: ["28", "30", "32"],
+  },
+  {
+    slug: "cord-five-pocket",
+    name: "Cord Five-Pocket",
+    price: 17000,
+    category: "Jeans",
+    department: "men",
+    subcategory: "non-denim",
+    description:
+      "An eight-wale corduroy cut on our straight jean block, in tobacco. The jean for the days denim feels too loud.",
+    sizes: ["30", "32", "34", "36"],
+  },
+  {
+    slug: "twill-carpenter-jean",
+    name: "Twill Carpenter Jean",
+    price: 16000,
+    category: "Jeans",
+    department: "women",
+    subcategory: "non-denim",
+    description:
+      "Relaxed carpenter jean in ecru cotton twill with a hammer loop and utility pocket.",
+    sizes: ["28", "30", "32"],
+  },
+
+  // --- Shirts & T-shirts ---------------------------------------------------
+  {
+    slug: "oxford-button-down",
+    name: "Oxford Button-Down",
+    price: 15000,
+    category: "Shirts & T-shirts",
+    department: "men",
+    subcategory: "shirts",
+    description:
+      "An unlined oxford-cloth button-down with a soft roll to the collar. Better for every wash.",
+    sizes: ["S", "M", "L", "XL"],
+  },
+  {
+    slug: "poplin-tunic-shirt",
+    name: "Poplin Tunic Shirt",
+    price: 14000,
+    category: "Shirts & T-shirts",
+    department: "women",
+    subcategory: "shirts",
+    description:
+      "Crisp cotton poplin with a band collar and a long, split-hem body. Wears tucked, open or belted.",
+    sizes: ["XS", "S", "M", "L"],
+  },
+  {
+    slug: "atelier-crest-tee",
+    name: "Atelier Crest Tee",
+    price: 22000,
+    category: "Shirts & T-shirts",
+    department: "men",
+    subcategory: "designer-t-shirts",
+    description:
+      "A designer-label tee in dense jersey with a tonal embroidered crest. Authenticated, with original tags.",
+    sizes: ["S", "M", "L", "XL"],
+  },
+  {
+    slug: "monogram-jersey-tee",
+    name: "Monogram Jersey Tee",
+    price: 24000,
+    category: "Shirts & T-shirts",
+    department: "women",
+    subcategory: "designer-t-shirts",
+    description:
+      "Fitted designer tee with a jacquard monogram knitted through the jersey. Authenticated, with original tags.",
+    sizes: ["XS", "S", "M", "L"],
   },
 ];
 
@@ -252,6 +449,8 @@ async function main() {
         name: p.name,
         price: p.price,
         category: p.category,
+        department: p.department ?? "unisex",
+        subcategory: p.subcategory ?? null,
         description: p.description,
         sizes: JSON.stringify(p.sizes),
         materials: p.materials,

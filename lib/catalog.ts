@@ -67,7 +67,12 @@ export function parsePriceRange(raw: string | undefined): PriceRange {
 
 export type CatalogFilterParams = {
   q?: string;
+  /** Product.department values to include — e.g. ["men", "unisex"]. */
+  departments?: string[];
+  /** Category display label (what Product.category stores). */
   category?: string;
+  /** Section slug within the category (Product.subcategory). */
+  subcategory?: string;
   size?: string;
   minPrice?: number;
   maxPrice?: number;
@@ -92,7 +97,8 @@ export type CatalogFilterParams = {
 export function buildProductWhere(
   params: CatalogFilterParams,
 ): Prisma.ProductWhereInput {
-  const { q, category, size, minPrice, maxPrice, collection } = params;
+  const { q, departments, category, subcategory, size, minPrice, maxPrice, collection } =
+    params;
 
   const searchClause: Prisma.ProductWhereInput = q
     ? {
@@ -104,8 +110,16 @@ export function buildProductWhere(
       }
     : {};
 
+  const departmentClause: Prisma.ProductWhereInput = departments?.length
+    ? { department: { in: departments } }
+    : {};
+
   const categoryClause: Prisma.ProductWhereInput =
     category && category !== "All" ? { category } : {};
+
+  const subcategoryClause: Prisma.ProductWhereInput = subcategory
+    ? { subcategory }
+    : {};
 
   // Stock-aware, relational size filter (D-09): a `?size=M` filter returns only
   // products that offer M *in stock*. Replaces the old SQLite JSON quote-guard
@@ -134,7 +148,9 @@ export function buildProductWhere(
   return {
     AND: [
       searchClause,
+      departmentClause,
       categoryClause,
+      subcategoryClause,
       sizeClause,
       minPriceClause,
       maxPriceClause,

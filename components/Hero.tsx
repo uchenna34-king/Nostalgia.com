@@ -84,7 +84,7 @@ export default function Hero() {
         </h1>
 
         <p className="mt-8 text-[11px] font-medium uppercase tracking-[0.3em] text-light/75">
-          History in the making
+          History in the making.
         </p>
 
         <p className="mt-9 max-w-[52ch] text-pretty text-[16px] leading-[1.75] text-light/90">

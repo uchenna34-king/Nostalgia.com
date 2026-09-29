@@ -33,6 +33,8 @@ export default async function EditProductPage({
         slug: product.slug,
         price: product.price,
         category: product.category,
+        department: product.department,
+        subcategory: product.subcategory,
         description: product.description,
         materials: product.materials,
         care: product.care,

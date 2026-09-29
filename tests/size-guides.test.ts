@@ -1,14 +1,14 @@
 import { describe, expect, it } from "vitest";
-import { SIZE_GUIDE_CATEGORIES, getSizeGuide } from "@/lib/size-guides";
+import { FALLBACK_SIZE_GUIDE, SIZE_GUIDE_CATEGORIES, getSizeGuide } from "@/lib/size-guides";
+import { CATEGORIES } from "@/lib/taxonomy";
 
 describe("SIZE_GUIDE_CATEGORIES", () => {
-  it("is the four size-guide categories in D-05 order", () => {
-    expect(SIZE_GUIDE_CATEGORIES).toEqual([
-      "Outerwear",
-      "Knitwear",
-      "Tees",
-      "Accessories",
-    ]);
+  it("has one guide per taxonomy category, in menu order", () => {
+    expect([...SIZE_GUIDE_CATEGORIES]).toEqual(CATEGORIES.map((c) => c.label));
+  });
+
+  it("falls back to a guide that exists", () => {
+    expect(getSizeGuide(FALLBACK_SIZE_GUIDE)).toBeDefined();
   });
 });
 

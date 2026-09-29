@@ -1,3 +1,4 @@
+import type { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import {
   PAGE_SIZE,
@@ -8,6 +9,7 @@ import {
   parsePriceRange,
 } from "@/lib/catalog";
 import { getRatingSummaries, type RatingSummary } from "@/lib/reviews";
+import { compareSizes, departmentScope, type DepartmentSlug } from "@/lib/taxonomy";
 
 export { PAGE_SIZE };
 
@@ -19,6 +21,8 @@ export type Product = {
   name: string;
   price: number; // cents
   category: string;
+  department: string;
+  subcategory: string | null;
   description: string;
   images: string[];
   sizes: string[];
@@ -35,6 +39,8 @@ function deserialize(row: {
   name: string;
   price: number;
   category: string;
+  department: string;
+  subcategory: string | null;
   description: string;
   sizes: string;
   featured: boolean;
@@ -110,7 +116,10 @@ export async function getCategories(): Promise<string[]> {
 
 export type CatalogParams = {
   q?: string;
+  /** Shopper-facing department; expands to [dept, "unisex"]. */
+  department?: DepartmentSlug;
   category?: string;
+  subcategory?: string;
   size?: string;
   price?: string;
   sort?: string;
@@ -124,6 +133,9 @@ export type CatalogResult = {
   totalPages: number;
   page: number;
   categories: string[];
+  /** In-stock sizes available at this location, before the size filter is
+   * applied — so choosing a size never hides the other choices. */
+  sizes: string[];
 };
 
 /**
@@ -135,9 +147,17 @@ export async function getCatalog(params: CatalogParams): Promise<CatalogResult> 
   const { minPrice, maxPrice } = parsePriceRange(params.price);
   const page = parsePage(params.page);
 
-  const where = buildProductWhere({
+  const scope = {
     q: params.q,
+    departments: params.department ? departmentScope(params.department) : undefined,
     category: params.category,
+    subcategory: params.subcategory,
+    minPrice,
+    maxPrice,
+    collection: params.collection,
+  };
+  const where = buildProductWhere({
+    ...scope,
     size: params.size,
     minPrice,
     maxPrice,
@@ -148,9 +168,10 @@ export async function getCatalog(params: CatalogParams): Promise<CatalogResult> 
   // The row query must run against the *clamped* page (meta.skip/meta.take),
   // not the raw requested page — otherwise an over-range page returns an
   // empty result set while still reporting a valid, in-range page/totalPages.
-  const [total, categories] = await Promise.all([
+  const [total, categories, sizes] = await Promise.all([
     prisma.product.count({ where }),
     getCategories(),
+    getSizeFacet(buildProductWhere(scope)),
   ]);
 
   const meta = paginationMeta(total, page, PAGE_SIZE);
@@ -172,7 +193,21 @@ export async function getCatalog(params: CatalogParams): Promise<CatalogResult> 
     totalPages: meta.totalPages,
     page: meta.page,
     categories,
+    sizes,
   };
+}
+
+/**
+ * Distinct in-stock sizes across the products matching `where`, ordered
+ * letters → numbers → the rest. One indexed query, bounded by the size table.
+ */
+async function getSizeFacet(where: Prisma.ProductWhereInput): Promise<string[]> {
+  const rows = await prisma.productSizeStock.findMany({
+    where: { stock: { gt: 0 }, product: where },
+    select: { size: true },
+    distinct: ["size"],
+  });
+  return rows.map((r) => r.size).sort(compareSizes);
 }
 
 export type CollectionSummary = {

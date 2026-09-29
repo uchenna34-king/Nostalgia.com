@@ -10,6 +10,7 @@ import {
   updateProduct,
   type ProductActionResult,
 } from "@/app/admin/products/actions";
+import { CATEGORIES, categoryByLabel } from "@/lib/taxonomy";
 
 export type ProductFormInitial = {
   id?: string;
@@ -17,6 +18,8 @@ export type ProductFormInitial = {
   slug?: string;
   price?: number;
   category?: string;
+  department?: string;
+  subcategory?: string | null;
   description?: string;
   materials?: string | null;
   care?: string | null;
@@ -44,7 +47,14 @@ export default function ProductForm({
   const [name, setName] = useState(initial?.name ?? "");
   const [slug, setSlug] = useState(initial?.slug ?? "");
   const [price, setPrice] = useState(String(initial?.price ?? ""));
-  const [category, setCategory] = useState(initial?.category ?? "");
+  // A legacy category outside the taxonomy starts blank, so saving forces a
+  // real placement rather than silently keeping an unreachable one.
+  const [category, setCategory] = useState(
+    categoryByLabel(initial?.category)?.label ?? "",
+  );
+  const [department, setDepartment] = useState(initial?.department ?? "unisex");
+  const [subcategory, setSubcategory] = useState(initial?.subcategory ?? "");
+  const sections = categoryByLabel(category)?.sections ?? [];
   const [description, setDescription] = useState(initial?.description ?? "");
   const [materials, setMaterials] = useState(initial?.materials ?? "");
   const [care, setCare] = useState(initial?.care ?? "");
@@ -67,6 +77,8 @@ export default function ProductForm({
     fd.set("slug", slug);
     fd.set("price", price);
     fd.set("category", category);
+    fd.set("department", department);
+    fd.set("subcategory", subcategory);
     fd.set("description", description);
     fd.set("materials", materials);
     fd.set("care", care);
@@ -143,14 +155,67 @@ export default function ProductForm({
               />
             </div>
           </div>
-          <div>
-            <label className={labelClass}>Category</label>
-            <input
-              className={inputClass}
-              value={category}
-              onChange={(e) => setCategory(e.target.value)}
-              required
-            />
+          <div className="grid grid-cols-3 gap-4">
+            <div>
+              <label htmlFor="pf-department" className={labelClass}>
+                Department
+              </label>
+              <select
+                id="pf-department"
+                className={inputClass}
+                value={department}
+                onChange={(e) => setDepartment(e.target.value)}
+              >
+                <option value="unisex">Women &amp; Men</option>
+                <option value="women">Women</option>
+                <option value="men">Men</option>
+              </select>
+            </div>
+            <div>
+              <label htmlFor="pf-category" className={labelClass}>
+                Category
+              </label>
+              <select
+                id="pf-category"
+                className={inputClass}
+                value={category}
+                onChange={(e) => {
+                  setCategory(e.target.value);
+                  setSubcategory(""); // sections belong to one category
+                }}
+                required
+              >
+                <option value="" disabled>
+                  Choose…
+                </option>
+                {CATEGORIES.map((c) => (
+                  <option key={c.slug} value={c.label}>
+                    {c.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label htmlFor="pf-section" className={labelClass}>
+                Section
+              </label>
+              <select
+                id="pf-section"
+                className={inputClass}
+                value={subcategory}
+                onChange={(e) => setSubcategory(e.target.value)}
+                disabled={sections.length === 0}
+              >
+                <option value="">
+                  {sections.length ? "Whole category" : "No sections"}
+                </option>
+                {sections.map((s) => (
+                  <option key={s.slug} value={s.slug}>
+                    {s.label}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
           <div>
             <label className={labelClass}>Description</label>

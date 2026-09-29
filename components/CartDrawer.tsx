@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useCart } from "@/context/CartContext";
+import CheckoutButton from "@/components/CheckoutButton";
 import { formatPrice } from "@/lib/products";
 
 export default function CartDrawer() {
@@ -114,13 +115,12 @@ export default function CartDrawer() {
               >
                 View bag
               </Link>
-              <Link
-                href="/checkout"
-                onClick={closeDrawer}
+              <CheckoutButton
+                onNavigate={closeDrawer}
                 className="btn-primary w-full"
               >
                 Checkout
-              </Link>
+              </CheckoutButton>
             </div>
           </>
         )}

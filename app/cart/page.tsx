@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useCart } from "@/context/CartContext";
+import CheckoutButton from "@/components/CheckoutButton";
 import { formatPrice } from "@/lib/products";
 import { FREE_SHIPPING_THRESHOLD } from "@/lib/shipping";
 
@@ -99,9 +100,9 @@ export default function CartPage() {
               <span className="font-serif">Total</span>
               <span className="font-serif">{formatPrice(subtotal)}</span>
             </div>
-            <Link href="/checkout" className="btn-primary mt-6 w-full">
+            <CheckoutButton className="btn-primary mt-6 w-full">
               Proceed to checkout
-            </Link>
+            </CheckoutButton>
             <Link
               href="/shop"
               className="mt-3 block text-center text-xs uppercase tracking-[0.18em] text-ink-soft underline"

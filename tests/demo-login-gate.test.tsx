@@ -111,7 +111,8 @@ describe("SignInForm", () => {
     expect(
       screen.queryByRole("button", { name: /Sign in as store owner/i }),
     ).toBeNull();
-    expect(screen.queryByText("or")).toBeNull();
+    // The one divider separates Google from email + password.
+    expect(screen.getByText("or")).toBeDefined();
     // No element whose text mentions demo survives.
     expect(screen.queryByText(/demo/i)).toBeNull();
   });
@@ -132,12 +133,20 @@ describe("SignInForm", () => {
     ).toBeDefined();
   });
 
-  it("renders the misconfiguration line when neither provider is enabled", () => {
-    const { container } = render(
-      <SignInForm googleEnabled={false} demoEnabled={false} callbackUrl="/" />,
+  it("always offers email + password sign-in and a link to register", () => {
+    render(
+      <SignInForm googleEnabled={false} demoEnabled={false} callbackUrl="/checkout" />,
     );
-    expect(container.textContent?.trim().length).toBeGreaterThan(0);
-    expect(screen.getByText(/not configured/i)).toBeDefined();
+    expect(screen.getByLabelText("Email")).toBeDefined();
+    expect(screen.getByLabelText("Password")).toBeDefined();
+    expect(screen.getByRole("button", { name: "Sign in" })).toBeDefined();
+    expect(
+      screen
+        .getByRole("link", { name: "Create an account" })
+        .getAttribute("href"),
+    ).toBe("/register?callbackUrl=%2Fcheckout");
+    // No Google, no divider.
+    expect(screen.queryByText("or")).toBeNull();
   });
 
   it("never renders the owner email as visible text", () => {

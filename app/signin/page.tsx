@@ -2,13 +2,15 @@ import Link from "next/link";
 import SignInForm from "@/components/SignInForm";
 import { googleEnabled, demoLoginEnabled } from "@/lib/auth";
 import { OWNER_EMAIL } from "@/lib/admin";
+import { safeCallbackUrl } from "@/lib/registration-rules";
 
 export default function SignInPage({
   searchParams,
 }: {
   searchParams: { callbackUrl?: string };
 }) {
-  const callbackUrl = searchParams.callbackUrl ?? "/";
+  // Same-site paths only: the password form navigates to this itself.
+  const callbackUrl = safeCallbackUrl(searchParams.callbackUrl);
 
   return (
     <main className="container-x flex min-h-[70vh] flex-col items-center justify-center py-16 text-center">

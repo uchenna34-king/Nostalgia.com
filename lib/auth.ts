@@ -4,17 +4,14 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import { prisma } from "@/lib/db";
 import { buildProviderFlags } from "@/lib/auth-flags";
+import { burnPasswordCheck, verifyPassword } from "@/lib/password";
+import { normalizeEmail, PASSWORD_MAX } from "@/lib/registration-rules";
 
 const { hasGoogle, allowDemoLogin } = buildProviderFlags(process.env);
 
-if (!hasGoogle && !allowDemoLogin) {
-  console.warn(
-    "[auth] No sign-in provider is configured: GOOGLE_CLIENT_ID/GOOGLE_CLIENT_SECRET are absent and ALLOW_DEMO_LOGIN is not the exact string \"true\". /signin will render with no provider buttons.",
-  );
-}
-
 /**
- * Google OAuth is registered when both GOOGLE_CLIENT_ID and
+ * Email + password sign-in is always registered. Google OAuth is registered
+ * when both GOOGLE_CLIENT_ID and
  * GOOGLE_CLIENT_SECRET are present. The demo credentials provider is
  * registered only when ALLOW_DEMO_LOGIN holds the exact string "true".
  *
@@ -32,6 +29,38 @@ export const authOptions: NextAuthOptions = {
   secret: process.env.NEXTAUTH_SECRET,
   pages: { signIn: "/signin" },
   providers: [
+    // Email + password, for accounts created at /register. Always on: the
+    // account only exists once its email was verified (lib/registration.ts),
+    // so this can't be used to sign in as an address the person doesn't own.
+    CredentialsProvider({
+      id: "password",
+      name: "Email and password",
+      credentials: {
+        email: { label: "Email", type: "email" },
+        password: { label: "Password", type: "password" },
+      },
+      async authorize(credentials) {
+        const email = normalizeEmail(credentials?.email ?? "");
+        const password = credentials?.password ?? "";
+        if (!email || !password || password.length > PASSWORD_MAX) return null;
+
+        const user = await prisma.user.findFirst({
+          where: { email: { equals: email, mode: "insensitive" } },
+        });
+        if (!user?.passwordHash) {
+          await burnPasswordCheck(password);
+          return null;
+        }
+        if (!(await verifyPassword(password, user.passwordHash))) return null;
+
+        return {
+          id: user.id,
+          email: user.email,
+          name: user.name,
+          image: user.image,
+        };
+      },
+    }),
     ...(hasGoogle
       ? [
           GoogleProvider({

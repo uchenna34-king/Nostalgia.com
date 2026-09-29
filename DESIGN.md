@@ -162,6 +162,12 @@ but all resolve to neutrals. Dark mode is the same system reversed.
 on a white page, white type on black), by weight of grey, and by scale — never by
 hue. Photography is darkened with black scrims (`shade`), never tinted.
 
+**Third-party marks keep their own colours.** The one exception to the rule
+above: the footer's payment marks (Visa, Mastercard, Amex, PayPal, Apple Pay,
+Google Pay) are drawn in each network's official colours, on white card chips so
+they read the same in light and dark mode (owner decision, 2026-09-29). The
+Google mark on the sign-in button follows the same principle.
+
 ## Typography
 
 **Display Font:** Bodoni Moda (with Didot, Georgia, serif fallback), loaded as

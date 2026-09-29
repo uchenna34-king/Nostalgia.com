@@ -103,11 +103,10 @@ export default function Footer() {
         </div>
       </div>
 
-      {/* Payment row — the real network marks, monochrome so the footer stays
-          one material (see components/PaymentMarks.tsx for why they are not
-          full-colour). The bordered chips that used to sit here existed only
-          to give the *text* labels a container; drawn marks read cleanly on
-          the bare ground and drop a stray 3px radius the system doesn't use. */}
+      {/* Payment row — the real network marks in their official colours on
+          white card chips, identical in light and dark mode (see
+          components/PaymentMarks.tsx and DESIGN.md "Third-party marks keep
+          their own colours"). */}
       <div className="border-t border-ink/12">
         <div className="container-x py-4">
           <PaymentMarks />

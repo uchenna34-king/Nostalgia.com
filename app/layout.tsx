@@ -5,6 +5,7 @@ import Footer from "@/components/Footer";
 import AppFrame from "@/components/AppFrame";
 import GlassMotion from "@/components/GlassMotion";
 import { buildProviderFlags } from "@/lib/auth-flags";
+import { SESSION_HINT_SCRIPT } from "@/lib/site-gate";
 import "./globals.css";
 
 // Read from the flags directly rather than lib/auth, so the root layout doesn't
@@ -42,6 +43,9 @@ export default function RootLayout({
     >
       <head>
         <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
+        {/* Same before-paint trick for the sign-in gate: hides the gate that is
+            in the server HTML for browsers that were signed in last time. */}
+        <script dangerouslySetInnerHTML={{ __html: SESSION_HINT_SCRIPT }} />
       </head>
       <body className="min-h-screen">
         <GlassMotion />

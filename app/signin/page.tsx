@@ -1,4 +1,3 @@
-import Link from "next/link";
 import SignInForm from "@/components/SignInForm";
 import { googleEnabled, demoLoginEnabled } from "@/lib/auth";
 import { OWNER_EMAIL } from "@/lib/admin";
@@ -41,12 +40,6 @@ export default function SignInPage({
         />
       </div>
 
-      <Link
-        href="/shop"
-        className="mt-10 text-xs uppercase tracking-[0.18em] text-ink-soft underline"
-      >
-        Keep browsing
-      </Link>
     </main>
   );
 }

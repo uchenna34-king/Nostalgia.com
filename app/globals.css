@@ -108,6 +108,14 @@
     outline: 2px solid theme(colors.sepia);
     outline-offset: 2px;
   }
+
+  /* The sign-in gate ships in the server HTML so a new visitor sees it at
+     first paint. A browser that was signed in last time is marked by the
+     session-hint <head> script before paint, and the not-yet-confirmed gate
+     stays hidden for it (components/SiteGate.tsx, lib/site-gate.ts). */
+  .session-hint [data-gate-provisional] {
+    display: none;
+  }
 }
 
 @layer components {

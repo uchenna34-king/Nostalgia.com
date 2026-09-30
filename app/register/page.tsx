@@ -1,4 +1,3 @@
-import Link from "next/link";
 import type { Metadata } from "next";
 import RegisterForm from "@/components/RegisterForm";
 import { googleEnabled } from "@/lib/auth";
@@ -31,12 +30,6 @@ export default function RegisterPage({
         <RegisterForm callbackUrl={callbackUrl} googleEnabled={googleEnabled} />
       </div>
 
-      <Link
-        href="/shop"
-        className="mt-10 text-xs uppercase tracking-[0.18em] text-ink-soft underline"
-      >
-        Keep browsing
-      </Link>
     </main>
   );
 }

@@ -17,9 +17,15 @@ export default function SignUpPrompt({
   onClose,
   onContinue,
   callbackUrl = "/checkout",
+  googleEnabled = false,
 }: {
   open: boolean;
   onClose: () => void;
+  /**
+   * Only changes the copy. The dialog links to /register and /signin, which
+   * render "Continue with Google" themselves when it's configured.
+   */
+  googleEnabled?: boolean;
   /** Runs when the visitor heads to sign-in (e.g. to close the cart drawer). */
   onContinue?: () => void;
   callbackUrl?: string;
@@ -112,8 +118,8 @@ export default function SignUpPrompt({
           </h2>
           <p id={descId} className="mt-3 text-sm text-ink-soft">
             Every order on Nostalgia is placed from a verified account. Sign up
-            with your name and email, or with Google. Your bag stays exactly
-            as it is.
+            with your name and email{googleEnabled ? ", or with Google" : ""}.
+            Your bag stays exactly as it is.
           </p>
 
           <ul className="mx-auto mt-6 max-w-xs space-y-2 text-left text-sm">

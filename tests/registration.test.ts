@@ -28,13 +28,14 @@ vi.mock("@/lib/db", () => ({ prisma: db.client }));
 import { hashPassword, verifyPassword } from "@/lib/password";
 import {
   EMAIL_TAKEN,
+  EMAIL_USES_GOOGLE,
   completeRegistration,
   hashToken,
   safeCallbackUrl,
   startRegistration,
   validateRegistration,
 } from "@/lib/registration";
-import { authOptions } from "@/lib/auth";
+import { authOptions, oauthSignInAllowed } from "@/lib/auth";
 
 const valid = {
   name: "Ada Lovelace",
@@ -126,11 +127,45 @@ describe("startRegistration", () => {
     );
   });
 
-  it("refuses an email that already has an account", async () => {
-    db.fns.userFindFirst.mockResolvedValue({ id: "u1" });
+  it("refuses an email that already has a password account", async () => {
+    db.fns.userFindFirst.mockResolvedValue({
+      passwordHash: "scrypt$hash",
+      accounts: [],
+    });
     const result = await startRegistration(valid);
     expect(result).toEqual({ ok: false, errors: { email: EMAIL_TAKEN } });
     expect(db.fns.pendingUpsert).not.toHaveBeenCalled();
+  });
+
+  it("points a Google-only account at Continue with Google", async () => {
+    db.fns.userFindFirst.mockResolvedValue({
+      passwordHash: null,
+      accounts: [{ provider: "google" }],
+    });
+    const result = await startRegistration(valid);
+    expect(result).toEqual({
+      ok: false,
+      errors: { email: EMAIL_USES_GOOGLE },
+    });
+    expect(db.fns.pendingUpsert).not.toHaveBeenCalled();
+  });
+
+  it("says EMAIL_TAKEN when an account has both a password and Google", async () => {
+    db.fns.userFindFirst.mockResolvedValue({
+      passwordHash: "scrypt$hash",
+      accounts: [{ provider: "google" }],
+    });
+    const result = await startRegistration(valid);
+    expect(result).toEqual({ ok: false, errors: { email: EMAIL_TAKEN } });
+  });
+
+  it("looks the email up case-insensitively, with the fields it needs", async () => {
+    db.fns.userFindFirst.mockResolvedValue(null);
+    await startRegistration(valid);
+    expect(db.fns.userFindFirst.mock.calls[0][0]).toEqual({
+      where: { email: { equals: "ada@example.com", mode: "insensitive" } },
+      select: { passwordHash: true, accounts: { select: { provider: true } } },
+    });
   });
 
   it("returns validation errors without touching the database", async () => {
@@ -235,5 +270,42 @@ describe("password provider", () => {
     expect(
       await authorize({ email: "who@example.com", password: "anything1" }),
     ).toBeNull();
+  });
+});
+
+describe("oauthSignInAllowed", () => {
+  const google = { provider: "google" };
+
+  it("lets Google through only when Google verified the email", () => {
+    expect(
+      oauthSignInAllowed({ account: google, profile: { email_verified: true } }),
+    ).toBe(true);
+    expect(
+      oauthSignInAllowed({ account: google, profile: { email_verified: false } }),
+    ).toBe(false);
+    expect(oauthSignInAllowed({ account: google, profile: {} })).toBe(false);
+    expect(oauthSignInAllowed({ account: google })).toBe(false);
+  });
+
+  it("leaves the password and demo providers to their own authorize()", () => {
+    for (const provider of ["password", "demo"]) {
+      expect(oauthSignInAllowed({ account: { provider } })).toBe(true);
+      expect(
+        oauthSignInAllowed({
+          account: { provider },
+          profile: { email_verified: false },
+        }),
+      ).toBe(true);
+    }
+  });
+
+  it("is wired in as the signIn callback", async () => {
+    const signIn = authOptions.callbacks?.signIn as unknown as (p: {
+      account: { provider: string };
+      profile: { email_verified: boolean };
+    }) => Promise<boolean>;
+    expect(
+      await signIn({ account: google, profile: { email_verified: false } }),
+    ).toBe(false);
   });
 });

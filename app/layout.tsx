@@ -4,7 +4,12 @@ import Providers from "@/components/Providers";
 import Footer from "@/components/Footer";
 import AppFrame from "@/components/AppFrame";
 import GlassMotion from "@/components/GlassMotion";
+import { buildProviderFlags } from "@/lib/auth-flags";
 import "./globals.css";
+
+// Read from the flags directly rather than lib/auth, so the root layout doesn't
+// pull the Prisma adapter and providers into every page's server bundle.
+const { hasGoogle: googleEnabled } = buildProviderFlags(process.env);
 
 /**
  * Applies the theme before first paint, so a dark-mode visitor never sees a
@@ -40,7 +45,7 @@ export default function RootLayout({
       </head>
       <body className="min-h-screen">
         <GlassMotion />
-        <Providers>
+        <Providers googleEnabled={googleEnabled}>
           <AppFrame footer={<Footer />}>{children}</AppFrame>
         </Providers>
       </body>

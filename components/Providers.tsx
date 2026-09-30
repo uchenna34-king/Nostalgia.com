@@ -8,6 +8,7 @@ import { WishlistProvider } from "@/context/WishlistContext";
 import ConsentBanner from "@/components/ConsentBanner";
 import { hasConsent, subscribeConsent } from "@/lib/analytics";
 import { useEffect, useState, type ReactNode } from "react";
+import { GoogleEnabledContext } from "@/context/GoogleEnabledContext";
 
 /**
  * Mounts Vercel analytics only after consent (D-10). `consented` starts false
@@ -33,16 +34,24 @@ function AnalyticsGate() {
   );
 }
 
-export default function Providers({ children }: { children: ReactNode }) {
+export default function Providers({
+  children,
+  googleEnabled,
+}: {
+  children: ReactNode;
+  googleEnabled: boolean;
+}) {
   return (
     <SessionProvider>
-      <CartProvider>
-        <WishlistProvider>
-          {children}
-          <ConsentBanner />
-          <AnalyticsGate />
-        </WishlistProvider>
-      </CartProvider>
+      <GoogleEnabledContext.Provider value={googleEnabled}>
+        <CartProvider>
+          <WishlistProvider>
+            {children}
+            <ConsentBanner />
+            <AnalyticsGate />
+          </WishlistProvider>
+        </CartProvider>
+      </GoogleEnabledContext.Provider>
     </SessionProvider>
   );
 }

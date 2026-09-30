@@ -21,6 +21,9 @@ export type RegistrationErrors = Partial<Record<RegistrationField, string>>;
 export const EMAIL_TAKEN =
   "An account with this email already exists. Sign in instead.";
 
+export const EMAIL_USES_GOOGLE =
+  "This email signs in with Google. Use Continue with Google instead.";
+
 export function normalizeEmail(email: string): string {
   return email.trim().toLowerCase();
 }

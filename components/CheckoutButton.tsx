@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useCallback, useState, type ReactNode } from "react";
 import { useSession } from "next-auth/react";
 import SignUpPrompt from "@/components/SignUpPrompt";
+import { useGoogleEnabled } from "@/context/GoogleEnabledContext";
 
 /**
  * The single entry point to /checkout. Signed-in buyers go straight through;
@@ -22,6 +23,7 @@ export default function CheckoutButton({
   children: ReactNode;
 }) {
   const { status } = useSession();
+  const googleEnabled = useGoogleEnabled();
   const [promptOpen, setPromptOpen] = useState(false);
   const closePrompt = useCallback(() => setPromptOpen(false), []);
 
@@ -40,6 +42,7 @@ export default function CheckoutButton({
           open={promptOpen}
           onClose={closePrompt}
           onContinue={onNavigate}
+          googleEnabled={googleEnabled}
         />
       </>
     );

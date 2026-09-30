@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState, type FormEvent } from "react";
 import { registerAccount } from "@/app/register/actions";
+import GoogleButton from "@/components/GoogleButton";
 import {
   PASSWORD_MIN,
   PASSWORD_MAX,
@@ -15,7 +16,13 @@ const inputClass =
 const labelClass =
   "mb-1 block text-xs uppercase tracking-[0.15em] text-ink-soft";
 
-export default function RegisterForm({ callbackUrl }: { callbackUrl: string }) {
+export default function RegisterForm({
+  callbackUrl,
+  googleEnabled,
+}: {
+  callbackUrl: string;
+  googleEnabled: boolean;
+}) {
   const [status, setStatus] = useState<"idle" | "submitting">("idle");
   const [errors, setErrors] = useState<RegistrationErrors>({});
   const [message, setMessage] = useState<string | null>(null);
@@ -76,112 +83,118 @@ export default function RegisterForm({ callbackUrl }: { callbackUrl: string }) {
     ) : null;
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      noValidate
-      className="w-full max-w-sm space-y-4 text-left"
-    >
-      <input type="hidden" name="callbackUrl" value={callbackUrl} />
-
-      <div>
-        <label htmlFor="name" className={labelClass}>
-          Full name
-        </label>
-        <input
-          id="name"
-          name="name"
-          autoComplete="name"
-          required
-          maxLength={NAME_MAX}
-          aria-invalid={Boolean(errors.name)}
-          aria-describedby={describedBy("name")}
-          className={inputClass}
+    <div className="w-full max-w-sm">
+      {googleEnabled && (
+        <GoogleButton
+          callbackUrl={callbackUrl}
+          disabled={status === "submitting"}
         />
-        {fieldError("name")}
-      </div>
+      )}
+      <form onSubmit={handleSubmit} noValidate className="space-y-4 text-left">
+        <input type="hidden" name="callbackUrl" value={callbackUrl} />
 
-      <div>
-        <label htmlFor="email" className={labelClass}>
-          Email
-        </label>
-        <input
-          id="email"
-          name="email"
-          type="email"
-          autoComplete="email"
-          required
-          aria-invalid={Boolean(errors.email)}
-          aria-describedby={describedBy("email")}
-          className={inputClass}
-        />
-        {fieldError("email")}
-      </div>
+        <div>
+          <label htmlFor="name" className={labelClass}>
+            Full name
+          </label>
+          <input
+            id="name"
+            name="name"
+            autoComplete="name"
+            required
+            maxLength={NAME_MAX}
+            aria-invalid={Boolean(errors.name)}
+            aria-describedby={describedBy("name")}
+            className={inputClass}
+          />
+          {fieldError("name")}
+        </div>
 
-      <div>
-        <label htmlFor="password" className={labelClass}>
-          Password
-        </label>
-        <input
-          id="password"
-          name="password"
-          type="password"
-          autoComplete="new-password"
-          required
-          minLength={PASSWORD_MIN}
-          maxLength={PASSWORD_MAX}
-          aria-invalid={Boolean(errors.password)}
-          aria-describedby={errors.password ? "password-error" : "password-hint"}
-          className={inputClass}
-        />
-        {errors.password ? (
-          fieldError("password")
-        ) : (
-          <p id="password-hint" className="mt-1 text-xs text-ink-soft">
-            At least {PASSWORD_MIN} characters.
+        <div>
+          <label htmlFor="email" className={labelClass}>
+            Email
+          </label>
+          <input
+            id="email"
+            name="email"
+            type="email"
+            autoComplete="email"
+            required
+            aria-invalid={Boolean(errors.email)}
+            aria-describedby={describedBy("email")}
+            className={inputClass}
+          />
+          {fieldError("email")}
+        </div>
+
+        <div>
+          <label htmlFor="password" className={labelClass}>
+            Password
+          </label>
+          <input
+            id="password"
+            name="password"
+            type="password"
+            autoComplete="new-password"
+            required
+            minLength={PASSWORD_MIN}
+            maxLength={PASSWORD_MAX}
+            aria-invalid={Boolean(errors.password)}
+            aria-describedby={
+              errors.password ? "password-error" : "password-hint"
+            }
+            className={inputClass}
+          />
+          {errors.password ? (
+            fieldError("password")
+          ) : (
+            <p id="password-hint" className="mt-1 text-xs text-ink-soft">
+              At least {PASSWORD_MIN} characters.
+            </p>
+          )}
+        </div>
+
+        <div>
+          <label htmlFor="confirm" className={labelClass}>
+            Confirm password
+          </label>
+          <input
+            id="confirm"
+            name="confirm"
+            type="password"
+            autoComplete="new-password"
+            required
+            aria-invalid={Boolean(errors.confirm)}
+            aria-describedby={describedBy("confirm")}
+            className={inputClass}
+          />
+          {fieldError("confirm")}
+        </div>
+
+        {message && (
+          <p role="alert" className="text-sm text-sepia">
+            {message}
           </p>
         )}
-      </div>
 
-      <div>
-        <label htmlFor="confirm" className={labelClass}>
-          Confirm password
-        </label>
-        <input
-          id="confirm"
-          name="confirm"
-          type="password"
-          autoComplete="new-password"
-          required
-          aria-invalid={Boolean(errors.confirm)}
-          aria-describedby={describedBy("confirm")}
-          className={inputClass}
-        />
-        {fieldError("confirm")}
-      </div>
-
-      {message && (
-        <p role="alert" className="text-sm text-sepia">
-          {message}
-        </p>
-      )}
-
-      <button
-        type="submit"
-        disabled={status === "submitting"}
-        className="btn-primary w-full disabled:opacity-60"
-      >
-        {status === "submitting" ? "Creating account…" : "Create account"}
-      </button>
-
-      <p className="text-center text-sm text-ink-soft">
-        Already have an account?{" "}
-        <Link
-          href={`/signin?callbackUrl=${encodeURIComponent(callbackUrl)}`}
-          className="text-ink underline"
+        <button
+          type="submit"
+          disabled={status === "submitting"}
+          className="btn-primary w-full disabled:opacity-60"
         >
-          Sign in
-        </Link>
-      </p>
-    </form>
+          {status === "submitting" ? "Creating account…" : "Create account"}
+        </button>
+
+        <p className="text-center text-sm text-ink-soft">
+          Already have an account?{" "}
+          <Link
+            href={`/signin?callbackUrl=${encodeURIComponent(callbackUrl)}`}
+            className="text-ink underline"
+          >
+            Sign in
+          </Link>
+        </p>
+      </form>
+    </div>
   );
 }

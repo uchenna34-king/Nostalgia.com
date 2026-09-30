@@ -4,6 +4,7 @@ import { prisma } from "@/lib/db";
 import { hashPassword } from "@/lib/password";
 import {
   EMAIL_TAKEN,
+  EMAIL_USES_GOOGLE,
   normalizeEmail,
   validateRegistration,
   type RegistrationErrors,
@@ -56,8 +57,21 @@ export async function startRegistration(
   const name = input.name.trim();
   const email = normalizeEmail(input.email);
 
-  if (await emailTaken(prisma, email)) {
-    return { ok: false, errors: { email: EMAIL_TAKEN } };
+  // One query says both "taken?" and "taken how?", so a Google-only customer
+  // is pointed at the button that actually signs them in. EMAIL_TAKEN already
+  // confirms the account exists, so naming the method reveals nothing more.
+  const existing = await prisma.user.findFirst({
+    where: { email: { equals: email, mode: "insensitive" } },
+    select: { passwordHash: true, accounts: { select: { provider: true } } },
+  });
+  if (existing) {
+    const googleOnly =
+      !existing.passwordHash &&
+      existing.accounts.some((a) => a.provider === "google");
+    return {
+      ok: false,
+      errors: { email: googleOnly ? EMAIL_USES_GOOGLE : EMAIL_TAKEN },
+    };
   }
 
   const passwordHash = await hashPassword(input.password);

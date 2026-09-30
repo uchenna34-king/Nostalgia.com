@@ -9,6 +9,26 @@ import { normalizeEmail, PASSWORD_MAX } from "@/lib/registration-rules";
 
 const { hasGoogle, allowDemoLogin } = buildProviderFlags(process.env);
 
+/** The slice of an OAuth profile the sign-in gate reads. */
+type OAuthProfile = { email?: string | null; email_verified?: boolean };
+
+/**
+ * The `signIn` callback's decision, kept pure so it can be unit-tested. Google
+ * is let through only when Google itself vouches for the email — that proof
+ * is what makes allowDangerousEmailAccountLinking safe. Every other provider
+ * (password, demo) has already decided in its own authorize().
+ */
+export function oauthSignInAllowed({
+  account,
+  profile,
+}: {
+  account?: { provider: string } | null;
+  profile?: OAuthProfile | null;
+}): boolean {
+  if (account?.provider === "google") return profile?.email_verified === true;
+  return true;
+}
+
 /**
  * Email + password sign-in is always registered. Google OAuth is registered
  * when both GOOGLE_CLIENT_ID and
@@ -27,7 +47,10 @@ export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
   session: { strategy: "jwt" },
   secret: process.env.NEXTAUTH_SECRET,
-  pages: { signIn: "/signin" },
+  // Errors land on /signin too, so AccessDenied (oauthSignInAllowed said no)
+  // reaches the same page that explains it (lib/auth-errors.ts), not
+  // NextAuth's unstyled default error page.
+  pages: { signIn: "/signin", error: "/signin" },
   providers: [
     // Email + password, for accounts created at /register. Always on: the
     // account only exists once its email was verified (lib/registration.ts),
@@ -61,11 +84,19 @@ export const authOptions: NextAuthOptions = {
         };
       },
     }),
+    // Email linking is safe here because both routes onto a User prove the
+    // person owns the address: Google sign-in is refused unless Google reports
+    // the email verified (oauthSignInAllowed below), and the password route
+    // only creates a User once its emailed link is clicked
+    // (lib/registration.ts). That proof is required, not nice-to-have —
+    // /admin is granted by email (lib/admin.ts requireOwner()), so linking an
+    // unproven address would hand over the account it lands on.
     ...(hasGoogle
       ? [
           GoogleProvider({
             clientId: process.env.GOOGLE_CLIENT_ID!,
             clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+            allowDangerousEmailAccountLinking: true,
           }),
         ]
       : []),
@@ -99,6 +130,9 @@ export const authOptions: NextAuthOptions = {
       : []),
   ],
   callbacks: {
+    async signIn({ account, profile }) {
+      return oauthSignInAllowed({ account, profile });
+    },
     async jwt({ token, user }) {
       if (user) token.uid = user.id;
       return token;

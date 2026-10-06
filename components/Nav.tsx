@@ -22,6 +22,10 @@ export default function Nav() {
   const { count, openDrawer } = useCart();
   const { count: wishlistCount } = useWishlist();
   const { data: session } = useSession();
+  // Set server-side in lib/auth.ts; only decides whether the link shows.
+  const isOwner = Boolean(
+    (session?.user as { isOwner?: boolean } | undefined)?.isOwner,
+  );
   const [mobileOpen, setMobileOpen] = useState(false);
   const [openDept, setOpenDept] = useState<DepartmentSlug | null>(null);
   const closeTimer = useRef<ReturnType<typeof setTimeout>>();
@@ -150,6 +154,14 @@ export default function Nav() {
             2.5.3 Label in Name (visible "Wishlist"/"Cart" ⊂ the label). The count
             badge is aria-hidden — the count already rides in the label. */}
         <div className="flex min-w-0 flex-1 basis-0 items-center justify-end gap-2.5 sm:gap-4 lg:ml-auto lg:flex-none lg:basis-auto lg:gap-5">
+          {isOwner && (
+            <Link
+              href="/admin"
+              className="link-underline hidden text-[13px] font-medium tracking-[0.01em] text-sepia hover:text-ink sm:block"
+            >
+              Admin
+            </Link>
+          )}
           {session?.user ? (
             <Link
               href="/account"
@@ -273,6 +285,18 @@ export default function Nav() {
                 </Link>
               </li>
             ))}
+            {isOwner && (
+              <li className="border-b border-ink/10 last:border-0">
+                <Link
+                  href="/admin"
+                  onClick={() => setMobileOpen(false)}
+                  tabIndex={mobileOpen ? 0 : -1}
+                  className="block py-[18px] text-[16px] font-medium tracking-[0.01em] text-sepia transition-colors hover:text-ink"
+                >
+                  Admin
+                </Link>
+              </li>
+            )}
           </ul>
         </div>
       </div>

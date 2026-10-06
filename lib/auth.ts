@@ -4,6 +4,7 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import { prisma } from "@/lib/db";
 import { buildProviderFlags } from "@/lib/auth-flags";
+import { isOwnerEmail } from "@/lib/owner";
 
 const { hasGoogle, allowDemoLogin } = buildProviderFlags(process.env);
 
@@ -105,6 +106,14 @@ export const authOptions: NextAuthOptions = {
     async session({ session, token }) {
       if (session.user && token.uid) {
         (session.user as { id?: string }).id = token.uid as string;
+      }
+      // Lets the storefront show the owner a way into /admin without shipping
+      // OWNER_EMAIL to the browser. Display only — /admin itself is still
+      // guarded by requireOwner() on the server.
+      if (session.user) {
+        (session.user as { isOwner?: boolean }).isOwner = isOwnerEmail(
+          session.user.email,
+        );
       }
       return session;
     },

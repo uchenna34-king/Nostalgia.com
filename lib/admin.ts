@@ -1,23 +1,9 @@
 import { getServerSession } from "next-auth";
 import { redirect, notFound } from "next/navigation";
 import { authOptions } from "@/lib/auth";
+import { isOwnerEmail } from "@/lib/owner";
 
-/**
- * Single-owner identity (D-01). Read from OWNER_EMAIL, falling back to a
- * placeholder for local dev — the real owner Google address is set in .env at
- * Phase 11 go-live. Never hardcode a real email here.
- */
-export const OWNER_EMAIL = (
-  process.env.OWNER_EMAIL ?? "owner@nostalgia.test"
-)
-  .trim()
-  .toLowerCase();
-
-/** Case- and whitespace-insensitive check that `email` is the store owner. */
-export function isOwnerEmail(email?: string | null): boolean {
-  if (!email) return false;
-  return email.trim().toLowerCase() === OWNER_EMAIL;
-}
+export { OWNER_EMAIL, isOwnerEmail } from "@/lib/owner";
 
 /**
  * The authoritative owner gate (D-02).

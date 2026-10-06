@@ -5,7 +5,7 @@ import { useEffect, useRef } from "react";
 import GoogleButton from "@/components/GoogleButton";
 
 /**
- * "Before you continue": the sign-in / register wall a signed-out visitor
+ * "Before you continue": the Google sign-in wall a signed-out visitor
  * meets on any storefront page (AppFrame decides when; lib/site-gate.ts lists
  * the pages that stay open). It is deliberately NOT dismissible — no close
  * button, Escape does nothing, the backdrop doesn't close it — and AppFrame
@@ -114,25 +114,23 @@ export default function SiteGate({
             Before you continue
           </h2>
           <p id={descId} className="mt-3 text-sm text-ink-soft">
-            Sign in or create an account to explore the collection. Every
-            account is verified, and your bag and wishlist stay with you.
+            Sign in{googleEnabled ? " with Google" : ""} to explore the
+            collection. Your bag and wishlist stay with you.
           </p>
 
           <div className="mt-7">
-            {googleEnabled && <GoogleButton callbackUrl={callbackUrl} />}
-
-            <Link
-              href={`/register?callbackUrl=${next}`}
-              className="btn-primary w-full"
-            >
-              Create an account
-            </Link>
-            <Link
-              href={`/signin?callbackUrl=${next}`}
-              className="btn-outline mt-3 w-full"
-            >
-              Sign in
-            </Link>
+            {googleEnabled ? (
+              <GoogleButton callbackUrl={callbackUrl} />
+            ) : (
+              // Google not configured (local or a test build): /signin offers
+              // whatever sign-in this deployment has, e.g. the demo login.
+              <Link
+                href={`/signin?callbackUrl=${next}`}
+                className="btn-primary w-full"
+              >
+                Sign in
+              </Link>
+            )}
           </div>
 
           <p className="mt-6 text-xs text-ink-soft">

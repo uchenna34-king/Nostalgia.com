@@ -1,7 +1,7 @@
 import SignInForm from "@/components/SignInForm";
 import { googleEnabled, demoLoginEnabled } from "@/lib/auth";
 import { OWNER_EMAIL } from "@/lib/admin";
-import { safeCallbackUrl } from "@/lib/registration-rules";
+import { safeCallbackUrl } from "@/lib/safe-callback";
 import { signInErrorMessage } from "@/lib/auth-errors";
 
 export default function SignInPage({
@@ -9,7 +9,7 @@ export default function SignInPage({
 }: {
   searchParams: { callbackUrl?: string; error?: string | string[] };
 }) {
-  // Same-site paths only: the password form navigates to this itself.
+  // Same-site paths only, so a crafted link can't send anyone off-site.
   const callbackUrl = safeCallbackUrl(searchParams.callbackUrl);
   // NextAuth's error code, mapped to fixed copy — the raw value is never shown.
   const errorCode = Array.isArray(searchParams.error)
@@ -22,7 +22,7 @@ export default function SignInPage({
       <p className="eyebrow">The House of Nostalgia</p>
       <h1 className="mt-3 font-serif text-5xl font-normal">Welcome back</h1>
       <p className="mt-3 max-w-sm text-ink-soft">
-        Sign in to keep your bag, track orders, and check out.
+        Sign in with Google to keep your bag, track orders, and check out.
       </p>
 
       {errorMessage && (

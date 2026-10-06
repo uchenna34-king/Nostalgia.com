@@ -4,8 +4,6 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import { prisma } from "@/lib/db";
 import { buildProviderFlags } from "@/lib/auth-flags";
-import { burnPasswordCheck, verifyPassword } from "@/lib/password";
-import { normalizeEmail, PASSWORD_MAX } from "@/lib/registration-rules";
 
 const { hasGoogle, allowDemoLogin } = buildProviderFlags(process.env);
 
@@ -15,8 +13,8 @@ type OAuthProfile = { email?: string | null; email_verified?: boolean };
 /**
  * The `signIn` callback's decision, kept pure so it can be unit-tested. Google
  * is let through only when Google itself vouches for the email — that proof
- * is what makes allowDangerousEmailAccountLinking safe. Every other provider
- * (password, demo) has already decided in its own authorize().
+ * is what makes allowDangerousEmailAccountLinking safe. The demo provider has
+ * already decided in its own authorize().
  */
 export function oauthSignInAllowed({
   account,
@@ -30,10 +28,10 @@ export function oauthSignInAllowed({
 }
 
 /**
- * Email + password sign-in is always registered. Google OAuth is registered
- * when both GOOGLE_CLIENT_ID and
- * GOOGLE_CLIENT_SECRET are present. The demo credentials provider is
- * registered only when ALLOW_DEMO_LOGIN holds the exact string "true".
+ * Customers sign in with Google only. Google OAuth is registered when both
+ * GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET are present. The demo credentials
+ * provider is registered only when ALLOW_DEMO_LOGIN holds the exact string
+ * "true".
  *
  * The demo provider authenticates as any supplied email with no secret of
  * any kind — leaving it enabled on a public URL grants anyone the owner
@@ -52,45 +50,12 @@ export const authOptions: NextAuthOptions = {
   // NextAuth's unstyled default error page.
   pages: { signIn: "/signin", error: "/signin" },
   providers: [
-    // Email + password, for accounts created at /register. Always on: the
-    // account only exists once its email was verified (lib/registration.ts),
-    // so this can't be used to sign in as an address the person doesn't own.
-    CredentialsProvider({
-      id: "password",
-      name: "Email and password",
-      credentials: {
-        email: { label: "Email", type: "email" },
-        password: { label: "Password", type: "password" },
-      },
-      async authorize(credentials) {
-        const email = normalizeEmail(credentials?.email ?? "");
-        const password = credentials?.password ?? "";
-        if (!email || !password || password.length > PASSWORD_MAX) return null;
-
-        const user = await prisma.user.findFirst({
-          where: { email: { equals: email, mode: "insensitive" } },
-        });
-        if (!user?.passwordHash) {
-          await burnPasswordCheck(password);
-          return null;
-        }
-        if (!(await verifyPassword(password, user.passwordHash))) return null;
-
-        return {
-          id: user.id,
-          email: user.email,
-          name: user.name,
-          image: user.image,
-        };
-      },
-    }),
-    // Email linking is safe here because both routes onto a User prove the
-    // person owns the address: Google sign-in is refused unless Google reports
-    // the email verified (oauthSignInAllowed below), and the password route
-    // only creates a User once its emailed link is clicked
-    // (lib/registration.ts). That proof is required, not nice-to-have —
-    // /admin is granted by email (lib/admin.ts requireOwner()), so linking an
-    // unproven address would hand over the account it lands on.
+    // Email linking lets Google sign in to an account that already exists for
+    // the same address (e.g. one created before sign-in was Google only). It
+    // is safe only because Google sign-in is refused unless Google reports the
+    // email verified (oauthSignInAllowed above). That proof is required, not
+    // nice-to-have — /admin is granted by email (lib/admin.ts requireOwner()),
+    // so linking an unproven address would hand over the account it lands on.
     ...(hasGoogle
       ? [
           GoogleProvider({

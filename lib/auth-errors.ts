@@ -5,16 +5,13 @@
 const GENERIC = "Google sign-in didn't complete. Please try again.";
 
 const MESSAGES: Record<string, string> = {
-  // A /register (password) account exists for this email but Google isn't
-  // linked to it yet.
+  // Shouldn't happen while Google may link by email (lib/auth.ts), but if an
+  // account for this email exists under another sign-in it lands here.
   OAuthAccountNotLinked:
-    "This email is already registered. Sign in with your password below, and you can use Google next time.",
+    "This email is already linked to another account. Contact us and we'll sort it out.",
   // Our signIn callback refused: Google didn't vouch for the email.
   AccessDenied:
-    "We couldn't confirm that Google email address. Try another account or sign in with email.",
-  // The password form signs in without a redirect, so this only appears if a
-  // credentials sign-in ever falls back to NextAuth's redirect flow.
-  CredentialsSignin: "That email and password don't match an account.",
+    "We couldn't confirm that Google email address. Try another Google account.",
 };
 
 export function signInErrorMessage(code: string | undefined): string | null {

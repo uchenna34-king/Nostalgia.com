@@ -1,14 +1,14 @@
 // Paths a signed-out visitor can use without the "Before you continue"
 // sign-in gate (components/SiteGate.tsx). Everything else asks them to sign in
-// or register first.
+// first.
 //
-// - /signin, /register (and /register/verify): the gate's own destinations —
-//   gating them would leave no way through.
+// - /signin: the gate's own destination — gating it would leave no way
+//   through.
 // - /returns, /shipping: store policies stay readable before anyone commits
 //   to an account.
 // - /admin: has its own chrome and its own server-side guard (middleware.ts,
 //   requireOwner()).
-const OPEN_PATHS = ["/signin", "/register", "/returns", "/shipping", "/admin"];
+const OPEN_PATHS = ["/signin", "/returns", "/shipping", "/admin"];
 
 export function isOpenPath(pathname: string | null | undefined): boolean {
   if (!pathname) return false;

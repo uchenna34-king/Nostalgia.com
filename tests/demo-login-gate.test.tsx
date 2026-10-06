@@ -53,9 +53,9 @@ describe("buildProviderFlags", () => {
     expect(
       buildProviderFlags({ ALLOW_DEMO_LOGIN: "TRUE" }).allowDemoLogin,
     ).toBe(false);
-    expect(
-      buildProviderFlags({ ALLOW_DEMO_LOGIN: "1" }).allowDemoLogin,
-    ).toBe(false);
+    expect(buildProviderFlags({ ALLOW_DEMO_LOGIN: "1" }).allowDemoLogin).toBe(
+      false,
+    );
     expect(buildProviderFlags({ ALLOW_DEMO_LOGIN: "" }).allowDemoLogin).toBe(
       false,
     );
@@ -81,9 +81,7 @@ describe("buildProviderFlags", () => {
 
 describe("SignInForm", () => {
   it("renders both providers when Google and demo are both enabled", () => {
-    render(
-      <SignInForm googleEnabled demoEnabled callbackUrl="/" />,
-    );
+    render(<SignInForm googleEnabled demoEnabled callbackUrl="/" />);
     expect(
       screen.getByRole("button", { name: /Continue with Google/i }),
     ).toBeDefined();
@@ -94,13 +92,10 @@ describe("SignInForm", () => {
     expect(
       screen.getByRole("button", { name: /Sign in as store owner/i }),
     ).toBeDefined();
-    expect(screen.getByText("or")).toBeDefined();
   });
 
   it("renders only the Google button when demo is disabled", () => {
-    render(
-      <SignInForm googleEnabled demoEnabled={false} callbackUrl="/" />,
-    );
+    render(<SignInForm googleEnabled demoEnabled={false} callbackUrl="/" />);
     expect(
       screen.getByRole("button", { name: /Continue with Google/i }),
     ).toBeDefined();
@@ -111,16 +106,12 @@ describe("SignInForm", () => {
     expect(
       screen.queryByRole("button", { name: /Sign in as store owner/i }),
     ).toBeNull();
-    // The one divider separates Google from email + password.
-    expect(screen.getByText("or")).toBeDefined();
     // No element whose text mentions demo survives.
     expect(screen.queryByText(/demo/i)).toBeNull();
   });
 
   it("renders only demo controls when Google is disabled", () => {
-    render(
-      <SignInForm googleEnabled={false} demoEnabled callbackUrl="/" />,
-    );
+    render(<SignInForm googleEnabled={false} demoEnabled callbackUrl="/" />);
     expect(
       screen.queryByRole("button", { name: /Continue with Google/i }),
     ).toBeNull();
@@ -133,20 +124,18 @@ describe("SignInForm", () => {
     ).toBeDefined();
   });
 
-  it("always offers email + password sign-in and a link to register", () => {
+  it("says sign-in is unavailable when neither provider is on", () => {
     render(
-      <SignInForm googleEnabled={false} demoEnabled={false} callbackUrl="/checkout" />,
+      <SignInForm
+        googleEnabled={false}
+        demoEnabled={false}
+        callbackUrl="/checkout"
+      />,
     );
-    expect(screen.getByLabelText("Email")).toBeDefined();
-    expect(screen.getByLabelText("Password")).toBeDefined();
-    expect(screen.getByRole("button", { name: "Sign in" })).toBeDefined();
-    expect(
-      screen
-        .getByRole("link", { name: "Create an account" })
-        .getAttribute("href"),
-    ).toBe("/register?callbackUrl=%2Fcheckout");
-    // No Google, no divider.
-    expect(screen.queryByText("or")).toBeNull();
+    expect(screen.getByRole("alert").textContent).toMatch(
+      /isn.t available right now/,
+    );
+    expect(screen.queryByRole("button")).toBeNull();
   });
 
   it("never renders the owner email as visible text", () => {

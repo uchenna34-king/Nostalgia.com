@@ -32,17 +32,14 @@ describe("CheckoutButton", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "Checkout" }));
 
-    screen.getByRole("dialog", { name: "Create your account" });
+    screen.getByRole("dialog", { name: "Sign in to check out" });
+    // Google isn't configured in this test, so it points at /signin.
     expect(
-      screen
-        .getByRole("link", { name: "Create an account" })
-        .getAttribute("href"),
-    ).toBe("/register?callbackUrl=%2Fcheckout");
-    expect(
-      screen
-        .getByRole("link", { name: "I already have an account" })
-        .getAttribute("href"),
+      screen.getByRole("link", { name: "Sign in" }).getAttribute("href"),
     ).toBe("/signin?callbackUrl=%2Fcheckout");
+    expect(
+      screen.queryByRole("link", { name: /create an account/i }),
+    ).toBeNull();
   });
 
   it("closes on Escape and on Keep browsing", () => {
@@ -62,7 +59,7 @@ describe("CheckoutButton", () => {
     const onNavigate = vi.fn();
     render(<CheckoutButton onNavigate={onNavigate}>Checkout</CheckoutButton>);
     fireEvent.click(screen.getByRole("button", { name: "Checkout" }));
-    fireEvent.click(screen.getByRole("link", { name: "Create an account" }));
+    fireEvent.click(screen.getByRole("link", { name: "Sign in" }));
     expect(onNavigate).toHaveBeenCalledOnce();
     expect(screen.queryByRole("dialog")).toBeNull();
   });

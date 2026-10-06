@@ -11,6 +11,7 @@ import {
 import AppFrame from "@/components/AppFrame";
 import { GoogleEnabledContext } from "@/context/GoogleEnabledContext";
 
+const signIn = vi.hoisted(() => vi.fn());
 const state = vi.hoisted(() => ({
   pathname: "/",
   status: "unauthenticated",
@@ -19,7 +20,7 @@ const state = vi.hoisted(() => ({
 vi.mock("next/navigation", () => ({ usePathname: () => state.pathname }));
 vi.mock("next-auth/react", () => ({
   useSession: () => ({ data: null, status: state.status }),
-  signIn: vi.fn(),
+  signIn,
 }));
 vi.mock("@/components/Nav", () => ({ default: () => <nav>Nav</nav> }));
 vi.mock("@/components/CartDrawer", () => ({ default: () => null }));
@@ -28,6 +29,7 @@ expect.extend(toHaveNoViolations);
 
 afterEach(() => {
   cleanup();
+  signIn.mockReset();
   localStorage.clear();
   state.pathname = "/";
   state.status = "unauthenticated";
@@ -45,16 +47,15 @@ function renderFrame(googleEnabled = false) {
   );
 }
 
-const gate = () => screen.queryByRole("dialog", { name: "Before you continue" });
+const gate = () =>
+  screen.queryByRole("dialog", { name: "Before you continue" });
 const frameOf = (container: HTMLElement) =>
   container.querySelector(".grain") as HTMLElement;
 
 describe("isOpenPath", () => {
-  it("keeps sign-in, registration, policies and admin open", () => {
+  it("keeps sign-in, policies and admin open", () => {
     for (const path of [
       "/signin",
-      "/register",
-      "/register/verify",
       "/returns",
       "/shipping",
       "/admin",
@@ -71,8 +72,8 @@ describe("isOpenPath", () => {
       "/product/x",
       "/cart",
       "/checkout",
+      "/register",
       "/signing",
-      "/registered",
     ]) {
       expect(isOpenPath(path)).toBe(false);
     }
@@ -81,24 +82,36 @@ describe("isOpenPath", () => {
 });
 
 describe("SiteGate in AppFrame", () => {
-  it("asks a signed-out visitor to sign in or register first", () => {
-    const { container } = renderFrame();
+  it("asks a signed-out visitor to sign in with Google first", () => {
+    const { container } = renderFrame(true);
     expect(gate()).not.toBeNull();
+    fireEvent.click(
+      screen.getByRole("button", { name: "Continue with Google" }),
+    );
+    expect(signIn).toHaveBeenCalledWith("google", { callbackUrl: "/" });
+    // Google is the only way in: no registration or password route.
     expect(
-      screen
-        .getByRole("link", { name: "Create an account" })
-        .getAttribute("href"),
-    ).toBe("/register?callbackUrl=%2F");
-    expect(
-      screen.getByRole("link", { name: "Sign in" }).getAttribute("href"),
-    ).toBe("/signin?callbackUrl=%2F");
+      screen.queryByRole("link", { name: /create an account/i }),
+    ).toBeNull();
+    expect(screen.queryByRole("link", { name: "Sign in" })).toBeNull();
     // The page behind can't be used.
     expect(frameOf(container).hasAttribute("inert")).toBe(true);
   });
 
   it("returns the visitor to the page they were trying to see", () => {
     state.pathname = "/product/wool-coat";
-    renderFrame();
+    renderFrame(true);
+    fireEvent.click(
+      screen.getByRole("button", { name: "Continue with Google" }),
+    );
+    expect(signIn).toHaveBeenCalledWith("google", {
+      callbackUrl: "/product/wool-coat",
+    });
+  });
+
+  it("falls back to the sign-in page when Google isn't configured", () => {
+    state.pathname = "/product/wool-coat";
+    renderFrame(false);
     expect(
       screen.getByRole("link", { name: "Sign in" }).getAttribute("href"),
     ).toBe("/signin?callbackUrl=%2Fproduct%2Fwool-coat");
@@ -185,7 +198,7 @@ describe("SiteGate in AppFrame", () => {
     document.documentElement.classList.remove(SESSION_HINT_CLASS);
   });
 
-  it("offers Continue with Google only when Google is configured", () => {
+  it("mentions Google only when Google is configured", () => {
     renderFrame(true);
     expect(
       screen.getByRole("button", { name: "Continue with Google" }),

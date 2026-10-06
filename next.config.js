@@ -11,6 +11,14 @@ const nextConfig = {
     contentDispositionType: "attachment",
     contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
   },
+  // Sign-in is Google only. Old /register links (and emailed verify links)
+  // land on the Google sign-in page, keeping where they were headed.
+  async redirects() {
+    return [
+      { source: "/register", destination: "/signin", permanent: false },
+      { source: "/register/:path*", destination: "/signin", permanent: false },
+    ];
+  },
 };
 
 module.exports = nextConfig;

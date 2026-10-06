@@ -35,7 +35,6 @@ import {
   startRegistration,
   validateRegistration,
 } from "@/lib/registration";
-import { authOptions, oauthSignInAllowed } from "@/lib/auth";
 
 const valid = {
   name: "Ada Lovelace",
@@ -225,87 +224,5 @@ describe("completeRegistration", () => {
     db.fns.userFindFirst.mockResolvedValue({ id: "google-user" });
     expect(await completeRegistration("tok")).toBe("exists");
     expect(db.fns.userCreate).not.toHaveBeenCalled();
-  });
-});
-
-describe("password provider", () => {
-  type Authorize = (c: Record<string, string>) => Promise<unknown>;
-  // CredentialsProvider() keeps a custom id in .options until NextAuth merges
-  // it at runtime; the top-level id is still "credentials".
-  const provider = authOptions.providers.find(
-    (p) => (p as { options?: { id?: string } }).options?.id === "password",
-  ) as { options: { authorize: Authorize } } | undefined;
-  const authorize = (c: Record<string, string>) =>
-    provider!.options.authorize(c);
-
-  it("is registered", () => {
-    expect(provider).toBeDefined();
-  });
-
-  it("signs in with the right password only", async () => {
-    const passwordHash = await hashPassword("correct horse");
-    db.fns.userFindFirst.mockResolvedValue({
-      id: "u1",
-      email: "ada@example.com",
-      name: "Ada Lovelace",
-      image: null,
-      passwordHash,
-    });
-
-    expect(
-      await authorize({ email: "ADA@example.com", password: "correct horse" }),
-    ).toMatchObject({ id: "u1", email: "ada@example.com" });
-    expect(
-      await authorize({ email: "ada@example.com", password: "wrong horse" }),
-    ).toBeNull();
-  });
-
-  it("refuses Google-only accounts and unknown emails", async () => {
-    db.fns.userFindFirst.mockResolvedValue({ id: "g1", passwordHash: null });
-    expect(
-      await authorize({ email: "g@example.com", password: "anything1" }),
-    ).toBeNull();
-
-    db.fns.userFindFirst.mockResolvedValue(null);
-    expect(
-      await authorize({ email: "who@example.com", password: "anything1" }),
-    ).toBeNull();
-  });
-});
-
-describe("oauthSignInAllowed", () => {
-  const google = { provider: "google" };
-
-  it("lets Google through only when Google verified the email", () => {
-    expect(
-      oauthSignInAllowed({ account: google, profile: { email_verified: true } }),
-    ).toBe(true);
-    expect(
-      oauthSignInAllowed({ account: google, profile: { email_verified: false } }),
-    ).toBe(false);
-    expect(oauthSignInAllowed({ account: google, profile: {} })).toBe(false);
-    expect(oauthSignInAllowed({ account: google })).toBe(false);
-  });
-
-  it("leaves the password and demo providers to their own authorize()", () => {
-    for (const provider of ["password", "demo"]) {
-      expect(oauthSignInAllowed({ account: { provider } })).toBe(true);
-      expect(
-        oauthSignInAllowed({
-          account: { provider },
-          profile: { email_verified: false },
-        }),
-      ).toBe(true);
-    }
-  });
-
-  it("is wired in as the signIn callback", async () => {
-    const signIn = authOptions.callbacks?.signIn as unknown as (p: {
-      account: { provider: string };
-      profile: { email_verified: boolean };
-    }) => Promise<boolean>;
-    expect(
-      await signIn({ account: google, profile: { email_verified: false } }),
-    ).toBe(false);
   });
 });

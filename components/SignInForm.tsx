@@ -1,8 +1,7 @@
 "use client";
 
-import Link from "next/link";
 import { signIn } from "next-auth/react";
-import { useState, type FormEvent } from "react";
+import { useState } from "react";
 import GoogleButton from "@/components/GoogleButton";
 
 export default function SignInForm({
@@ -18,27 +17,6 @@ export default function SignInForm({
 }) {
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState("");
-  const [passwordError, setPasswordError] = useState<string | null>(null);
-
-  async function handlePassword(e: FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    const form = new FormData(e.currentTarget);
-    setLoading(true);
-    setPasswordError(null);
-    const res = await signIn("password", {
-      email: String(form.get("email") ?? ""),
-      password: String(form.get("password") ?? ""),
-      redirect: false,
-    });
-    if (!res || res.error) {
-      setPasswordError("That email and password don't match an account.");
-      setLoading(false);
-      return;
-    }
-    // Full navigation so every server component re-renders signed in.
-    // callbackUrl is already restricted to a same-site path by the page.
-    window.location.assign(callbackUrl);
-  }
 
   async function handleDemo() {
     setLoading(true);
@@ -61,67 +39,14 @@ export default function SignInForm({
         />
       )}
 
-      <form onSubmit={handlePassword} className="space-y-4 text-left">
-        <div>
-          <label
-            htmlFor="signin-email"
-            className="mb-1 block text-xs uppercase tracking-[0.15em] text-ink-soft"
-          >
-            Email
-          </label>
-          <input
-            id="signin-email"
-            name="email"
-            type="email"
-            autoComplete="email"
-            required
-            className="w-full border border-ink/20 bg-cream px-3 py-2.5 text-sm"
-          />
-        </div>
-        <div>
-          <label
-            htmlFor="signin-password"
-            className="mb-1 block text-xs uppercase tracking-[0.15em] text-ink-soft"
-          >
-            Password
-          </label>
-          <input
-            id="signin-password"
-            name="password"
-            type="password"
-            autoComplete="current-password"
-            required
-            aria-describedby={passwordError ? "signin-error" : undefined}
-            className="w-full border border-ink/20 bg-cream px-3 py-2.5 text-sm"
-          />
-        </div>
-        {passwordError && (
-          <p id="signin-error" role="alert" className="text-sm text-sepia">
-            {passwordError}
-          </p>
-        )}
-        <button
-          type="submit"
-          disabled={loading}
-          className="btn-primary w-full disabled:opacity-60"
-        >
-          Sign in
-        </button>
-      </form>
-
-      <p className="mt-5 text-center text-sm text-ink-soft">
-        New here?{" "}
-        <Link
-          href={`/register?callbackUrl=${encodeURIComponent(callbackUrl)}`}
-          className="text-ink underline"
-        >
-          Create an account
-        </Link>
-      </p>
+      {!googleEnabled && !demoEnabled && (
+        <p role="alert" className="text-sm text-ink-soft">
+          Sign-in isn&rsquo;t available right now. Please try again later.
+        </p>
+      )}
 
       {demoEnabled && (
         <div className="mt-8 border-t border-cream-dark pt-6">
-
           <p className="mb-2 text-xs uppercase tracking-[0.15em] text-ink-soft">
             Demo login (for testers)
           </p>

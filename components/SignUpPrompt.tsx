@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useRef } from "react";
+import GoogleButton from "@/components/GoogleButton";
 
 /**
  * Shown when a signed-out visitor tries to check out. Every buyer must hold a
@@ -22,8 +23,8 @@ export default function SignUpPrompt({
   open: boolean;
   onClose: () => void;
   /**
-   * Only changes the copy. The dialog links to /register and /signin, which
-   * render "Continue with Google" themselves when it's configured.
+   * Shows "Continue with Google". Without it (Google not configured) the
+   * dialog links to /signin instead, which offers whatever sign-in exists.
    */
   googleEnabled?: boolean;
   /** Runs when the visitor heads to sign-in (e.g. to close the cart drawer). */
@@ -31,7 +32,7 @@ export default function SignUpPrompt({
   callbackUrl?: string;
 }) {
   const panelRef = useRef<HTMLDivElement>(null);
-  const primaryRef = useRef<HTMLAnchorElement>(null);
+  const primaryRef = useRef<HTMLDivElement>(null);
   const restoreRef = useRef<Element | null>(null);
 
   useEffect(() => {
@@ -40,7 +41,7 @@ export default function SignUpPrompt({
     restoreRef.current = document.activeElement;
     const prevOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
-    primaryRef.current?.focus();
+    primaryRef.current?.querySelector<HTMLElement>("button, a")?.focus();
 
     function onKeyDown(e: KeyboardEvent) {
       if (e.key === "Escape") {
@@ -114,12 +115,11 @@ export default function SignUpPrompt({
 
           <p className="eyebrow">Before you check out</p>
           <h2 id={headingId} className="mt-3 font-serif text-3xl font-normal">
-            Create your account
+            Sign in to check out
           </h2>
           <p id={descId} className="mt-3 text-sm text-ink-soft">
-            Every order on Nostalgia is placed from a verified account. Sign up
-            with your name and email{googleEnabled ? ", or with Google" : ""}.
-            Your bag stays exactly as it is.
+            Every order on Nostalgia is placed from a verified account. Your bag
+            stays exactly as it is.
           </p>
 
           <ul className="mx-auto mt-6 max-w-xs space-y-2 text-left text-sm">
@@ -137,21 +137,19 @@ export default function SignUpPrompt({
             </li>
           </ul>
 
-          <Link
-            ref={primaryRef}
-            href={`/register?callbackUrl=${encodeURIComponent(callbackUrl)}`}
-            onClick={handleContinue}
-            className="btn-primary mt-7 w-full"
-          >
-            Create an account
-          </Link>
-          <Link
-            href={`/signin?callbackUrl=${encodeURIComponent(callbackUrl)}`}
-            onClick={handleContinue}
-            className="btn-outline mt-3 w-full"
-          >
-            I already have an account
-          </Link>
+          <div ref={primaryRef} className="mt-7">
+            {googleEnabled ? (
+              <GoogleButton callbackUrl={callbackUrl} />
+            ) : (
+              <Link
+                href={`/signin?callbackUrl=${encodeURIComponent(callbackUrl)}`}
+                onClick={handleContinue}
+                className="btn-primary w-full"
+              >
+                Sign in
+              </Link>
+            )}
+          </div>
           <button
             type="button"
             onClick={onClose}

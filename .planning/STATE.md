@@ -102,6 +102,12 @@ Recent decisions affecting current work:
 - [Phase 11-05]: sendOrderConfirmation wired at exactly two call sites (webhook pending->paid transition, checkout stub branch); Stripe test-mode branch deliberately excluded to avoid double-send
 - [Phase 11-05]: checkout route's redirect origin has zero hardcoded fallback; unset NEXTAUTH_URL returns 500 before any Order row is created (D-09)
 
+### Quick Tasks Completed
+
+| # | Description | Date | Commit | Directory |
+|---|-------------|------|--------|-----------|
+| 261006-jyn | Vercel Blob uploads + instant product-page images | 2026-10-06 | 6b12623 | [261006-jyn-vercel-blob-uploads-instant-product-page](./quick/261006-jyn-vercel-blob-uploads-instant-product-page/) |
+
 ### Pending Todos
 
 None yet.

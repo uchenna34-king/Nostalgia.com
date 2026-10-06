@@ -8,6 +8,7 @@ import {
   getSection,
   isProductDepartment,
 } from "@/lib/taxonomy";
+import { isValidBlurDataUrl } from "@/lib/product-images";
 
 export type ProductActionResult = { ok: true } | { ok: false; error: string };
 
@@ -23,7 +24,12 @@ type ParsedProduct = {
   price: number;
   featured: boolean;
   variants: { size: string; stock: number }[];
-  images: { url: string; alt: string | null; position: number }[];
+  images: {
+    url: string;
+    alt: string | null;
+    blurDataUrl: string | null;
+    position: number;
+  }[];
   collectionIds: string[];
 };
 
@@ -108,7 +114,10 @@ function parseProductInput(fd: FormData): ParsedProduct | null {
     const url = String((row as { url?: unknown }).url ?? "").trim();
     if (!url) continue;
     const alt = String((row as { alt?: unknown }).alt ?? "").trim() || null;
-    images.push({ url, alt, position: images.length });
+    // Client-supplied, so only keep it if it looks like one of our placeholders.
+    const blur = (row as { blurDataUrl?: unknown }).blurDataUrl;
+    const blurDataUrl = isValidBlurDataUrl(blur) ? blur : null;
+    images.push({ url, alt, blurDataUrl, position: images.length });
   }
 
   const collectionIds = jsonRows(fd, "collectionIds")

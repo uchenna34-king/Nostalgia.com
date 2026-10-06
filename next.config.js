@@ -2,6 +2,10 @@
 const nextConfig = {
   reactStrictMode: true,
   images: {
+    // Admin-uploaded product photos live in Vercel Blob (lib/product-images.ts).
+    remotePatterns: [
+      { protocol: "https", hostname: "*.public.blob.vercel-storage.com" },
+    ],
     // Required only so the first-party committed /products/*.svg placeholder
     // assets pass through the next/image optimizer instead of 400-ing. Safe
     // here because these SVGs are our own committed placeholders, never user

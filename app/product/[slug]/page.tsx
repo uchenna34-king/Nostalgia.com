@@ -67,6 +67,34 @@ function relativeDate(from: Date): string {
   return "today";
 }
 
+/**
+ * Review-form eligibility, derived server-side (D-01). This drives DISPLAY
+ * only — submitReview re-checks session + purchase independently on every
+ * submit, so this is never the security boundary (T-10-05-01).
+ */
+async function reviewFormState(
+  productId: string,
+  slug: string,
+): Promise<{
+  eligibility: ReviewEligibility;
+  existingReview?: { rating: number; title: string; body: string | null };
+}> {
+  const session = await getServerSession(authOptions);
+  const userId = (session?.user as { id?: string } | undefined)?.id;
+  if (!userId) return { eligibility: "signed-out" };
+
+  const [purchased, own] = await Promise.all([
+    hasPurchased(userId, slug),
+    prisma.review.findUnique({
+      where: { productId_userId: { productId, userId } },
+      select: { rating: true, title: true, body: true },
+    }),
+  ]);
+  if (!purchased) return { eligibility: "no-purchase" };
+  if (own) return { eligibility: "already-reviewed", existingReview: own };
+  return { eligibility: "eligible" };
+}
+
 export default async function ProductPage({
   params,
 }: {
@@ -102,12 +130,22 @@ export default async function ProductPage({
     category: product.category,
     page: 1,
   };
-  const [sameSection, sameCategory] = await Promise.all([
-    section
-      ? getCatalog({ ...relatedScope, subcategory: section.slug })
-      : Promise.resolve({ products: [] as Awaited<ReturnType<typeof getCatalog>>["products"] }),
-    getCatalog(relatedScope),
-  ]);
+  // Related products, reviews and the review-form state are independent —
+  // fetch them together so the page waits on one database round trip, not
+  // several in a row.
+  const [[sameSection, sameCategory], { reviews: reviewRows }, review] =
+    await Promise.all([
+      Promise.all([
+        section
+          ? getCatalog({ ...relatedScope, subcategory: section.slug })
+          : Promise.resolve({ products: [] as Awaited<ReturnType<typeof getCatalog>>["products"] }),
+        getCatalog(relatedScope),
+      ]),
+      // Verified-purchase reviews (bounded set) for the #reviews list.
+      getReviewsForProduct(product.id),
+      reviewFormState(product.id, product.slug),
+    ]);
+  const { eligibility, existingReview } = review;
   const seen = new Set([product.slug]);
   const related = [...sameSection.products, ...sameCategory.products]
     .filter((p) => (seen.has(p.slug) ? false : (seen.add(p.slug), true)))
@@ -115,8 +153,6 @@ export default async function ProductPage({
 
   const hasDetails = Boolean(product.materials || product.care);
 
-  // Verified-purchase reviews (bounded set) for the #reviews list.
-  const { reviews: reviewRows } = await getReviewsForProduct(product.id);
   const reviews: ReviewDisplay[] = reviewRows.map((r) => ({
     id: r.id,
     rating: r.rating,
@@ -126,33 +162,6 @@ export default async function ProductPage({
     dateIso: r.createdAt.toISOString(),
     dateLabel: relativeDate(r.createdAt),
   }));
-
-  // Review-form eligibility, derived server-side (D-01). This drives DISPLAY
-  // only — submitReview re-checks session + purchase independently on every
-  // submit, so this is never the security boundary (T-10-05-01).
-  const session = await getServerSession(authOptions);
-  const userId = (session?.user as { id?: string } | undefined)?.id;
-  let eligibility: ReviewEligibility = "signed-out";
-  let existingReview:
-    | { rating: number; title: string; body: string | null }
-    | undefined;
-
-  if (userId) {
-    if (!(await hasPurchased(userId, product.slug))) {
-      eligibility = "no-purchase";
-    } else {
-      const own = await prisma.review.findUnique({
-        where: { productId_userId: { productId: product.id, userId } },
-        select: { rating: true, title: true, body: true },
-      });
-      if (own) {
-        eligibility = "already-reviewed";
-        existingReview = own;
-      } else {
-        eligibility = "eligible";
-      }
-    }
-  }
 
   // Product JSON-LD (SEO-01, D-14). aggregateRating reuses the same
   // product.rating as the on-page summary, so structured data and the visible
@@ -193,7 +202,11 @@ export default async function ProductPage({
       </nav>
 
       <div className="grid gap-10 lg:grid-cols-2">
-        <Gallery images={product.images} name={product.name} />
+        <Gallery
+          images={product.images}
+          blurs={product.imageBlurs}
+          name={product.name}
+        />
 
         {/* Details */}
         <div className="lg:sticky lg:top-24 lg:self-start">

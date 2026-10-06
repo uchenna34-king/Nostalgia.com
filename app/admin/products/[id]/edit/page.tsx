@@ -46,6 +46,7 @@ export default async function EditProductPage({
         images: product.images.map((img) => ({
           url: img.url,
           alt: img.alt ?? "",
+          blurDataUrl: img.blurDataUrl ?? undefined,
         })),
         collectionIds: product.collections.map((c) => c.id),
       }}

@@ -35,3 +35,6 @@ prisma/dev.db-journal
 
 # GSD research tooling cache (not a planning artifact)
 .planning/research/
+
+# admin photo uploads in local dev (production uses Vercel Blob)
+/public/uploads/

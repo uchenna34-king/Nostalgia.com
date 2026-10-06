@@ -25,6 +25,8 @@ export type Product = {
   subcategory: string | null;
   description: string;
   images: string[];
+  /** Blur placeholder per entry of `images` (same order); null when none. */
+  imageBlurs: (string | null)[];
   sizes: string[];
   variants: ProductVariant[];
   featured: boolean;
@@ -46,12 +48,13 @@ function deserialize(row: {
   featured: boolean;
   materials?: string | null;
   care?: string | null;
-  images: { url: string }[];
+  images: { url: string; blurDataUrl: string | null }[];
   variants: { size: string; stock: number }[];
 }): Omit<Product, "rating"> {
   return {
     ...row,
     images: row.images.map((img) => img.url),
+    imageBlurs: row.images.map((img) => img.blurDataUrl),
     sizes: JSON.parse(row.sizes) as string[],
     variants: row.variants.map((v) => ({ size: v.size, stock: v.stock })),
   };

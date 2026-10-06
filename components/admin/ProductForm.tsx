@@ -66,6 +66,7 @@ export default function ProductForm({
   );
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -266,7 +267,11 @@ export default function ProductForm({
         {/* Images */}
         <fieldset>
           <legend className="mb-2 font-serif text-lg text-ink">Images</legend>
-          <ImageUrlEditor value={images} onChange={setImages} />
+          <ImageUrlEditor
+            value={images}
+            onChange={setImages}
+            onBusyChange={setUploading}
+          />
         </fieldset>
 
         {/* Collections */}
@@ -283,8 +288,8 @@ export default function ProductForm({
       </div>
 
       <div className="mt-8 flex items-center gap-3">
-        <button type="submit" className="btn" disabled={saving}>
-          {saving ? "Saving…" : "Save product"}
+        <button type="submit" className="btn" disabled={saving || uploading}>
+          {saving ? "Saving…" : uploading ? "Uploading photos…" : "Save product"}
         </button>
         <button
           type="button"

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { slugParam } from "@/lib/slug";
 import AddToCart from "@/components/AddToCart";
 import Gallery from "@/components/Gallery";
 import ProductCard from "@/components/ProductCard";
@@ -33,7 +34,7 @@ export async function generateMetadata({
 }: {
   params: { slug: string };
 }): Promise<Metadata> {
-  const product = await getProductBySlug(params.slug);
+  const product = await getProductBySlug(slugParam(params.slug));
   if (!product) return {};
   const image = product.images[0] ? [{ url: product.images[0] }] : undefined;
   return {
@@ -100,7 +101,7 @@ export default async function ProductPage({
 }: {
   params: { slug: string };
 }) {
-  const product = await getProductBySlug(params.slug);
+  const product = await getProductBySlug(slugParam(params.slug));
   if (!product) notFound();
 
   // Where this piece sits in the shop tree. A unisex piece belongs to both

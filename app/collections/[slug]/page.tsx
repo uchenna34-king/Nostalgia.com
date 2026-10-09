@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
+import { slugParam } from "@/lib/slug";
 import ProductGrid from "@/components/ProductGrid";
 import Pagination from "@/components/shop/Pagination";
 import { getCatalog, getCollectionBySlug } from "@/lib/products";
@@ -12,7 +13,7 @@ export async function generateMetadata({
 }: {
   params: { slug: string };
 }): Promise<Metadata> {
-  const collection = await getCollectionBySlug(params.slug);
+  const collection = await getCollectionBySlug(slugParam(params.slug));
   if (!collection) return {};
   const title = `${collection.name} — Nostalgia`;
   const description =
@@ -44,11 +45,11 @@ export default async function CollectionDetailPage({
   params: { slug: string };
   searchParams: CollectionSearchParams;
 }) {
-  const collection = await getCollectionBySlug(params.slug);
+  const collection = await getCollectionBySlug(slugParam(params.slug));
   if (!collection) notFound();
 
   const { products, totalPages } = await getCatalog({
-    collection: params.slug,
+    collection: slugParam(params.slug),
     sort: searchParams.sort,
     page: searchParams.page,
   });

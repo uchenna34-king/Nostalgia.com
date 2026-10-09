@@ -3,6 +3,7 @@
 import { requireOwner } from "@/lib/admin";
 import { prisma } from "@/lib/db";
 import { revalidatePath } from "next/cache";
+import { toSlug } from "@/lib/slug";
 
 export type CollectionActionResult = { ok: true } | { ok: false; error: string };
 
@@ -48,7 +49,8 @@ function revalidateStorefront() {
 
 function parseCollectionInput(fd: FormData): ParsedCollection | null {
   const name = field(fd, "name");
-  const slug = field(fd, "slug");
+  // Same normalisation as products: always a URL-safe slug.
+  const slug = toSlug(field(fd, "slug") || name);
   if (!name || !slug) return null;
   const description = field(fd, "description") || null;
   const productIds = jsonIds(fd, "productIds");

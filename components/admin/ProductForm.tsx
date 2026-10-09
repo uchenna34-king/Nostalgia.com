@@ -11,6 +11,7 @@ import {
   type ProductActionResult,
 } from "@/app/admin/products/actions";
 import { CATEGORIES, categoryByLabel } from "@/lib/taxonomy";
+import { toSlug } from "@/lib/slug";
 
 export type ProductFormInitial = {
   id?: string;
@@ -46,6 +47,8 @@ export default function ProductForm({
 
   const [name, setName] = useState(initial?.name ?? "");
   const [slug, setSlug] = useState(initial?.slug ?? "");
+  // A new product's slug follows its name until the owner edits it.
+  const [slugEdited, setSlugEdited] = useState(Boolean(initial?.slug));
   const [price, setPrice] = useState(String(initial?.price ?? ""));
   // A legacy category outside the taxonomy starts blank, so saving forces a
   // real placement rather than silently keeping an unreachable one.
@@ -130,7 +133,10 @@ export default function ProductForm({
             <input
               className={inputClass}
               value={name}
-              onChange={(e) => setName(e.target.value)}
+              onChange={(e) => {
+                setName(e.target.value);
+                if (!slugEdited) setSlug(toSlug(e.target.value));
+              }}
               required
             />
           </div>
@@ -140,7 +146,13 @@ export default function ProductForm({
               <input
                 className={inputClass}
                 value={slug}
-                onChange={(e) => setSlug(e.target.value)}
+                onChange={(e) => {
+                  setSlugEdited(true);
+                  setSlug(e.target.value);
+                }}
+                // Show the address it will actually get (the server applies
+                // the same toSlug on save).
+                onBlur={() => setSlug(toSlug(slug))}
                 required
               />
             </div>

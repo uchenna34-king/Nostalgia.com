@@ -9,6 +9,7 @@ import {
   isProductDepartment,
 } from "@/lib/taxonomy";
 import { isValidBlurDataUrl } from "@/lib/product-images";
+import { toSlug } from "@/lib/slug";
 
 export type ProductActionResult = { ok: true } | { ok: false; error: string };
 
@@ -73,7 +74,9 @@ function revalidateStorefront() {
 // `data` (mass-assignment mitigation, mirroring app/api/checkout/route.ts).
 function parseProductInput(fd: FormData): ParsedProduct | null {
   const name = field(fd, "name");
-  const slug = field(fd, "slug");
+  // Typed by hand, so normalise it to the URL-safe shape the storefront links
+  // to (falling back to the name); a slug with spaces made its page 404.
+  const slug = toSlug(field(fd, "slug") || name);
   const description = field(fd, "description");
   if (!name || !slug || !description) return null;
 

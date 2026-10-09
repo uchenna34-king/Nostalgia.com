@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { toSlug } from "@/lib/slug";
 import {
   createCollection,
   updateCollection,
@@ -108,6 +109,7 @@ export default function CollectionForm({
             className={inputClass}
             value={slug}
             onChange={(e) => setSlug(e.target.value)}
+            onBlur={() => setSlug(toSlug(slug))}
             required
           />
         </div>

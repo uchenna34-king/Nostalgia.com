@@ -108,14 +108,20 @@
     outline: 2px solid theme(colors.sepia);
     outline-offset: 2px;
   }
+}
 
-  /* The sign-in gate ships in the server HTML so a new visitor sees it at
-     first paint. A browser that was signed in last time is marked by the
-     session-hint <head> script before paint, and the not-yet-confirmed gate
-     stays hidden for it (components/SiteGate.tsx, lib/site-gate.ts). */
-  .session-hint [data-gate-provisional] {
-    display: none;
-  }
+/* The sign-in gate ships in the server HTML so a new visitor sees it at first
+   paint. A browser that was signed in last time is marked by the session-hint
+   <head> script before paint, and the not-yet-confirmed gate stays hidden for
+   it (components/SiteGate.tsx, lib/site-gate.ts).
+
+   Deliberately outside every @layer: Tailwind drops layered rules whose class
+   it never sees in its content files, and `session-hint` is only ever written
+   by that script in lib/. Inside @layer base this rule was silently removed,
+   so signed-in customers saw the gate flash until the page hydrated.
+   tests/site-gate-css.test.ts guards it. */
+.session-hint [data-gate-provisional] {
+  display: none;
 }
 
 @layer components {

@@ -23,7 +23,7 @@ export default function ProductTable({ products }: { products: Row[] }) {
           <p className="text-xs uppercase tracking-[0.25em] text-sepia">Catalog</p>
           <h1 className="mt-2 font-serif text-3xl text-ink">Products</h1>
         </div>
-        <Link href="/admin/products/new" className="btn">
+        <Link href="/admin/products/new" className="btn-primary">
           Add product
         </Link>
       </div>

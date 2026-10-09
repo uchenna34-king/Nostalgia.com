@@ -288,7 +288,7 @@ export default function ProductForm({
       </div>
 
       <div className="mt-8 flex items-center gap-3">
-        <button type="submit" className="btn" disabled={saving || uploading}>
+        <button type="submit" className="btn-primary" disabled={saving || uploading}>
           {saving ? "Saving…" : uploading ? "Uploading photos…" : "Save product"}
         </button>
         <button

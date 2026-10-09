@@ -85,7 +85,7 @@ export default function FulfillmentForm({
       </div>
 
       <div className="mt-6 flex items-center gap-3">
-        <button type="submit" className="btn" disabled={saving}>
+        <button type="submit" className="btn-primary" disabled={saving}>
           {saving ? "Updating…" : "Update order"}
         </button>
         {saved && <span className="text-xs text-sepia">Saved</span>}

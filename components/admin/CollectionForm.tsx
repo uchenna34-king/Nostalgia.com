@@ -148,7 +148,7 @@ export default function CollectionForm({
       </div>
 
       <div className="mt-8 flex items-center gap-3">
-        <button type="submit" className="btn" disabled={saving}>
+        <button type="submit" className="btn-primary" disabled={saving}>
           {saving ? "Saving…" : "Save collection"}
         </button>
         <button

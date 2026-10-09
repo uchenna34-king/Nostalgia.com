@@ -24,7 +24,7 @@ export default function CollectionTable({
           </p>
           <h1 className="mt-2 font-serif text-3xl text-ink">Collections</h1>
         </div>
-        <Link href="/admin/collections/new" className="btn">
+        <Link href="/admin/collections/new" className="btn-primary">
           Add collection
         </Link>
       </div>

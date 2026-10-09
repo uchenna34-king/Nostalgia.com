@@ -64,18 +64,41 @@ describe("ImageUrlEditor uploads", () => {
     expect(state()).toHaveLength(1);
   });
 
-  it("drops the stored placeholder when the URL is edited by hand", () => {
-    function WithBlur() {
-      const [images, setImages] = useState<Img[]>([{ url: "/a.webp", alt: "", blurDataUrl: BLUR }]);
-      return (
-        <>
-          <ImageUrlEditor value={images} onChange={setImages} />
-          <output data-testid="state">{JSON.stringify(images)}</output>
-        </>
-      );
+  it("leads with Add images, which opens the file picker for JPG and SVG", () => {
+    render(<Harness onBusy={() => {}} />);
+    const input = screen.getByLabelText("Upload product photos") as HTMLInputElement;
+    const click = vi.spyOn(input, "click");
+    fireEvent.click(screen.getByRole("button", { name: "Add images" }));
+    expect(click).toHaveBeenCalledOnce();
+    expect(input.type).toBe("file");
+    expect(input.multiple).toBe(true);
+    expect(input.accept).toContain("image/jpeg");
+    expect(input.accept).toContain("image/svg+xml");
+  });
+
+  it("shows uploaded photos by their role, not their stored address", () => {
+    function Uploaded() {
+      const [images, setImages] = useState<Img[]>([
+        { url: "/uploads/a.webp", alt: "", blurDataUrl: BLUR },
+        { url: "/uploads/b.webp", alt: "", blurDataUrl: BLUR },
+      ]);
+      return <ImageUrlEditor value={images} onChange={setImages} />;
     }
-    render(<WithBlur />);
-    fireEvent.change(screen.getByLabelText("Image URL 1"), { target: { value: "/b.webp" } });
-    expect(state()[0]).toEqual({ url: "/b.webp", alt: "" });
+    render(<Uploaded />);
+    expect(screen.getByText("Main photo")).toBeDefined();
+    expect(screen.getByText("Photo 2")).toBeDefined();
+    expect(screen.queryByLabelText(/Image URL/)).toBeNull();
+    expect(screen.queryByDisplayValue("/uploads/a.webp")).toBeNull();
+  });
+
+  it("keeps pasting a link as a secondary option", () => {
+    render(<Harness onBusy={() => {}} />);
+    fireEvent.click(screen.getByRole("button", { name: "Or paste an image link" }));
+    const link = screen.getByLabelText("Image URL 2");
+    fireEvent.change(link, { target: { value: "https://cdn.example.com/coat.jpg" } });
+    expect(state()[1]).toEqual({
+      url: "https://cdn.example.com/coat.jpg",
+      alt: "",
+    });
   });
 });

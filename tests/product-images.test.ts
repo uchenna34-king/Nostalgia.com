@@ -32,6 +32,20 @@ describe("processProductPhoto", () => {
     expect([meta.width, meta.height]).toEqual([800, 1000]);
   });
 
+  it("accepts an SVG and stores it as a plain WebP picture", async () => {
+    const svg = Buffer.from(
+      `<svg xmlns="http://www.w3.org/2000/svg" width="600" height="800">` +
+        `<script>alert(1)</script>` +
+        `<rect width="600" height="800" fill="#a6552f"/></svg>`,
+    );
+    const { webp } = await processProductPhoto(svg);
+    const meta = await sharp(webp).metadata();
+    expect(meta.format).toBe("webp");
+    expect([meta.width, meta.height]).toEqual([600, 800]);
+    // Rasterised: no markup (and so no script) survives into what's served.
+    expect(webp.includes(Buffer.from("<script"))).toBe(false);
+  });
+
   it("returns a small, valid blur placeholder", async () => {
     const { blurDataUrl } = await processProductPhoto(await photo(1200, 1600));
     expect(blurDataUrl.startsWith("data:image/webp;base64,")).toBe(true);

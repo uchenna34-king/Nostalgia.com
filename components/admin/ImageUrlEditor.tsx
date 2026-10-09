@@ -129,18 +129,23 @@ export default function ImageUrlEditor({
           dragging ? "border-ink bg-cream-dark" : "border-ink/25"
         }`}
       >
-        <p className="text-ink-soft">Drop product photos here, or</p>
+        {/* The main way in: photos straight from the owner's computer or
+            phone. No file paths, nothing to put in the code. */}
         <button
           type="button"
           onClick={() => fileInput.current?.click()}
-          className="btn-outline text-xs"
+          className="btn-primary text-xs"
         >
-          Upload photos
+          Add images
         </button>
+        <p className="text-ink-soft">
+          From your computer or phone (JPG, PNG, WebP or SVG), or drag them
+          here.
+        </p>
         <input
           ref={fileInput}
           type="file"
-          accept="image/*"
+          accept="image/jpeg,image/png,image/webp,image/svg+xml,image/*"
           multiple
           className="sr-only"
           aria-label="Upload product photos"
@@ -169,20 +174,29 @@ export default function ImageUrlEditor({
               <img
                 src={img.url}
                 alt=""
-                className="mt-1 h-12 w-12 shrink-0 rounded-sm bg-cream-dark object-cover"
+                className="mt-1 h-16 w-16 shrink-0 rounded-sm bg-cream-dark object-cover"
               />
             ) : (
-              <div className="mt-1 h-12 w-12 shrink-0 rounded-sm bg-cream-dark" />
+              <div className="mt-1 h-16 w-16 shrink-0 rounded-sm bg-cream-dark" />
             )}
             <div className="flex flex-1 flex-col gap-2">
-              <input
-                aria-label={`Image URL ${i + 1}`}
-                value={img.url}
-                // A hand-edited URL no longer matches the stored placeholder.
-                onChange={(e) => update(i, { url: e.target.value, blurDataUrl: undefined })}
-                placeholder="/products/example-1.svg or https://…"
-                className="w-full border border-ink/20 bg-cream-dark px-3 py-2 text-sm"
-              />
+              {img.blurDataUrl ? (
+                // Uploaded here (only uploads carry a blur placeholder): the
+                // stored address is an implementation detail, so show what the
+                // photo is for instead of an editable path.
+                <p className="py-2 text-sm text-ink">
+                  {i === 0 ? "Main photo" : `Photo ${i + 1}`}
+                </p>
+              ) : (
+                <input
+                  aria-label={`Image URL ${i + 1}`}
+                  value={img.url}
+                  // A hand-edited URL no longer matches the stored placeholder.
+                  onChange={(e) => update(i, { url: e.target.value, blurDataUrl: undefined })}
+                  placeholder="Paste a link to an image (https://…)"
+                  className="w-full border border-ink/20 bg-cream-dark px-3 py-2 text-sm"
+                />
+              )}
               <input
                 aria-label={`Image alt text ${i + 1}`}
                 value={img.alt}
@@ -223,8 +237,13 @@ export default function ImageUrlEditor({
         ))}
       </div>
 
-      <button type="button" onClick={add} className="btn-outline mt-3 text-xs">
-        Add image by URL
+      {/* Secondary: a photo that already lives online (another shop, a CDN). */}
+      <button
+        type="button"
+        onClick={add}
+        className="mt-3 text-xs text-ink-soft underline hover:text-ink"
+      >
+        Or paste an image link
       </button>
     </div>
   );

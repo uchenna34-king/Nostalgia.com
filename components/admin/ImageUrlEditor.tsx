@@ -33,6 +33,7 @@ const UPLOAD_ERRORS: Record<string, string> = {
   not_an_image: "isn't an image we can read",
   too_large: "is too large — try a smaller photo",
   storage_not_configured: "couldn't be stored — image storage isn't set up yet",
+  storage_failed: "couldn't be stored — image storage refused it. Try again; if it keeps happening, check the Blob store in Vercel",
 };
 
 async function uploadOne(file: File): Promise<Img> {

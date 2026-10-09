@@ -48,6 +48,14 @@ export async function POST(req: Request) {
     if (e instanceof BlobNotConfiguredError) {
       return NextResponse.json({ error: "storage_not_configured" }, { status: 503 });
     }
-    throw e;
+    // Blob rejected the write (e.g. a private store, or OIDC not enabled for
+    // this environment). Log the cause for the Vercel logs — name and message
+    // only, never credentials — and tell the owner plainly.
+    const err = e as Error;
+    console.error("product photo upload: storage failed", {
+      name: err?.name,
+      message: err?.message,
+    });
+    return NextResponse.json({ error: "storage_failed" }, { status: 502 });
   }
 }

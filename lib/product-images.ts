@@ -21,8 +21,23 @@ const MAX_BLUR_LENGTH = 4000;
 
 export class BlobNotConfiguredError extends Error {
   constructor() {
-    super("BLOB_READ_WRITE_TOKEN is not set");
+    super("Vercel Blob is not configured (no BLOB_READ_WRITE_TOKEN or BLOB_STORE_ID)");
   }
+}
+
+/**
+ * Whether this deployment can reach a Vercel Blob store. Two ways exist, and
+ * @vercel/blob resolves either itself:
+ *  - the classic read-write token, BLOB_READ_WRITE_TOKEN;
+ *  - newer stores connected with OIDC: Vercel sets BLOB_STORE_ID and the
+ *    library authenticates with the deployment's own OIDC token, so there is
+ *    no BLOB_READ_WRITE_TOKEN at all. Checking only the token refused uploads
+ *    on a store connected this way ("image storage isn't set up yet").
+ */
+export function blobConfigured(
+  env: Record<string, string | undefined> = process.env,
+): boolean {
+  return Boolean(env.BLOB_READ_WRITE_TOKEN?.trim() || env.BLOB_STORE_ID?.trim());
 }
 
 export async function makeBlurDataUrl(input: Buffer): Promise<string> {
@@ -61,15 +76,15 @@ export function isValidBlurDataUrl(value: unknown): value is string {
 }
 
 /**
- * Store a processed photo and return its public URL. Uses Vercel Blob when
- * BLOB_READ_WRITE_TOKEN is set. Without it, local dev writes to
+ * Store a processed photo and return its public URL. Uses Vercel Blob when a
+ * store is connected (blobConfigured). Without one, local dev writes to
  * public/uploads/ (gitignored) so the admin upload flow still works offline;
  * production refuses rather than writing to a read-only, ephemeral disk.
  */
 export async function storeProductPhoto(webp: Buffer): Promise<string> {
   const name = `${randomUUID()}.webp`;
 
-  if (process.env.BLOB_READ_WRITE_TOKEN) {
+  if (blobConfigured()) {
     const { put } = await import("@vercel/blob");
     const blob = await put(`products/${name}`, webp, {
       access: "public",

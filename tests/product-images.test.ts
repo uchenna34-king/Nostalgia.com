@@ -1,8 +1,12 @@
 // @vitest-environment node
 import sharp from "sharp";
 import { afterEach, describe, expect, it, vi } from "vitest";
+const blobPut = vi.hoisted(() => vi.fn());
+vi.mock("@vercel/blob", () => ({ put: blobPut }));
+
 import {
   BlobNotConfiguredError,
+  blobConfigured,
   isValidBlurDataUrl,
   makeBlurDataUrl,
   processProductPhoto,
@@ -74,14 +78,53 @@ describe("isValidBlurDataUrl", () => {
   });
 });
 
+describe("blobConfigured", () => {
+  it("accepts the classic read-write token", () => {
+    expect(blobConfigured({ BLOB_READ_WRITE_TOKEN: "vercel_blob_rw_x" })).toBe(true);
+  });
+
+  it("accepts a store connected with OIDC (BLOB_STORE_ID, no token)", () => {
+    expect(blobConfigured({ BLOB_STORE_ID: "store_abc123" })).toBe(true);
+  });
+
+  it("is false when neither is set, or both are blank", () => {
+    expect(blobConfigured({})).toBe(false);
+    expect(blobConfigured({ BLOB_READ_WRITE_TOKEN: " ", BLOB_STORE_ID: "" })).toBe(false);
+  });
+});
+
 describe("storeProductPhoto", () => {
-  afterEach(() => vi.unstubAllEnvs());
+  afterEach(() => {
+    vi.unstubAllEnvs();
+    blobPut.mockReset();
+  });
 
   it("refuses in production when Vercel Blob is not configured", async () => {
     vi.stubEnv("BLOB_READ_WRITE_TOKEN", "");
+    vi.stubEnv("BLOB_STORE_ID", "");
     vi.stubEnv("NODE_ENV", "production");
     await expect(storeProductPhoto(Buffer.from("x"))).rejects.toBeInstanceOf(
       BlobNotConfiguredError,
     );
+    expect(blobPut).not.toHaveBeenCalled();
+  });
+
+  it("uploads to Blob in production on an OIDC-connected store", async () => {
+    // The live failure: the store was connected (BLOB_STORE_ID) but the old
+    // check only looked for BLOB_READ_WRITE_TOKEN and refused.
+    vi.stubEnv("BLOB_READ_WRITE_TOKEN", "");
+    vi.stubEnv("BLOB_STORE_ID", "store_abc123");
+    vi.stubEnv("NODE_ENV", "production");
+    blobPut.mockResolvedValue({
+      url: "https://abc123.public.blob.vercel-storage.com/products/x.webp",
+    });
+
+    const url = await storeProductPhoto(Buffer.from("x"));
+
+    expect(url).toBe("https://abc123.public.blob.vercel-storage.com/products/x.webp");
+    expect(blobPut).toHaveBeenCalledOnce();
+    const [pathname, , options] = blobPut.mock.calls[0];
+    expect(pathname).toMatch(/^products\/[0-9a-f-]{36}\.webp$/);
+    expect(options).toMatchObject({ access: "public", contentType: "image/webp" });
   });
 });

@@ -128,3 +128,66 @@ describe("storeProductPhoto", () => {
     expect(options).toMatchObject({ access: "public", contentType: "image/webp" });
   });
 });
+
+describe("storeProductPhoto on a private store", () => {
+  // The store remembers its access mode per server instance, so each test
+  // gets a fresh copy of the module.
+  async function freshStore() {
+    vi.resetModules();
+    return (await import("@/lib/product-images")).storeProductPhoto;
+  }
+
+  afterEach(() => {
+    vi.unstubAllEnvs();
+    blobPut.mockReset();
+  });
+
+  it("retries as private and returns a same-site /media address", async () => {
+    // The live failure: the nostalgia-com store was created private.
+    vi.stubEnv("BLOB_STORE_ID", "store_abc123");
+    vi.stubEnv("NODE_ENV", "production");
+    blobPut
+      .mockRejectedValueOnce(
+        new Error(
+          "Vercel Blob: Cannot use public access on a private store. The store is configured with private access.",
+        ),
+      )
+      .mockResolvedValueOnce({
+        url: "https://abc123.private.blob.vercel-storage.com/products/x.webp",
+      });
+    const store = await freshStore();
+
+    const url = await store(Buffer.from("x"));
+
+    expect(url).toMatch(/^\/media\/products\/[0-9a-f-]{36}\.webp$/);
+    expect(blobPut.mock.calls.map((c) => c[2].access)).toEqual(["public", "private"]);
+    // Both attempts write the same file, so the address matches what's stored.
+    expect(blobPut.mock.calls[1][0]).toBe(`products/${url.split("/").pop()}`);
+  });
+
+  it("goes straight to private once it has learned the store is private", async () => {
+    vi.stubEnv("BLOB_STORE_ID", "store_abc123");
+    vi.stubEnv("NODE_ENV", "production");
+    blobPut
+      .mockRejectedValueOnce(new Error("Cannot use public access on a private store."))
+      .mockResolvedValue({ url: "https://abc123.private.blob.vercel-storage.com/p.webp" });
+    const store = await freshStore();
+
+    await store(Buffer.from("x"));
+    blobPut.mockClear();
+    await store(Buffer.from("y"));
+
+    expect(blobPut).toHaveBeenCalledOnce();
+    expect(blobPut.mock.calls[0][2].access).toBe("private");
+  });
+
+  it("does not retry other storage errors", async () => {
+    vi.stubEnv("BLOB_STORE_ID", "store_abc123");
+    vi.stubEnv("NODE_ENV", "production");
+    blobPut.mockRejectedValue(new Error("Vercel Blob: This store has been suspended."));
+    const store = await freshStore();
+
+    await expect(store(Buffer.from("x"))).rejects.toThrow(/suspended/);
+    expect(blobPut).toHaveBeenCalledOnce();
+  });
+});

@@ -75,26 +75,65 @@ export function isValidBlurDataUrl(value: unknown): value is string {
   );
 }
 
-/**
- * Store a processed photo and return its public URL. Uses Vercel Blob when a
- * store is connected (blobConfigured). Without one, local dev writes to
- * public/uploads/ (gitignored) so the admin upload flow still works offline;
- * production refuses rather than writing to a read-only, ephemeral disk.
- */
-export async function storeProductPhoto(webp: Buffer): Promise<string> {
-  const name = `${randomUUID()}.webp`;
+type BlobAccess = "public" | "private";
 
-  if (blobConfigured()) {
-    const { put } = await import("@vercel/blob");
+/**
+ * A Blob store is created public or private in Vercel and can't be switched
+ * afterwards; writing with the other access is refused ("Cannot use public
+ * access on a private store"). Learn the store's mode from that refusal and
+ * remember it for this server instance.
+ */
+let storeAccess: BlobAccess | undefined;
+
+function accessFromRefusal(e: unknown): BlobAccess | undefined {
+  const message = e instanceof Error ? e.message : "";
+  if (/\bprivate store\b/i.test(message)) return "private";
+  if (/\bpublic store\b/i.test(message)) return "public";
+  return undefined;
+}
+
+/** Same-site address for a photo in a private store (app/media/products). */
+export function privatePhotoPath(name: string): string {
+  return `/media/products/${name}`;
+}
+
+async function putInBlob(name: string, webp: Buffer): Promise<string> {
+  const { put } = await import("@vercel/blob");
+  const write = async (access: BlobAccess) => {
     const blob = await put(`products/${name}`, webp, {
-      access: "public",
+      access,
       contentType: "image/webp",
       // Names are random UUIDs, so a stored URL never changes content —
       // safe for browsers and the CDN to cache for a year.
       cacheControlMaxAge: 60 * 60 * 24 * 365,
     });
-    return blob.url;
+    storeAccess = access;
+    // A public blob is served straight from Blob's CDN. A private one needs
+    // credentials to read, so the shop serves it from its own route.
+    return access === "public" ? blob.url : privatePhotoPath(name);
+  };
+
+  const first = storeAccess ?? "public";
+  try {
+    return await write(first);
+  } catch (e) {
+    const actual = accessFromRefusal(e);
+    if (!actual || actual === first) throw e;
+    return write(actual);
   }
+}
+
+/**
+ * Store a processed photo and return the URL to save on the product. Uses
+ * Vercel Blob when a store is connected (blobConfigured), public or private.
+ * Without one, local dev writes to public/uploads/ (gitignored) so the admin
+ * upload flow still works offline; production refuses rather than writing to
+ * a read-only, ephemeral disk.
+ */
+export async function storeProductPhoto(webp: Buffer): Promise<string> {
+  const name = `${randomUUID()}.webp`;
+
+  if (blobConfigured()) return putInBlob(name, webp);
 
   if (process.env.NODE_ENV === "production") throw new BlobNotConfiguredError();
 

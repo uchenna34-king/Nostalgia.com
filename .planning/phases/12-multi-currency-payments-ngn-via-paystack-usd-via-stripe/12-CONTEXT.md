@@ -268,7 +268,8 @@ Deferred).
 - Country list source (static ISO list vs `Intl.DisplayNames` for names) and the
   Nigerian states list file.
 - Exact copy for the failed/cancelled-payment notice and helper texts (within the
-  locked design system: cream/ink/sepia, Fraunces/Inter, existing button/input
+  locked design system as defined in `DESIGN.md` + `app/globals.css`: black-and-white
+  palette, Bodoni display at 400, Inter for reading text and prices, existing button/input
   classes).
 - Test file organization, as long as every new pure module and route handler gets
   unit tests in the existing Vitest mock style (see `tests/stripe-webhook.test.ts`,

@@ -7,6 +7,7 @@ import { useCart } from "@/context/CartContext";
 import { useWishlist } from "@/context/WishlistContext";
 import { useSession, signIn } from "next-auth/react";
 import ThemeToggle from "@/components/ThemeToggle";
+import CurrencyToggle from "@/components/CurrencyToggle";
 import Wordmark from "@/components/Wordmark";
 import { MegaPanel, MobileShopMenu } from "@/components/ShopMenu";
 import { DEPARTMENTS, type DepartmentSlug } from "@/lib/taxonomy";
@@ -178,6 +179,7 @@ export default function Nav() {
             </button>
           )}
 
+          <CurrencyToggle variant="bar" />
           <ThemeToggle />
 
           <Link
@@ -298,6 +300,7 @@ export default function Nav() {
               </li>
             )}
           </ul>
+          <CurrencyToggle variant="menu" tabIndex={mobileOpen ? 0 : -1} />
         </div>
       </div>
     </header>

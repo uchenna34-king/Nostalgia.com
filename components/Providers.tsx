@@ -4,6 +4,7 @@ import { SessionProvider } from "next-auth/react";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { CartProvider } from "@/context/CartContext";
+import { CurrencyProvider } from "@/context/CurrencyContext";
 import { WishlistProvider } from "@/context/WishlistContext";
 import ConsentBanner from "@/components/ConsentBanner";
 import { hasConsent, subscribeConsent } from "@/lib/analytics";
@@ -44,13 +45,15 @@ export default function Providers({
   return (
     <SessionProvider>
       <GoogleEnabledContext.Provider value={googleEnabled}>
-        <CartProvider>
-          <WishlistProvider>
-            {children}
-            <ConsentBanner />
-            <AnalyticsGate />
-          </WishlistProvider>
-        </CartProvider>
+        <CurrencyProvider>
+          <CartProvider>
+            <WishlistProvider>
+              {children}
+              <ConsentBanner />
+              <AnalyticsGate />
+            </WishlistProvider>
+          </CartProvider>
+        </CurrencyProvider>
       </GoogleEnabledContext.Provider>
     </SessionProvider>
   );

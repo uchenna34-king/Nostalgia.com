@@ -9,31 +9,40 @@ datasource db {
 }
 
 model Product {
-  id          String             @id @default(cuid())
-  slug        String             @unique
-  name        String
-  price       Int // stored in cents
+  id               String             @id @default(cuid())
+  slug             String             @unique
+  name             String
+  // Prices in minor units (D-03). priceNgn (kobo) is typed by the owner and
+  // required. priceUsdOverride (cents) is an optional hand-set dollar price.
+  // priceUsd (cents) is the EFFECTIVE dollar price everything reads: the
+  // override, else priceNgn at StoreSettings.usdNgnRate rounded up to a whole
+  // dollar (lib/currency.ts autoUsdMinor; recomputed by lib/settings.ts). It
+  // is the original "price" column, so no rename and its index is kept.
+  priceNgn         Int
+  priceUsdOverride Int?
+  priceUsd         Int                @map("price")
   // Display label of a lib/taxonomy.ts category ("Shoes", "Shirts & T-shirts").
-  category    String
+  category         String
   // lib/taxonomy.ts slugs. "unisex" pieces are listed under both Women and Men;
   // subcategory is a section slug within the category, or null for the category
   // at large (and always null for categories without sections).
-  department  String             @default("unisex")
-  subcategory String?
-  description String
-  materials   String?
-  care        String?
-  sizes       String // JSON-encoded string[]
-  featured    Boolean            @default(false)
-  createdAt   DateTime           @default(now())
-  images      ProductImage[]
-  variants    ProductSizeStock[]
-  collections Collection[]
-  reviews     Review[]
+  department       String             @default("unisex")
+  subcategory      String?
+  description      String
+  materials        String?
+  care             String?
+  sizes            String // JSON-encoded string[]
+  featured         Boolean            @default(false)
+  createdAt        DateTime           @default(now())
+  images           ProductImage[]
+  variants         ProductSizeStock[]
+  collections      Collection[]
+  reviews          Review[]
 
   @@index([category])
   @@index([department, category, subcategory])
-  @@index([price])
+  @@index([priceUsd])
+  @@index([priceNgn])
   @@index([createdAt])
 }
 
@@ -93,17 +102,32 @@ model Collection {
 }
 
 model Order {
-  id             String   @id @default(cuid())
-  userId         String?
-  email          String
-  items          String // JSON-encoded cart items
-  total          Int // cents
+  id              String   @id @default(cuid())
+  userId          String?
+  email           String
+  items           String // JSON-encoded cart items
+  total           Int // minor units of `currency` (kobo or cents)
+  // NGN or USD (lib/currency.ts). The default only labels orders from before
+  // Phase 12, which were all charged in dollars; checkout always sets it.
+  currency        String   @default("USD")
+  // paystack | stripe | demo (app-level allow-list in lib/orders.ts)
+  paymentProvider String?
+  // JSON snapshot of the validated delivery address (lib/address.ts)
+  shippingAddress String?
   // status allowed values (enforced in app code via allow-list, not a DB enum, for SQLite-now / Postgres-later portability): pending, paid, fulfilled, cancelled
-  status         String   @default("pending")
-  trackingNumber String?
-  notes          String?
-  createdAt      DateTime @default(now())
-  user           User?    @relation(fields: [userId], references: [id])
+  status          String   @default("pending")
+  trackingNumber  String?
+  notes           String?
+  createdAt       DateTime @default(now())
+  user            User?    @relation(fields: [userId], references: [id])
+}
+
+// Store-wide settings: a single row, id = 1 (D-05). usdNgnRate is whole
+// naira per $1, used for every product without a hand-set dollar price.
+model StoreSettings {
+  id         Int      @id
+  usdNgnRate Int
+  updatedAt  DateTime @updatedAt
 }
 
 // ---- NextAuth models ----

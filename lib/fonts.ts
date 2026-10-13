@@ -86,3 +86,39 @@ export const inter = localFont({
     "sans-serif",
   ],
 });
+
+/**
+ * Inter's latin-ext subset, for the naira sign (₦, U+20A6) and accented
+ * letters, which the latin file above doesn't contain — without it every ₦
+ * price fell back to a system face (D-FONT-1). Same Google release; to
+ * refresh it, take the latin-ext block of the css2 URL above.
+ *
+ * It sits FIRST in the sans stack (tailwind.config.ts), ahead of
+ * var(--font-inter). next/font expands that variable to include its fallbacks
+ * (Arial, system-ui…), which would catch ₦ before an extension listed after
+ * it. Its unicode-range keeps it off plain Latin, and with no fallbacks of its
+ * own, the variable expands to this face alone. No preload: the browser
+ * fetches it only when a page shows a character in its range.
+ */
+export const interExt = localFont({
+  src: [
+    {
+      path: "../app/fonts/Inter-latin-ext-normal.woff2",
+      weight: "400 700",
+      style: "normal",
+    },
+  ],
+  variable: "--font-inter-ext",
+  display: "swap",
+  preload: false,
+  adjustFontFallback: false,
+  fallback: [],
+  declarations: [
+    {
+      prop: "unicode-range",
+      value:
+        "U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF",
+    },
+  ],
+});
+

@@ -124,6 +124,18 @@
   display: none;
 }
 
+/* Dual-currency prices (D-10). <Money> renders a ₦ span and a $ span; the
+   before-paint CURRENCY_SCRIPT sets <html data-currency> from the cookie and
+   this hides the inactive one. No attribute means naira. Unlayered for the
+   same reason as the rule above: [data-money] only appears in components,
+   and the attribute is written by a script in lib/. Hiding only the inactive
+   span leaves the active one its natural display inside flex/grid parents.
+   tests/currency-css.test.ts guards it. */
+:root:not([data-currency="USD"]) [data-money="USD"],
+:root[data-currency="USD"] [data-money="NGN"] {
+  display: none;
+}
+
 @layer components {
   /* Film-grain overlay applied over the whole page */
   .grain::before {

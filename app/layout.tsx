@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
-import { bodoni, inter } from "@/lib/fonts";
+import { bodoni, inter, interExt } from "@/lib/fonts";
 import Providers from "@/components/Providers";
 import Footer from "@/components/Footer";
 import AppFrame from "@/components/AppFrame";
 import GlassMotion from "@/components/GlassMotion";
 import { buildProviderFlags } from "@/lib/auth-flags";
 import { SESSION_HINT_SCRIPT } from "@/lib/site-gate";
+import { CURRENCY_SCRIPT } from "@/lib/currency";
 import "./globals.css";
 
 // Read from the flags directly rather than lib/auth, so the root layout doesn't
@@ -39,13 +40,18 @@ export default function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className={`${bodoni.variable} ${inter.variable}`}
+      className={`${bodoni.variable} ${inter.variable} ${interExt.variable}`}
     >
       <head>
         <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
         {/* Same before-paint trick for the sign-in gate: hides the gate that is
             in the server HTML for browsers that were signed in last time. */}
         <script dangerouslySetInnerHTML={{ __html: SESSION_HINT_SCRIPT }} />
+        {/* And for the shopper's currency: copies the nostalgia-currency
+            cookie onto <html data-currency> so CSS shows the right <Money>
+            span from the first paint. This layout still reads no cookies
+            itself, so static pages stay static (D-10, D-12). */}
+        <script dangerouslySetInnerHTML={{ __html: CURRENCY_SCRIPT }} />
       </head>
       <body className="min-h-screen">
         <GlassMotion />

@@ -44,7 +44,10 @@ const config: Config = {
         // vanishes — the type went faint and had to be propped up with
         // semibold weights and near-black greys that a grotesque never needs.
         serif: ["var(--font-bodoni)", "Didot", "Bodoni MT", "Georgia", "serif"],
+        // --font-inter-ext first: it only covers latin-ext (₦ and accents),
+        // and var(--font-inter) carries fallbacks that would catch ₦ first.
         sans: [
+          "var(--font-inter-ext)",
           "var(--font-inter)",
           "ui-sans-serif",
           "system-ui",

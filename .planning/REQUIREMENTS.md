@@ -69,13 +69,22 @@ Committed scope for the current milestone. Each maps to exactly one phase (8–1
 - [x] **LIVE-05**: Production runs on hosted Postgres, migrated from SQLite
 - [ ] **LIVE-06**: App is deployed to a hosted Node platform and is publicly reachable
 
+### Multi-currency payments (Phase 12)
+
+- [ ] **CURR-01**: Shopper sees every price in naira by default (dollars for visitors outside Nigeria), can switch currency anywhere, and the cart, checkout and order use the chosen currency
+- [ ] **CURR-02**: Owner sets each product's naira price (required) and an optional dollar price; dollar prices left blank follow a store exchange rate the owner sets in admin
+- [ ] **PAYM-01**: Naira orders are paid through Paystack and marked paid only by a verified Paystack callback or signed webhook whose amount and currency match the order
+- [ ] **PAYM-02**: Dollar orders are paid through Stripe (or Paystack USD via a config switch) and marked paid only by the signed Stripe webhook whose amount and currency match the order
+- [ ] **SHIP-01**: Customer enters a delivery address at checkout; shipping is priced by destination (Nigeria / international) in the order's currency, and the address appears on the order in admin, account and the confirmation email
+- [ ] **ORDR-01**: Every order records its currency and payment provider; every order display and email formats amounts in the order's own currency, and production never creates unpaid "demo" orders
+
 ## v2 Requirements
 
 Deferred beyond Milestone 2. Tracked, not in the current roadmap.
 
 ### Post-launch
 
-- **INTL-01**: Internationalization / multi-currency / tax handling
+- **INTL-01**: Internationalization / tax handling (multi-currency NGN/USD pulled forward into Phase 12)
 - **REC-01**: Personalized recommendations and "related products"
 - **PROMO-01**: Discount codes, gift cards, and promotions
 - **CMS-01**: Editorial/marketing content pages beyond the storefront
@@ -87,7 +96,7 @@ Deferred beyond Milestone 2. Tracked, not in the current roadmap.
 | Real product photography | Owner supplies images later; M2 builds image handling, not images |
 | Native mobile app | Web-first; responsive storefront is sufficient |
 | Multi-vendor / marketplace | Single-brand store only |
-| Internationalization / multi-currency | Not required for the primary success metric; revisit post-launch |
+| Internationalization (languages) / currencies beyond NGN+USD | NGN/USD multi-currency moved into Phase 12; more currencies revisit post-launch |
 
 ## Traceability
 
@@ -126,11 +135,17 @@ Deferred beyond Milestone 2. Tracked, not in the current roadmap.
 | LIVE-04 | Phase 11 | Pending |
 | LIVE-05 | Phase 11 | Complete |
 | LIVE-06 | Phase 11 | Pending |
+| CURR-01 | Phase 12 | Pending |
+| CURR-02 | Phase 12 | Pending |
+| PAYM-01 | Phase 12 | Pending |
+| PAYM-02 | Phase 12 | Pending |
+| SHIP-01 | Phase 12 | Pending |
+| ORDR-01 | Phase 12 | Pending |
 
 **Coverage:**
 
-- Milestone 2 (v1) requirements: 23 total
-- Mapped to phases: 23
+- Milestone 2 (v1) requirements: 29 total
+- Mapped to phases: 29
 - Unmapped: 0 ✓
 
 ---

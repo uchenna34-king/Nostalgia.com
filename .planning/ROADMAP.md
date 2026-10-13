@@ -13,7 +13,7 @@ paid purchase.
 ## Milestones
 
 - ✅ **M1 — Storefront vertical slice** — Phases 1–7 (shipped 2026-07-13)
-- 🚧 **M2 — Ready for the world** — Phases 8–11 (in progress)
+- 🚧 **M2 — Ready for the world** — Phases 8–12 (in progress)
 
 ## Phases
 
@@ -35,12 +35,13 @@ paid purchase.
 
 </details>
 
-### 🚧 M2 — Ready for the world (Phases 8–11)
+### 🚧 M2 — Ready for the world (Phases 8–12)
 
 - [x] **Phase 8: Merchandising & Discovery** - Search, filter/sort, scalable collections, wishlist, richer PDPs, catalog built for thousands (completed 2026-07-16)
 - [x] **Phase 9: Store Operations / Admin** - No-code admin for product CRUD, inventory, and order/fulfillment management (completed 2026-07-22)
 - [x] **Phase 10: Trust & Polish** - Reviews, size guides, shipping/returns, SEO, performance, accessibility, analytics (completed 2026-07-29)
 - [x] **Phase 11: Go Live** - Real Google OAuth + real Stripe, confirmation emails, order history, Postgres, deployment
+- [ ] **Phase 12: Multi-currency payments** - Naira-first pricing with a dollar option, Paystack (₦) + Stripe ($), delivery address + destination shipping
 
 ## Phase Details
 
@@ -220,10 +221,30 @@ paid purchase.
 - [x] 11-07-PLAN.md
 - [x] 11-08-PLAN.md
 
+### Phase 12: Multi-currency payments — NGN via Paystack, USD via Stripe
+
+**Goal**: Nostalgia is a naira-first store with a dollar option — every price shows in the shopper's currency, naira orders pay through Paystack, dollar orders through Stripe, and checkout collects a delivery address priced by destination.
+**Depends on**: Phase 11
+**Requirements**: CURR-01, CURR-02, PAYM-01, PAYM-02, SHIP-01, ORDR-01
+**Success Criteria** (what must be TRUE):
+
+  1. A visitor in Nigeria sees ₦ prices by default and a visitor elsewhere sees $; one toggle switches every price on the site instantly and the choice persists.
+  2. The owner sets a product's ₦ price (required) and optional $ price in /admin, and an exchange rate in /admin/settings that re-prices every product without a hand-set $ price.
+  3. A signed-in customer checks out in ₦ with a delivery address, pays on Paystack (test mode), and the order becomes paid via verified callback + webhook, with a ₦ confirmation email that shows the address.
+  4. A customer checks out in $ and pays through Stripe (test mode); the order records USD + Stripe and the verified webhook marks it paid.
+  5. The shipping fee shown at checkout is exactly what is charged and stored, for Nigeria and international destinations in both currencies.
+  6. Production never creates a free "paid" demo order when a payment key is missing.
+
+**Plans**: 0 plans
+
+Plans:
+
+- [ ] TBD (run /gsd-plan-phase 12 to break down)
+
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 → … → 7 (done) → 8 → 9 → 10 → 11
+Phases execute in numeric order: 1 → … → 7 (done) → 8 → 9 → 10 → 11 → 12
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
@@ -238,3 +259,4 @@ Phases execute in numeric order: 1 → … → 7 (done) → 8 → 9 → 10 → 1
 | 9. Store Operations / Admin | M2 | 6/6 | Complete | 2026-07-22 |
 | 10. Trust & Polish | M2 | 12/12 | Complete | 2026-07-29 |
 | 11. Go Live | M2 | 8/8 | Complete | 2026-09-02 |
+| 12. Multi-currency payments | M2 | 0/? | Not started | - |

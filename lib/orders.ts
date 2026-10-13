@@ -1,5 +1,7 @@
 // Order fulfillment domain helpers. Prisma-import-free (types + pure functions
 // only) so it stays unit-testable without a DB — mirrors lib/catalog.ts.
+import { parseCurrency, type Currency } from "@/lib/currency";
+import type { ShippingAddress } from "@/lib/address";
 
 /** The fixed fulfillment pipeline (D-12). Order is the intended progression. */
 export const ORDER_STATUSES = [
@@ -54,4 +56,79 @@ export function parseOrderItems(itemsJson: string): OrderItem[] {
   } catch {
     return [];
   }
+}
+
+// ---- Payment provider, currency and delivery address (D-25, D-26) ----
+
+/** Who took the payment. App-level allow-list, like ORDER_STATUSES. */
+export const PAYMENT_PROVIDERS = ["paystack", "stripe", "demo"] as const;
+export type PaymentProvider = (typeof PAYMENT_PROVIDERS)[number];
+
+const PROVIDER_SET = new Set<string>(PAYMENT_PROVIDERS);
+
+export function isPaymentProvider(value: unknown): value is PaymentProvider {
+  return typeof value === "string" && PROVIDER_SET.has(value);
+}
+
+export function paymentProviderLabel(value: string | null | undefined): string {
+  switch (value) {
+    case "paystack":
+      return "Paystack";
+    case "stripe":
+      return "Stripe";
+    case "demo":
+      return "Demo (no real payment)";
+    default:
+      return "—";
+  }
+}
+
+/**
+ * The currency an order was charged in. Orders from before Phase 12 were all
+ * charged in dollars, and Order.currency defaults to "USD" for them; anything
+ * unrecognised falls back to USD too rather than mislabelling an amount.
+ */
+export function orderCurrency(order: { currency?: string | null }): Currency {
+  return parseCurrency(order.currency) ?? "USD";
+}
+
+/**
+ * Defensively parse the Order.shippingAddress JSON snapshot. Returns null for
+ * legacy orders (no address) and for anything corrupt or incomplete, so a bad
+ * row never breaks the admin/account order pages.
+ */
+export function parseShippingAddress(json: string | null | undefined): ShippingAddress | null {
+  if (!json) return null;
+  try {
+    const x = JSON.parse(json) as Record<string, unknown>;
+    if (!x || typeof x !== "object") return null;
+    const str = (k: string) => (typeof x[k] === "string" ? (x[k] as string) : "");
+    const address: ShippingAddress = {
+      fullName: str("fullName"),
+      phone: str("phone"),
+      line1: str("line1"),
+      city: str("city"),
+      region: str("region"),
+      country: str("country"),
+    };
+    if (!address.fullName || !address.line1 || !address.country) return null;
+    if (str("line2")) address.line2 = str("line2");
+    if (str("postalCode")) address.postalCode = str("postalCode");
+    return address;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * The shipping fee an order paid: the stored total minus its line items
+ * (UI-SPEC A-7). Correct for legacy orders too, whose total already included
+ * shipping. Clamped at 0 so a corrupt snapshot can't show a negative fee.
+ */
+export function orderShippingMinor(order: { total: number; items: string }): number {
+  const lines = parseOrderItems(order.items).reduce(
+    (sum, i) => sum + i.unitPrice * i.qty,
+    0,
+  );
+  return Math.max(0, order.total - lines);
 }

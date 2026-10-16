@@ -3,11 +3,11 @@
 import Link from "next/link";
 import { useCart } from "@/context/CartContext";
 import CheckoutButton from "@/components/CheckoutButton";
-import { formatPrice } from "@/lib/products";
-import { FREE_SHIPPING_THRESHOLD } from "@/lib/shipping";
+import Money from "@/components/Money";
+import { lineTotal } from "@/lib/cart";
 
 export default function CartPage() {
-  const { items, updateQty, removeItem, subtotal, count } = useCart();
+  const { items, updateQty, removeItem, subtotals, count } = useCart();
 
   if (items.length === 0) {
     return (
@@ -47,7 +47,9 @@ export default function CartPage() {
                   >
                     {item.name}
                   </Link>
-                  <span>{formatPrice(item.price * item.qty)}</span>
+                  <span className="tabular-nums">
+                    <Money amounts={lineTotal(item)} />
+                  </span>
                 </div>
                 <p className="text-sm text-ink-soft">Size {item.size}</p>
                 <div className="mt-auto flex items-center gap-6">
@@ -86,19 +88,21 @@ export default function CartPage() {
             <h2 className="font-serif text-2xl">Summary</h2>
             <div className="mt-5 flex justify-between text-sm text-ink-soft">
               <span>Subtotal</span>
-              <span>{formatPrice(subtotal)}</span>
-            </div>
-            <div className="mt-2 flex justify-between text-sm text-ink-soft">
-              <span>Shipping</span>
-              <span>
-                {subtotal >= FREE_SHIPPING_THRESHOLD
-                  ? "Free"
-                  : "Calculated at checkout"}
+              <span className="tabular-nums">
+                <Money amounts={subtotals} />
               </span>
             </div>
+            {/* The destination isn't known until checkout, so the bag never
+                claims a shipping figure (D-14). */}
+            <div className="mt-2 flex justify-between text-sm text-ink-soft">
+              <span>Shipping</span>
+              <span>Calculated at checkout</span>
+            </div>
             <div className="mt-5 flex justify-between border-t border-ink/10 pt-5 text-lg">
-              <span className="font-serif">Total</span>
-              <span className="font-serif">{formatPrice(subtotal)}</span>
+              <span className="font-serif">Estimated total</span>
+              <span className="font-sans tabular-nums">
+                <Money amounts={subtotals} />
+              </span>
             </div>
             <CheckoutButton className="btn-primary mt-6 w-full">
               Proceed to checkout

@@ -11,7 +11,10 @@ import { calculateShipping } from "@/lib/shipping";
 
 export default function CheckoutPage() {
   const { data: session, status } = useSession();
-  const { items, subtotal } = useCart();
+  const { items, subtotals } = useCart();
+  // Checkout charges in dollars through Stripe until the address step and
+  // provider routing replace this page (Phase 12 plan 12-14).
+  const subtotal = subtotals.USD;
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -107,7 +110,7 @@ export default function CheckoutPage() {
                   Size {item.size} · Qty {item.qty}
                 </p>
               </div>
-              <span>{formatPrice(item.price * item.qty)}</span>
+              <span>{formatPrice(item.prices.USD * item.qty)}</span>
             </div>
           ))}
         </div>

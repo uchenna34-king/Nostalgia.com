@@ -8,24 +8,28 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import type { Currency } from "@/lib/currency";
+import {
+  applyPriceUpdates,
+  normaliseCartItems,
+  subtotalsOf,
+  type CartItem,
+  type PriceUpdate,
+} from "@/lib/cart";
 
-export type CartItem = {
-  slug: string;
-  name: string;
-  price: number; // cents
-  image: string;
-  size: string;
-  qty: number;
-};
+export type { CartItem, PriceUpdate };
 
 type CartContextValue = {
   items: CartItem[];
   count: number;
-  subtotal: number; // cents
+  /** Bag subtotal in each currency (minor units), never mixed. */
+  subtotals: Record<Currency, number>;
   isOpen: boolean;
   addItem: (item: Omit<CartItem, "qty">, qty?: number) => void;
   removeItem: (slug: string, size: string) => void;
   updateQty: (slug: string, size: string, qty: number) => void;
+  /** Refresh price snapshots with current prices (checkout's 409 reply). */
+  updatePrices: (updates: PriceUpdate[]) => void;
   clear: () => void;
   openDrawer: () => void;
   closeDrawer: () => void;
@@ -43,14 +47,12 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const [isOpen, setIsOpen] = useState(false);
   const [hydrated, setHydrated] = useState(false);
 
-  // Load persisted cart once on mount.
+  // Load persisted cart once on mount. Legacy single-price entries and
+  // anything malformed are dropped by the normaliser (D-13).
   useEffect(() => {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) {
-        const parsed = JSON.parse(raw);
-        if (Array.isArray(parsed)) setItems(parsed as CartItem[]);
-      }
+      if (raw) setItems(normaliseCartItems(JSON.parse(raw)));
     } catch {
       // ignore malformed storage
     }
@@ -95,27 +97,24 @@ export function CartProvider({ children }: { children: ReactNode }) {
     );
   };
 
+  const updatePrices: CartContextValue["updatePrices"] = (updates) => {
+    setItems((prev) => applyPriceUpdates(prev, updates));
+  };
+
   const clear = () => setItems([]);
 
-  const { count, subtotal } = useMemo(() => {
-    return items.reduce(
-      (acc, i) => {
-        acc.count += i.qty;
-        acc.subtotal += i.qty * i.price;
-        return acc;
-      },
-      { count: 0, subtotal: 0 },
-    );
-  }, [items]);
+  const count = useMemo(() => items.reduce((n, i) => n + i.qty, 0), [items]);
+  const subtotals = useMemo(() => subtotalsOf(items), [items]);
 
   const value: CartContextValue = {
     items,
     count,
-    subtotal,
+    subtotals,
     isOpen,
     addItem,
     removeItem,
     updateQty,
+    updatePrices,
     clear,
     openDrawer: () => setIsOpen(true),
     closeDrawer: () => setIsOpen(false),

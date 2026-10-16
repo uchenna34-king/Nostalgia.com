@@ -3,10 +3,11 @@
 import Link from "next/link";
 import { useCart } from "@/context/CartContext";
 import CheckoutButton from "@/components/CheckoutButton";
-import { formatPrice } from "@/lib/products";
+import Money from "@/components/Money";
+import { lineTotal } from "@/lib/cart";
 
 export default function CartDrawer() {
-  const { items, isOpen, closeDrawer, updateQty, removeItem, subtotal, count } =
+  const { items, isOpen, closeDrawer, updateQty, removeItem, subtotals, count } =
     useCart();
 
   return (
@@ -92,8 +93,8 @@ export default function CartDrawer() {
                           +
                         </button>
                       </div>
-                      <span className="text-sm">
-                        {formatPrice(item.price * item.qty)}
+                      <span className="text-sm tabular-nums">
+                        <Money amounts={lineTotal(item)} />
                       </span>
                     </div>
                   </div>
@@ -102,12 +103,15 @@ export default function CartDrawer() {
             </div>
 
             <div className="border-t border-ink/10 px-6 py-5">
-              <div className="mb-4 flex items-center justify-between">
+              <div className="mb-1 flex items-center justify-between">
                 <span className="eyebrow">Subtotal</span>
-                <span className="font-serif text-xl">
-                  {formatPrice(subtotal)}
+                <span className="font-sans text-xl tabular-nums">
+                  <Money amounts={subtotals} />
                 </span>
               </div>
+              <p className="mb-4 text-xs text-ink-soft">
+                Shipping calculated at checkout.
+              </p>
               <Link
                 href="/cart"
                 onClick={closeDrawer}

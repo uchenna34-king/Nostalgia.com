@@ -38,8 +38,9 @@ export default function AddToCart({ product }: { product: Product }) {
     addItem({
       slug: product.slug,
       name: product.name,
-      price: product.price,
-      image: product.images[0],
+      // Both currencies, so switching never touches the bag (D-13).
+      prices: { NGN: product.priceNgn, USD: product.priceUsd },
+      image: product.images[0] ?? "",
       size: selected.size,
     });
     // Success path only — the no-size/sold-out branch returns above. Non-PII.

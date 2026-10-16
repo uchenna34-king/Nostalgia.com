@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/db";
-import { parseOrderItems } from "@/lib/orders";
+import { orderCurrency, parseOrderItems } from "@/lib/orders";
 import OrderTable from "@/components/admin/OrderTable";
 
 // Rendering is owner-gated by app/admin/layout.tsx (requireOwner); every mutation
@@ -14,6 +14,8 @@ export default async function AdminOrdersPage() {
     email: o.email,
     itemCount: parseOrderItems(o.items).reduce((sum, i) => sum + i.qty, 0),
     total: o.total,
+    currency: orderCurrency(o),
+    paymentProvider: o.paymentProvider,
     status: o.status,
     createdAt: o.createdAt.toLocaleDateString("en-US", {
       year: "numeric",

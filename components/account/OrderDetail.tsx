@@ -1,5 +1,11 @@
-import { parseOrderItems } from "@/lib/orders";
-import { formatPrice } from "@/lib/products";
+import { addressLines } from "@/lib/address";
+import { formatMoney } from "@/lib/currency";
+import {
+  orderCurrency,
+  orderShippingMinor,
+  parseOrderItems,
+  parseShippingAddress,
+} from "@/lib/orders";
 
 /** Structural subset of a Prisma Order row this component needs. A full
  * Order row satisfies this shape, so the route can pass it directly. */
@@ -7,7 +13,12 @@ export type OrderDetailProps = {
   order: {
     id: string;
     status: string;
+    /** Minor units of `currency`. */
     total: number;
+    /** Absent or unrecognised means a legacy dollar order. */
+    currency?: string | null;
+    /** JSON snapshot; absent or null on legacy orders. */
+    shippingAddress?: string | null;
     trackingNumber: string | null;
     createdAt: Date;
     items: string;
@@ -55,6 +66,11 @@ function StatusPill({ status }: { status: string }) {
 
 export default function OrderDetail({ order }: OrderDetailProps) {
   const items = parseOrderItems(order.items);
+  // Amounts in the currency the order was charged in (D-26), never the toggle.
+  const currency = orderCurrency(order);
+  const money = (minor: number) => formatMoney(minor, currency);
+  const shipping = orderShippingMinor(order);
+  const address = parseShippingAddress(order.shippingAddress);
   const reference = `#${order.id.slice(-8)}`;
   const date = order.createdAt.toLocaleString("en-US", {
     dateStyle: "medium",
@@ -91,18 +107,35 @@ export default function OrderDetail({ order }: OrderDetailProps) {
                 <span className="text-ink-soft"> × {item.qty}</span>
               </span>
               <span className="tabular-nums text-ink">
-                {formatPrice(item.unitPrice * item.qty)}
+                {money(item.unitPrice * item.qty)}
               </span>
             </li>
           ))}
         </ul>
-        <div className="mt-4 flex justify-between border-t border-cream-dark pt-4 text-sm">
+        <div className="mt-4 flex justify-between border-t border-cream-dark pt-4 text-sm text-ink-soft">
+          <span>Shipping</span>
+          <span className="tabular-nums">{shipping === 0 ? "Free" : money(shipping)}</span>
+        </div>
+        <div className="mt-2 flex justify-between text-sm">
           <span className="font-medium text-ink">Total</span>
           <span className="tabular-nums font-medium text-ink">
-            {formatPrice(order.total)}
+            {money(order.total)}
           </span>
         </div>
       </div>
+
+      {address && (
+        <div className="mt-8">
+          <h2 className="mb-1 font-serif text-lg text-ink">Delivery address</h2>
+          <p className="text-sm text-ink-soft">
+            {addressLines(address).map((line, i) => (
+              <span key={i} className={i === 0 ? "block text-ink" : "block"}>
+                {line}
+              </span>
+            ))}
+          </p>
+        </div>
+      )}
 
       {order.trackingNumber && (
         <div className="mt-8">

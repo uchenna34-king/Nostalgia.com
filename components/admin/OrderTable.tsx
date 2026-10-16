@@ -1,11 +1,15 @@
 import Link from "next/link";
-import { formatPrice } from "@/lib/products";
+import { formatMoney, type Currency } from "@/lib/currency";
+import { paymentProviderLabel } from "@/lib/orders";
 
 type Row = {
   id: string;
   email: string;
   itemCount: number;
+  /** Minor units of `currency`; totals are never summed across currencies. */
   total: number;
+  currency: Currency;
+  paymentProvider: string | null;
   status: string;
   createdAt: string;
 };
@@ -45,6 +49,7 @@ export default function OrderTable({ orders }: { orders: Row[] }) {
             <th className="py-3 pr-4 font-medium">Customer</th>
             <th className="py-3 pr-4 font-medium">Items</th>
             <th className="py-3 pr-4 font-medium">Total</th>
+            <th className="py-3 pr-4 font-medium">Paid via</th>
             <th className="py-3 font-medium">Status</th>
           </tr>
         </thead>
@@ -64,7 +69,10 @@ export default function OrderTable({ orders }: { orders: Row[] }) {
               <td className="py-3 pr-4 text-ink">{o.email}</td>
               <td className="py-3 pr-4 tabular-nums text-ink">{o.itemCount}</td>
               <td className="py-3 pr-4 tabular-nums text-ink">
-                {formatPrice(o.total)}
+                {formatMoney(o.total, o.currency)}
+              </td>
+              <td className="py-3 pr-4 text-ink-soft">
+                {paymentProviderLabel(o.paymentProvider)}
               </td>
               <td className="py-3">
                 <span

@@ -1,6 +1,6 @@
 import Link from "next/link";
-import { parseOrderItems } from "@/lib/orders";
-import { formatPrice } from "@/lib/products";
+import { formatMoney, type Currency } from "@/lib/currency";
+import { orderCurrency, parseOrderItems } from "@/lib/orders";
 
 /** A single order row, already shaped for rendering — deliberately no email
  * column (unlike the admin table): a customer doesn't need their own email
@@ -8,7 +8,10 @@ import { formatPrice } from "@/lib/products";
 export type Row = {
   id: string;
   itemCount: number;
+  /** Minor units of `currency`. */
   total: number;
+  /** The currency the order was charged in (never the shopper's toggle). */
+  currency: Currency;
   status: string;
   createdAt: string;
 };
@@ -17,6 +20,8 @@ type OrderInput = {
   id: string;
   items: string;
   total: number;
+  /** Absent or unrecognised means a legacy dollar order. */
+  currency?: string | null;
   status: string;
   createdAt: Date;
 };
@@ -32,6 +37,7 @@ export function toOrderRows(orders: OrderInput[]): Row[] {
     id: o.id,
     itemCount: parseOrderItems(o.items).reduce((sum, i) => sum + i.qty, 0),
     total: o.total,
+    currency: orderCurrency(o),
     status: o.status,
     createdAt: o.createdAt.toLocaleDateString("en-US", {
       year: "numeric",
@@ -130,7 +136,7 @@ export default function OrderList({ orders }: { orders: Row[] }) {
                   {o.itemCount}
                 </td>
                 <td className="py-3 pr-4 tabular-nums text-ink">
-                  {formatPrice(o.total)}
+                  {formatMoney(o.total, o.currency)}
                 </td>
                 <td className="py-3">
                   <StatusPill status={o.status} />
@@ -157,7 +163,7 @@ export default function OrderList({ orders }: { orders: Row[] }) {
             <div className="mt-2 flex items-center justify-between">
               <StatusPill status={o.status} />
               <span className="tabular-nums text-ink">
-                {formatPrice(o.total)}
+                {formatMoney(o.total, o.currency)}
               </span>
             </div>
           </Link>

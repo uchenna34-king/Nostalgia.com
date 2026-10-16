@@ -124,6 +124,7 @@ const SAMPLE_ORDERS: Row[] = [
     total: 1000,
     status: "pending",
     createdAt: "Jan 1, 2026",
+    currency: "USD",
   },
   {
     id: "order-paid-000000002",
@@ -131,6 +132,7 @@ const SAMPLE_ORDERS: Row[] = [
     total: 2000,
     status: "paid",
     createdAt: "Jan 2, 2026",
+    currency: "USD",
   },
   {
     id: "order-fulfilled-0003",
@@ -138,6 +140,7 @@ const SAMPLE_ORDERS: Row[] = [
     total: 3000,
     status: "fulfilled",
     createdAt: "Jan 3, 2026",
+    currency: "USD",
   },
   {
     id: "order-cancelled-004",
@@ -145,6 +148,7 @@ const SAMPLE_ORDERS: Row[] = [
     total: 4000,
     status: "cancelled",
     createdAt: "Jan 4, 2026",
+    currency: "USD",
   },
 ];
 
@@ -241,5 +245,31 @@ describe("AccountSignOutButton", () => {
   it("has zero axe violations", async () => {
     const { container } = render(<AccountSignOutButton />);
     expect(await axe(container)).toHaveNoViolations();
+  });
+});
+
+describe("orders in their own currency (D-26)", () => {
+  it("labels each row with the currency it was charged in; legacy rows are dollars", () => {
+    const rows = toOrderRows([
+      { id: "n", items: "[]", total: 5_000_000, status: "paid", createdAt: new Date(), currency: "NGN" },
+      { id: "u", items: "[]", total: 3_500, status: "paid", createdAt: new Date(), currency: "USD" },
+      { id: "legacy", items: "[]", total: 3_500, status: "paid", createdAt: new Date() },
+      { id: "odd", items: "[]", total: 3_500, status: "paid", createdAt: new Date(), currency: "EUR" },
+    ]);
+    expect(rows.map((r) => r.currency)).toEqual(["NGN", "USD", "USD", "USD"]);
+  });
+
+  it("shows a naira order and a dollar order side by side, each in its own currency", () => {
+    render(
+      <OrderList
+        orders={[
+          { id: "order-naira-00000001", itemCount: 1, total: 5_000_000, status: "paid", createdAt: "Jan 1, 2026", currency: "NGN" },
+          { id: "order-dollar-0000002", itemCount: 1, total: 3_500, status: "paid", createdAt: "Jan 2, 2026", currency: "USD" },
+        ]}
+      />,
+    );
+    // Table and card layouts both render (CSS picks one), so each appears twice.
+    expect(screen.getAllByText("₦50,000")).toHaveLength(2);
+    expect(screen.getAllByText("$35")).toHaveLength(2);
   });
 });

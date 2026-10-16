@@ -12,12 +12,20 @@ import {
 } from "@/app/admin/products/actions";
 import { CATEGORIES, categoryByLabel } from "@/lib/taxonomy";
 import { toSlug } from "@/lib/slug";
+import { MAX_MINOR, autoUsdMinor, formatMoney, toMinorUnits } from "@/lib/currency";
+
+// The largest whole naira/dollar amount the INTEGER price columns hold; the
+// server applies the same limit through toMinorUnits.
+const MAX_PRICE_MAJOR = Math.floor(MAX_MINOR / 100);
 
 export type ProductFormInitial = {
   id?: string;
   name?: string;
   slug?: string;
-  price?: number;
+  /** Kobo. */
+  priceNgn?: number;
+  /** Cents, or null when the dollar price follows the store rate. */
+  priceUsdOverride?: number | null;
   category?: string;
   department?: string;
   subcategory?: string | null;
@@ -32,15 +40,28 @@ export type ProductFormInitial = {
 
 function messageFor(error: string): string {
   if (error === "slug_taken") return "That slug is already in use.";
+  if (error === "invalid_price_ngn") return "Enter the naira price as a whole number.";
+  if (error === "invalid_price_usd")
+    return "The dollar price must be a whole number, or left blank.";
+  if (error === "rate_unavailable")
+    return "The store exchange rate isn't set. Set it in Settings, then save again.";
   return "Couldn't save — check the highlighted fields and try again.";
+}
+
+/** Whole units for an input, from minor units; blank when there's no value. */
+function majorInput(minor: number | null | undefined): string {
+  return minor === null || minor === undefined ? "" : String(minor / 100);
 }
 
 export default function ProductForm({
   initial,
   collections,
+  usdNgnRate,
 }: {
   initial?: ProductFormInitial;
   collections: CollectionOption[];
+  /** Whole naira per $1 from StoreSettings, or null if it isn't set yet. */
+  usdNgnRate: number | null;
 }) {
   const router = useRouter();
   const editing = Boolean(initial?.id);
@@ -49,7 +70,11 @@ export default function ProductForm({
   const [slug, setSlug] = useState(initial?.slug ?? "");
   // A new product's slug follows its name until the owner edits it.
   const [slugEdited, setSlugEdited] = useState(Boolean(initial?.slug));
-  const [price, setPrice] = useState(String(initial?.price ?? ""));
+  // Typed in whole naira / dollars (D-07). A blank dollar price follows the
+  // store rate, so an edit of an auto-priced product stays auto.
+  const [priceNgn, setPriceNgn] = useState(majorInput(initial?.priceNgn));
+  const [priceUsd, setPriceUsd] = useState(majorInput(initial?.priceUsdOverride));
+  const [ngnTouched, setNgnTouched] = useState(false);
   // A legacy category outside the taxonomy starts blank, so saving forces a
   // real placement rather than silently keeping an unreachable one.
   const [category, setCategory] = useState(
@@ -79,7 +104,8 @@ export default function ProductForm({
     const fd = new FormData();
     fd.set("name", name);
     fd.set("slug", slug);
-    fd.set("price", price);
+    fd.set("priceNgn", priceNgn);
+    fd.set("priceUsd", priceUsd);
     fd.set("category", category);
     fd.set("department", department);
     fd.set("subcategory", subcategory);
@@ -100,14 +126,38 @@ export default function ProductForm({
       router.refresh();
     } else {
       setError(messageFor(result.error));
+      setNgnTouched(true);
       setSaving(false);
     }
+  }
+
+  // Live price helpers (UI-SPEC 7a), recomputed on every keystroke.
+  const ngnMinor = toMinorUnits(priceNgn);
+  const ngnInvalid = ngnTouched && ngnMinor === null;
+  const usdTyped = priceUsd.trim() !== "";
+  const usdInvalid = usdTyped && toMinorUnits(priceUsd) === null;
+  let usdHelper: string;
+  if (usdInvalid) {
+    usdHelper = "Enter a whole number of dollars, or leave blank to use the store rate.";
+  } else if (usdTyped) {
+    usdHelper = "Fixed price. It won't change when the store rate changes.";
+  } else if (usdNgnRate === null) {
+    usdHelper = "The store exchange rate isn't set yet. Open Settings to set it.";
+  } else if (ngnMinor !== null) {
+    const auto = formatMoney(autoUsdMinor(ngnMinor, usdNgnRate), "USD");
+    const rate = formatMoney(usdNgnRate * 100, "NGN");
+    usdHelper = `Leave blank to use the store rate: ${auto} (${rate} = $1).`;
+  } else {
+    usdHelper =
+      "Leave blank to price this automatically from the naira price at the store rate.";
   }
 
   const inputClass =
     "w-full border border-ink/20 bg-cream-dark px-3 py-2 text-sm";
   const labelClass =
     "block text-xs uppercase tracking-[0.15em] text-ink-soft mb-1";
+  const hintClass = "mt-1 text-xs text-ink-soft";
+  const fieldErrorClass = "mt-1 text-xs text-[#9B2C2C] dark:text-ink";
 
   return (
     <form onSubmit={handleSubmit} className="max-w-2xl">
@@ -140,32 +190,73 @@ export default function ProductForm({
               required
             />
           </div>
+          <div>
+            <label className={labelClass}>Slug</label>
+            <input
+              className={inputClass}
+              value={slug}
+              onChange={(e) => {
+                setSlugEdited(true);
+                setSlug(e.target.value);
+              }}
+              // Show the address it will actually get (the server applies
+              // the same toSlug on save).
+              onBlur={() => setSlug(toSlug(slug))}
+              required
+            />
+          </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className={labelClass}>Slug</label>
+              <label htmlFor="pf-price-ngn" className={labelClass}>
+                Price (₦)
+              </label>
               <input
-                className={inputClass}
-                value={slug}
-                onChange={(e) => {
-                  setSlugEdited(true);
-                  setSlug(e.target.value);
-                }}
-                // Show the address it will actually get (the server applies
-                // the same toSlug on save).
-                onBlur={() => setSlug(toSlug(slug))}
-                required
-              />
-            </div>
-            <div>
-              <label className={labelClass}>Price (cents)</label>
-              <input
+                id="pf-price-ngn"
                 type="number"
                 min={0}
+                max={MAX_PRICE_MAJOR}
+                step={1}
+                inputMode="numeric"
                 className={`${inputClass} tabular-nums`}
-                value={price}
-                onChange={(e) => setPrice(e.target.value)}
+                value={priceNgn}
+                onChange={(e) => setPriceNgn(e.target.value)}
+                onBlur={() => setNgnTouched(true)}
+                aria-describedby="pf-price-ngn-hint"
+                aria-invalid={ngnInvalid || undefined}
                 required
               />
+              <p
+                id="pf-price-ngn-hint"
+                className={ngnInvalid ? fieldErrorClass : hintClass}
+              >
+                {ngnInvalid
+                  ? "Enter the naira price as a whole number, for example 45000."
+                  : "Whole naira, no commas. Example: 45000."}
+              </p>
+            </div>
+            <div>
+              <label htmlFor="pf-price-usd" className={labelClass}>
+                Price ($), optional
+              </label>
+              <input
+                id="pf-price-usd"
+                type="number"
+                min={0}
+                max={MAX_PRICE_MAJOR}
+                step={1}
+                inputMode="numeric"
+                className={`${inputClass} tabular-nums`}
+                value={priceUsd}
+                onChange={(e) => setPriceUsd(e.target.value)}
+                aria-describedby="pf-price-usd-hint"
+                aria-invalid={usdInvalid || undefined}
+              />
+              <p
+                id="pf-price-usd-hint"
+                className={usdInvalid ? fieldErrorClass : hintClass}
+              >
+                {usdHelper}
+              </p>
             </div>
           </div>
           <div className="grid grid-cols-3 gap-4">

@@ -40,7 +40,8 @@ vi.mock("@/lib/db", () => ({
 const CHEAP_PRODUCT = {
   slug: "tote",
   name: "Nostalgia Tote",
-  price: 4500, // $45
+  priceUsd: 4500, // $45
+  priceNgn: 6750000, // ₦67,500
   sizes: JSON.stringify(["One Size"]),
   images: [{ url: "https://example.test/tote.jpg" }],
 };
@@ -48,7 +49,8 @@ const CHEAP_PRODUCT = {
 const EXPENSIVE_PRODUCT = {
   slug: "coat",
   name: "Nostalgia Coat",
-  price: 26000, // $260 — alone, already clears the $200 free-shipping threshold
+  priceUsd: 26000, // $260 — alone, already clears the $200 free-shipping threshold
+  priceNgn: 39000000, // ₦390,000
   sizes: JSON.stringify(["M"]),
   images: [{ url: "https://example.test/coat.jpg" }],
 };

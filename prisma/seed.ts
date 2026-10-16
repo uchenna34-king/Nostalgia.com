@@ -9,7 +9,7 @@ const DEFAULT_STOCK = 8;
 type Seed = {
   slug: string;
   name: string;
-  price: number; // cents
+  price: number; // dollar cents, as originally typed (becomes priceUsd + its override)
   category: string; // a lib/taxonomy.ts category label
   department?: "women" | "men" | "unisex"; // defaults to unisex
   subcategory?: string; // a section slug within the category
@@ -28,6 +28,12 @@ function resolveVariants(p: Seed): { size: string; stock: number; position: numb
     position,
     stock: p.stock?.[size] ?? DEFAULT_STOCK,
   }));
+}
+
+// Naira price (kobo) for a dollar price (cents), exactly as the multi-currency
+// migration backfills existing products: x1500, rounded to the nearest ₦500.
+function ngnFromUsd(cents: number): number {
+  return Math.round((cents * 1500) / 50000) * 50000;
 }
 
 const products: Seed[] = [
@@ -447,7 +453,10 @@ async function main() {
       data: {
         slug: p.slug,
         name: p.name,
-        price: p.price,
+        // Same shape the multi-currency migration gives existing products (D-08).
+        priceNgn: ngnFromUsd(p.price),
+        priceUsd: p.price,
+        priceUsdOverride: p.price,
         category: p.category,
         department: p.department ?? "unisex",
         subcategory: p.subcategory ?? null,
@@ -485,7 +494,7 @@ async function main() {
   // ---- Verified-purchase reviews (TRST-01) ----
   // Map slug -> created product so orders/reviews reference real ids and copy real names/prices.
   const productRows = await prisma.product.findMany({
-    select: { id: true, slug: true, name: true, price: true },
+    select: { id: true, slug: true, name: true, priceUsd: true },
   });
   const bySlug = new Map(productRows.map((p) => [p.slug, p]));
 
@@ -505,7 +514,7 @@ async function main() {
     const items: OrderItem[] = r.reviews.map((rev) => {
       const p = bySlug.get(rev.slug);
       if (!p) throw new Error(`Seed error: review references unknown product slug "${rev.slug}".`);
-      return { slug: p.slug, name: p.name, size: rev.size, unitPrice: p.price, qty: 1 };
+      return { slug: p.slug, name: p.name, size: rev.size, unitPrice: p.priceUsd, qty: 1 };
     });
     const total = items.reduce((sum, it) => sum + it.unitPrice * it.qty, 0);
     await prisma.order.create({

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { formatPrice } from "@/lib/products";
+import { formatMoney } from "@/lib/currency";
 import { deleteProduct } from "@/app/admin/products/actions";
 
 type Row = {
@@ -9,7 +9,12 @@ type Row = {
   slug: string;
   name: string;
   category: string;
-  price: number;
+  /** Kobo. */
+  priceNgn: number;
+  /** Cents: the effective dollar price. */
+  priceUsd: number;
+  /** Cents, or null when the dollar price follows the store rate. */
+  priceUsdOverride: number | null;
   featured: boolean;
   thumbnail: string | null;
   totalStock: number;
@@ -66,8 +71,17 @@ export default function ProductTable({ products }: { products: Row[] }) {
                   </div>
                 </td>
                 <td className="py-3 pr-4 text-ink-soft">{p.category}</td>
-                <td className="py-3 pr-4 tabular-nums text-ink">
-                  {formatPrice(p.price)}
+                <td className="py-3 pr-4 tabular-nums">
+                  <div className="text-ink">{formatMoney(p.priceNgn, "NGN")}</div>
+                  <div className="mt-1 flex items-center gap-2 text-xs text-ink-soft">
+                    {formatMoney(p.priceUsd, "USD")}
+                    {p.priceUsdOverride === null && (
+                      <span className="inline-block rounded-sm bg-cream-dark px-2 py-1 text-xs text-ink">
+                        auto
+                        <span className="sr-only"> (follows the store exchange rate)</span>
+                      </span>
+                    )}
+                  </div>
                 </td>
                 <td className="py-3 pr-4 tabular-nums text-ink">
                   {p.totalStock}
@@ -110,6 +124,15 @@ export default function ProductTable({ products }: { products: Row[] }) {
             ))}
           </tbody>
         </table>
+      )}
+      {products.length > 0 && (
+        <p className="mt-4 text-xs text-ink-soft">
+          &ldquo;auto&rdquo; dollar prices follow the store exchange rate. Change it in{" "}
+          <Link href="/admin/settings" className="text-sepia hover:text-ink">
+            Settings
+          </Link>
+          .
+        </p>
       )}
     </div>
   );

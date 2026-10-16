@@ -4,6 +4,7 @@
 // unit-testable without a DB or browser (see 08-RESEARCH.md Validation Architecture).
 // It may import `Prisma` as a *type* for return-type annotations only.
 import type { Prisma } from "@prisma/client";
+import { DEFAULT_CURRENCY, MAX_MINOR, type Currency } from "@/lib/currency";
 
 /** Products per page (D-07: "e.g. 24"). */
 export const PAGE_SIZE = 24;
@@ -74,10 +75,24 @@ export type CatalogFilterParams = {
   /** Section slug within the category (Product.subcategory). */
   subcategory?: string;
   size?: string;
+  /** Whole naira or dollars, in `currency` (D-28). */
   minPrice?: number;
   maxPrice?: number;
   collection?: string;
+  /** The shopper's currency: picks the price column. Defaults to naira. */
+  currency?: Currency;
 };
+
+/** The column holding a product's price in `currency` (kobo / cents). */
+function priceColumn(currency: Currency): "priceNgn" | "priceUsd" {
+  return currency === "USD" ? "priceUsd" : "priceNgn";
+}
+
+/** Typed whole naira/dollars → minor units, kept inside the INTEGER range so a
+ * huge `?price=` narrows to nothing instead of failing the query. */
+function toMinorFilter(major: number): number {
+  return Math.min(Math.round(major * 100), MAX_MINOR);
+}
 
 /**
  * Builds a Prisma `Product.where` clause from untrusted URL params. Search is
@@ -99,6 +114,7 @@ export function buildProductWhere(
 ): Prisma.ProductWhereInput {
   const { q, departments, category, subcategory, size, minPrice, maxPrice, collection } =
     params;
+  const column = priceColumn(params.currency ?? DEFAULT_CURRENCY);
 
   const searchClause: Prisma.ProductWhereInput = q
     ? {
@@ -136,10 +152,10 @@ export function buildProductWhere(
   };
 
   const minPriceClause: Prisma.ProductWhereInput =
-    minPrice !== undefined ? { price: { gte: minPrice } } : {};
+    minPrice !== undefined ? { [column]: { gte: toMinorFilter(minPrice) } } : {};
 
   const maxPriceClause: Prisma.ProductWhereInput =
-    maxPrice !== undefined ? { price: { lte: maxPrice } } : {};
+    maxPrice !== undefined ? { [column]: { lte: toMinorFilter(maxPrice) } } : {};
 
   const collectionClause: Prisma.ProductWhereInput = collection
     ? { collections: { some: { slug: collection } } }
@@ -165,17 +181,19 @@ const SORT_VALUES = new Set(SORT_OPTIONS.map((o) => o.value));
 /**
  * Maps a `?sort=` value to a Prisma `orderBy` object via a strict allow-list.
  * Any unknown/absent/malicious value falls back to "newest" — never passes
- * an arbitrary string into Prisma's orderBy field selection (ASVS V5).
+ * an arbitrary string into Prisma's orderBy field selection (ASVS V5). Price
+ * sorts use the shopper's currency column (D-28).
  */
 export function buildOrderBy(
   sort: string | undefined,
+  currency: Currency = DEFAULT_CURRENCY,
 ): Prisma.ProductOrderByWithRelationInput {
   const key = sort && SORT_VALUES.has(sort) ? sort : "newest";
   switch (key) {
     case "price-asc":
-      return { price: "asc" };
+      return { [priceColumn(currency)]: "asc" };
     case "price-desc":
-      return { price: "desc" };
+      return { [priceColumn(currency)]: "desc" };
     case "name":
       return { name: "asc" };
     default:

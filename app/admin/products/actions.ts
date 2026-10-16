@@ -10,6 +10,8 @@ import {
 } from "@/lib/taxonomy";
 import { isValidBlurDataUrl } from "@/lib/product-images";
 import { toSlug } from "@/lib/slug";
+import { effectiveUsdMinor, toMinorUnits } from "@/lib/currency";
+import { getUsdNgnRate } from "@/lib/settings";
 
 export type ProductActionResult = { ok: true } | { ok: false; error: string };
 
@@ -22,7 +24,10 @@ type ParsedProduct = {
   description: string;
   materials: string | null;
   care: string | null;
-  price: number;
+  /** Kobo, typed by the owner (required). */
+  priceNgn: number;
+  /** Cents, a hand-set dollar price, or null to follow the store rate. */
+  priceUsdOverride: number | null;
   featured: boolean;
   variants: { size: string; stock: number }[];
   images: {
@@ -72,28 +77,33 @@ function revalidateStorefront() {
 
 // Explicit field-by-field extraction — never spread raw FormData into Prisma
 // `data` (mass-assignment mitigation, mirroring app/api/checkout/route.ts).
-function parseProductInput(fd: FormData): ParsedProduct | null {
+// Returns the parsed product, or the error code to show the owner.
+function parseProductInput(fd: FormData): ParsedProduct | string {
   const name = field(fd, "name");
   // Typed by hand, so normalise it to the URL-safe shape the storefront links
   // to (falling back to the name); a slug with spaces made its page 404.
   const slug = toSlug(field(fd, "slug") || name);
   const description = field(fd, "description");
-  if (!name || !slug || !description) return null;
+  if (!name || !slug || !description) return "invalid_product_input";
 
   // Placement must be a real place in lib/taxonomy.ts — the storefront routes
   // only render what the tree knows, so a typo here would hide the product.
   const cat = categoryByLabel(field(fd, "category"));
-  if (!cat) return null;
+  if (!cat) return "invalid_product_input";
   const category = cat.label; // canonical casing
   const department = field(fd, "department") || "unisex";
-  if (!isProductDepartment(department)) return null;
+  if (!isProductDepartment(department)) return "invalid_product_input";
   const sectionSlug = field(fd, "subcategory");
-  if (sectionSlug && !getSection(cat, sectionSlug)) return null;
+  if (sectionSlug && !getSection(cat, sectionSlug)) return "invalid_product_input";
   const subcategory = sectionSlug || null;
 
-  const priceNum = Number(field(fd, "price"));
-  if (!Number.isFinite(priceNum) || priceNum < 0) return null;
-  const price = Math.round(priceNum);
+  // Whole naira / dollars, no commas or decimals (D-07); toMinorUnits also
+  // keeps the result inside the INTEGER column.
+  const priceNgn = toMinorUnits(field(fd, "priceNgn"));
+  if (priceNgn === null) return "invalid_price_ngn";
+  const usdTyped = field(fd, "priceUsd");
+  const priceUsdOverride = usdTyped ? toMinorUnits(usdTyped) : null;
+  if (usdTyped && priceUsdOverride === null) return "invalid_price_usd";
 
   const materials = field(fd, "materials") || null;
   const care = field(fd, "care") || null;
@@ -136,11 +146,23 @@ function parseProductInput(fd: FormData): ParsedProduct | null {
     description,
     materials,
     care,
-    price,
+    priceNgn,
+    priceUsdOverride,
     featured,
     variants,
     images,
     collectionIds,
+  };
+}
+
+// The three price columns (D-03). The effective dollar price is always
+// computed here, from the override or the store rate: never taken from the
+// browser. lib/settings.ts re-prices rate-following products when the rate changes.
+function prices(input: ParsedProduct, rate: number) {
+  return {
+    priceNgn: input.priceNgn,
+    priceUsdOverride: input.priceUsdOverride,
+    priceUsd: effectiveUsdMinor(input.priceNgn, input.priceUsdOverride, rate),
   };
 }
 
@@ -149,14 +171,16 @@ export async function createProduct(
 ): Promise<ProductActionResult> {
   await requireOwner();
   const input = parseProductInput(formData);
-  if (!input) return { ok: false, error: "invalid_product_input" };
+  if (typeof input === "string") return { ok: false, error: input };
+  const rate = await getUsdNgnRate();
+  if (rate === null) return { ok: false, error: "rate_unavailable" };
 
   try {
     await prisma.product.create({
       data: {
         name: input.name,
         slug: input.slug,
-        price: input.price,
+        ...prices(input, rate),
         category: input.category,
         department: input.department,
         subcategory: input.subcategory,
@@ -195,7 +219,9 @@ export async function updateProduct(
 ): Promise<ProductActionResult> {
   await requireOwner();
   const input = parseProductInput(formData);
-  if (!input) return { ok: false, error: "invalid_product_input" };
+  if (typeof input === "string") return { ok: false, error: input };
+  const rate = await getUsdNgnRate();
+  if (rate === null) return { ok: false, error: "rate_unavailable" };
 
   try {
     await prisma.product.update({
@@ -203,7 +229,7 @@ export async function updateProduct(
       data: {
         name: input.name,
         slug: input.slug,
-        price: input.price,
+        ...prices(input, rate),
         category: input.category,
         department: input.department,
         subcategory: input.subcategory,

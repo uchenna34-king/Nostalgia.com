@@ -1,13 +1,14 @@
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/db";
 import ProductForm from "@/components/admin/ProductForm";
+import { getUsdNgnRate } from "@/lib/settings";
 
 export default async function EditProductPage({
   params,
 }: {
   params: { id: string };
 }) {
-  const [product, collections] = await Promise.all([
+  const [product, collections, usdNgnRate] = await Promise.all([
     prisma.product.findUnique({
       where: { id: params.id },
       include: {
@@ -20,6 +21,7 @@ export default async function EditProductPage({
       select: { id: true, name: true },
       orderBy: { name: "asc" },
     }),
+    getUsdNgnRate(),
   ]);
 
   if (!product) notFound();
@@ -27,11 +29,13 @@ export default async function EditProductPage({
   return (
     <ProductForm
       collections={collections}
+      usdNgnRate={usdNgnRate}
       initial={{
         id: product.id,
         name: product.name,
         slug: product.slug,
-        price: product.price,
+        priceNgn: product.priceNgn,
+        priceUsdOverride: product.priceUsdOverride,
         category: product.category,
         department: product.department,
         subcategory: product.subcategory,

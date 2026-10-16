@@ -8,6 +8,7 @@ import {
   buildOrderBy,
   paginationMeta,
 } from "@/lib/catalog";
+import { MAX_MINOR } from "@/lib/currency";
 
 describe("PAGE_SIZE", () => {
   it("is 24", () => {
@@ -140,14 +141,37 @@ describe("buildProductWhere", () => {
     }
   });
 
-  it("minPrice produces a gte clause", () => {
-    const where = buildProductWhere({ minPrice: 1000 }) as { AND: unknown[] };
-    expect(where.AND).toContainEqual({ price: { gte: 1000 } });
+  // ?price= is typed in whole naira or dollars (D-28); the columns hold kobo /
+  // cents, so the filter multiplies by 100. Comparing typed values straight
+  // against cents was the old bug.
+  it("minPrice is major units of the active currency: a gte clause on that column", () => {
+    const ngn = buildProductWhere({ minPrice: 1000, currency: "NGN" }) as { AND: unknown[] };
+    expect(ngn.AND).toContainEqual({ priceNgn: { gte: 100000 } });
+    const usd = buildProductWhere({ minPrice: 50, currency: "USD" }) as { AND: unknown[] };
+    expect(usd.AND).toContainEqual({ priceUsd: { gte: 5000 } });
   });
 
-  it("maxPrice produces an lte clause", () => {
-    const where = buildProductWhere({ maxPrice: 5000 }) as { AND: unknown[] };
-    expect(where.AND).toContainEqual({ price: { lte: 5000 } });
+  it("maxPrice is major units of the active currency: an lte clause on that column", () => {
+    const ngn = buildProductWhere({ maxPrice: 5000, currency: "NGN" }) as { AND: unknown[] };
+    expect(ngn.AND).toContainEqual({ priceNgn: { lte: 500000 } });
+    const usd = buildProductWhere({ maxPrice: 200, currency: "USD" }) as { AND: unknown[] };
+    expect(usd.AND).toContainEqual({ priceUsd: { lte: 20000 } });
+  });
+
+  it("defaults to naira when no currency is given", () => {
+    const where = buildProductWhere({ minPrice: 1 }) as { AND: unknown[] };
+    expect(where.AND).toContainEqual({ priceNgn: { gte: 100 } });
+  });
+
+  it("clamps a huge typed price into the INTEGER range instead of erroring", () => {
+    const where = buildProductWhere({ minPrice: 1e15, maxPrice: 1e15 }) as { AND: unknown[] };
+    expect(where.AND).toContainEqual({ priceNgn: { gte: MAX_MINOR } });
+    expect(where.AND).toContainEqual({ priceNgn: { lte: MAX_MINOR } });
+  });
+
+  it("never filters on the legacy price field", () => {
+    const where = buildProductWhere({ minPrice: 1, maxPrice: 2, currency: "USD" });
+    expect(JSON.stringify(where)).not.toContain('"price"');
   });
 
   it("collection filters by slug via the relation", () => {
@@ -168,12 +192,18 @@ describe("buildProductWhere", () => {
 });
 
 describe("buildOrderBy", () => {
-  it("price-asc", () => {
-    expect(buildOrderBy("price-asc")).toEqual({ price: "asc" });
+  it("price-asc sorts by the active currency's column", () => {
+    expect(buildOrderBy("price-asc", "NGN")).toEqual({ priceNgn: "asc" });
+    expect(buildOrderBy("price-asc", "USD")).toEqual({ priceUsd: "asc" });
   });
 
-  it("price-desc", () => {
-    expect(buildOrderBy("price-desc")).toEqual({ price: "desc" });
+  it("price-desc sorts by the active currency's column", () => {
+    expect(buildOrderBy("price-desc", "NGN")).toEqual({ priceNgn: "desc" });
+    expect(buildOrderBy("price-desc", "USD")).toEqual({ priceUsd: "desc" });
+  });
+
+  it("price sorts default to naira", () => {
+    expect(buildOrderBy("price-asc")).toEqual({ priceNgn: "asc" });
   });
 
   it("name", () => {

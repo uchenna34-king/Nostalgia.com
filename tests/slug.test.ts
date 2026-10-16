@@ -2,12 +2,14 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { slugParam, toSlug } from "@/lib/slug";
 
 const create = vi.fn();
+const findRate = vi.fn(async () => ({ id: 1, usdNgnRate: 1500 }));
 
 vi.mock("next/cache", () => ({ revalidatePath: vi.fn() }));
 vi.mock("@/lib/admin", () => ({ requireOwner: vi.fn(async () => undefined) }));
 vi.mock("@/lib/db", () => ({
   prisma: {
     product: { create: (...a: unknown[]) => create(...a) },
+    storeSettings: { findUnique: () => findRate() },
     collection: { create: (...a: unknown[]) => create(...a) },
   },
 }));
@@ -54,7 +56,7 @@ function productForm(fields: Record<string, string>) {
   for (const [k, v] of Object.entries({
     name: "Orange Cotton Sweatshirt",
     slug: "orange cotton sweatshirt",
-    price: "12000",
+    priceNgn: "12000",
     category: "Sweatshirts",
     department: "unisex",
     subcategory: "",

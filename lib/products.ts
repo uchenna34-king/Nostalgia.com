@@ -8,6 +8,7 @@ import {
   parsePage,
   parsePriceRange,
 } from "@/lib/catalog";
+import { DEFAULT_CURRENCY, type Currency } from "@/lib/currency";
 import { getRatingSummaries, type RatingSummary } from "@/lib/reviews";
 import { compareSizes, departmentScope, type DepartmentSlug } from "@/lib/taxonomy";
 
@@ -19,7 +20,12 @@ export type Product = {
   id: string;
   slug: string;
   name: string;
-  price: number; // cents
+  /** Kobo. */
+  priceNgn: number;
+  /** Cents: the effective dollar price (hand-set override or the store rate). */
+  priceUsd: number;
+  /** Cents, same as priceUsd. Removed once every caller reads the two above. */
+  price: number;
   category: string;
   department: string;
   subcategory: string | null;
@@ -35,11 +41,14 @@ export type Product = {
   rating: RatingSummary;
 };
 
+// Fields are copied one by one, never spread: the row also carries
+// priceUsdOverride, which is admin-only and must not reach client props.
 function deserialize(row: {
   id: string;
   slug: string;
   name: string;
-  price: number;
+  priceNgn: number;
+  priceUsd: number;
   category: string;
   department: string;
   subcategory: string | null;
@@ -52,7 +61,19 @@ function deserialize(row: {
   variants: { size: string; stock: number }[];
 }): Omit<Product, "rating"> {
   return {
-    ...row,
+    id: row.id,
+    slug: row.slug,
+    name: row.name,
+    priceNgn: row.priceNgn,
+    priceUsd: row.priceUsd,
+    price: row.priceUsd,
+    category: row.category,
+    department: row.department,
+    subcategory: row.subcategory,
+    description: row.description,
+    featured: row.featured,
+    materials: row.materials,
+    care: row.care,
     images: row.images.map((img) => img.url),
     imageBlurs: row.images.map((img) => img.blurDataUrl),
     sizes: JSON.parse(row.sizes) as string[],
@@ -128,6 +149,8 @@ export type CatalogParams = {
   sort?: string;
   page?: number | string;
   collection?: string;
+  /** Shopper's currency for the price filter and sort; defaults to naira. */
+  currency?: Currency;
 };
 
 export type CatalogResult = {
@@ -150,6 +173,8 @@ export async function getCatalog(params: CatalogParams): Promise<CatalogResult> 
   const { minPrice, maxPrice } = parsePriceRange(params.price);
   const page = parsePage(params.page);
 
+  const currency = params.currency ?? DEFAULT_CURRENCY;
+
   const scope = {
     q: params.q,
     departments: params.department ? departmentScope(params.department) : undefined,
@@ -158,6 +183,7 @@ export async function getCatalog(params: CatalogParams): Promise<CatalogResult> 
     minPrice,
     maxPrice,
     collection: params.collection,
+    currency,
   };
   const where = buildProductWhere({
     ...scope,
@@ -166,7 +192,7 @@ export async function getCatalog(params: CatalogParams): Promise<CatalogResult> 
     maxPrice,
     collection: params.collection,
   });
-  const orderBy = buildOrderBy(params.sort);
+  const orderBy = buildOrderBy(params.sort, currency);
 
   // The row query must run against the *clamped* page (meta.skip/meta.take),
   // not the raw requested page — otherwise an over-range page returns an

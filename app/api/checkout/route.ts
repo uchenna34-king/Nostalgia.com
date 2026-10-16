@@ -77,7 +77,7 @@ export async function POST(req: Request) {
         slug: p.slug,
         name: p.name,
         size: i.size,
-        unitPrice: p.price,
+        unitPrice: p.priceUsd,
         qty,
         image: p.images[0]?.url,
       };

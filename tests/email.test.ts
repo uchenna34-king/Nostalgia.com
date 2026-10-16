@@ -1,11 +1,14 @@
+import { createElement } from "react";
+import { render } from "react-email";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   orderReference,
-  formatCents,
   buildOrderConfirmationContent,
   type OrderEmailSource,
 } from "@/lib/email-content";
+import { formatMoney } from "@/lib/currency";
 import { ORDER_STATUSES } from "@/lib/orders";
+import OrderConfirmationEmail from "@/emails/OrderConfirmation";
 
 const baseOrder: OrderEmailSource = {
   id: "clx0000000abcdefgh",
@@ -15,23 +18,38 @@ const baseOrder: OrderEmailSource = {
     { slug: "cream-linen-shirt", name: "Cream Linen Shirt", size: "L", unitPrice: 9500, qty: 2 },
   ]),
   total: 47500,
+  currency: "USD",
+  shippingAddress: null,
   status: "paid",
   createdAt: new Date("2026-08-01T10:00:00Z"),
+};
+
+const LAGOS = {
+  fullName: "Ada Obi",
+  phone: "+234 803 123 4567",
+  line1: "12 Admiralty Way",
+  line2: "Flat 3",
+  city: "Lekki",
+  region: "Lagos",
+  postalCode: "106104",
+  country: "NG",
+};
+
+// A naira order: two lines (₦45,000 + 2 x ₦25,000) and a ₦5,000 delivery fee.
+const nairaOrder: OrderEmailSource = {
+  ...baseOrder,
+  items: JSON.stringify([
+    { slug: "coat", name: "Coat", size: "M", unitPrice: 4_500_000, qty: 1 },
+    { slug: "tee", name: "Tee", size: "S", unitPrice: 2_500_000, qty: 2 },
+  ]),
+  total: 10_000_000,
+  currency: "NGN",
+  shippingAddress: JSON.stringify(LAGOS),
 };
 
 describe("orderReference", () => {
   it("returns the # prefix plus the final eight characters", () => {
     expect(orderReference("clx0000000abcdefgh")).toBe("#abcdefgh");
-  });
-});
-
-describe("formatCents", () => {
-  it("formats cents to a no-cents dollar string", () => {
-    expect(formatCents(4200)).toBe("$42");
-  });
-
-  it("formats zero cents", () => {
-    expect(formatCents(0)).toBe("$0");
   });
 });
 
@@ -60,7 +78,7 @@ describe("buildOrderConfirmationContent", () => {
     // Deliberately mismatched total vs line-item sum to prove the DB total wins.
     const skewedOrder: OrderEmailSource = { ...baseOrder, total: 99999 };
     const content = buildOrderConfirmationContent(skewedOrder);
-    expect(content.formattedTotal).toBe(formatCents(99999));
+    expect(content.formattedTotal).toBe(formatMoney(99999, "USD"));
     expect(content.total).toBe(99999);
   });
 
@@ -69,7 +87,7 @@ describe("buildOrderConfirmationContent", () => {
     const content = buildOrderConfirmationContent(corrupt);
     expect(content.lines).toEqual([]);
     expect(content.subject.length).toBeGreaterThan(0);
-    expect(content.formattedTotal).toBe(formatCents(corrupt.total));
+    expect(content.formattedTotal).toBe(formatMoney(corrupt.total, "USD"));
   });
 
   it("maps each ORDER_STATUSES value to its label and color", () => {
@@ -104,6 +122,92 @@ describe("buildOrderConfirmationContent", () => {
   });
 });
 
+describe("buildOrderConfirmationContent in the order's currency (D-26)", () => {
+  it("formats a naira order's lines, shipping and total in naira", () => {
+    const content = buildOrderConfirmationContent(nairaOrder);
+    expect(content.lines.map((l) => l.formattedLineTotal)).toEqual(["₦45,000", "₦50,000"]);
+    expect(content.lines[1].formattedUnitPrice).toBe("₦25,000");
+    expect(content.formattedShipping).toBe("₦5,000");
+    expect(content.formattedTotal).toBe("₦100,000");
+  });
+
+  it("keeps a legacy dollar order in dollars, with free shipping when the lines make the total", () => {
+    const content = buildOrderConfirmationContent(baseOrder);
+    expect(content.lines.map((l) => l.formattedLineTotal)).toEqual(["$285", "$190"]);
+    expect(content.formattedShipping).toBe("Free");
+    expect(content.formattedTotal).toBe("$475");
+  });
+
+  it("derives the shipping fee as the stored total minus the lines", () => {
+    const content = buildOrderConfirmationContent({ ...baseOrder, total: 52_500 });
+    expect(content.formattedShipping).toBe("$50");
+  });
+
+  it("falls back to dollars for an unrecognised currency rather than mislabelling", () => {
+    const content = buildOrderConfirmationContent({ ...baseOrder, currency: "EUR" });
+    expect(content.formattedTotal).toBe("$475");
+  });
+
+  it("lists the delivery address, one line per part, with the country by name", () => {
+    expect(buildOrderConfirmationContent(nairaOrder).addressLines).toEqual([
+      "Ada Obi",
+      "12 Admiralty Way",
+      "Flat 3",
+      "Lekki, Lagos 106104",
+      "Nigeria",
+      "+234 803 123 4567",
+    ]);
+  });
+
+  it("has no address block for a legacy order or a corrupt snapshot", () => {
+    expect(buildOrderConfirmationContent(baseOrder).addressLines).toBeNull();
+    expect(
+      buildOrderConfirmationContent({ ...baseOrder, shippingAddress: "not json" }).addressLines,
+    ).toBeNull();
+  });
+});
+
+describe("OrderConfirmationEmail", () => {
+  const html = (order: OrderEmailSource) =>
+    render(createElement(OrderConfirmationEmail, { content: buildOrderConfirmationContent(order) }));
+
+  it("declares UTF-8 so the naira sign survives every mail client", async () => {
+    const out = await html(nairaOrder);
+    expect(out.toLowerCase()).toMatch(/charset=["']?utf-8/);
+    expect(out).toContain("₦100,000");
+  });
+
+  it("shows the shipping row and the delivery address", async () => {
+    const out = await html(nairaOrder);
+    expect(out).toContain("Shipping");
+    expect(out).toContain("₦5,000");
+    expect(out).toContain("Delivering to");
+    expect(out).toContain("12 Admiralty Way");
+    expect(out).toContain("Lekki, Lagos 106104");
+  });
+
+  it("omits the address block for a legacy order", async () => {
+    const out = await html(baseOrder);
+    expect(out).not.toContain("Delivering to");
+    expect(out).toContain("Free");
+  });
+
+  it("keeps long naira amounts on one line", async () => {
+    const out = await html(nairaOrder);
+    expect(out).toMatch(/width:\s*96px/);
+    expect(out).toMatch(/white-space:\s*nowrap/);
+  });
+
+  it("escapes address text instead of injecting it as HTML", async () => {
+    const out = await html({
+      ...nairaOrder,
+      shippingAddress: JSON.stringify({ ...LAGOS, line1: "<img src=x onerror=alert(1)>" }),
+    });
+    expect(out).not.toContain("<img src=x");
+    expect(out).toContain("&lt;img src=x");
+  });
+});
+
 // --- sendOrderConfirmation (Task 3) ---------------------------------------
 //
 // lib/email.ts reads process.env.RESEND_API_KEY at module-load time (mirrors
@@ -124,6 +228,8 @@ const orderRow = {
     },
   ]),
   total: 28500,
+  currency: "USD",
+  shippingAddress: null,
   status: "paid",
   createdAt: new Date("2026-08-01T10:00:00Z"),
 };

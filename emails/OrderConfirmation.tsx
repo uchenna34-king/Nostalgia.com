@@ -58,6 +58,8 @@ export default function OrderConfirmationEmail({
     preheader,
     lines,
     formattedTotal,
+    formattedShipping,
+    addressLines,
     statusLabel,
     statusColor,
     orderUrl,
@@ -154,7 +156,15 @@ export default function OrderConfirmationEmail({
                     Size {line.size} &middot; Qty {line.qty}
                   </Text>
                 </Column>
-                <Column style={{ verticalAlign: "top", textAlign: "right", width: "80px" }}>
+                {/* 96px and nowrap: naira figures (₦1,250,000) are longer than dollars. */}
+                <Column
+                  style={{
+                    verticalAlign: "top",
+                    textAlign: "right",
+                    width: "96px",
+                    whiteSpace: "nowrap",
+                  }}
+                >
                   <Text
                     style={{
                       fontFamily: BODY_FONT,
@@ -171,6 +181,33 @@ export default function OrderConfirmationEmail({
           </Section>
 
           <Hr style={{ borderColor: "#E5E5E5", margin: "24px 0" }} />
+
+          <Row style={{ marginBottom: "8px" }}>
+            <Column>
+              <Text
+                style={{
+                  fontFamily: BODY_FONT,
+                  fontSize: "14px",
+                  color: COLORS.inkSoft,
+                  margin: 0,
+                }}
+              >
+                Shipping
+              </Text>
+            </Column>
+            <Column style={{ textAlign: "right", whiteSpace: "nowrap" }}>
+              <Text
+                style={{
+                  fontFamily: BODY_FONT,
+                  fontSize: "14px",
+                  color: COLORS.ink,
+                  margin: 0,
+                }}
+              >
+                {formattedShipping}
+              </Text>
+            </Column>
+          </Row>
 
           <Row>
             <Column>
@@ -200,6 +237,40 @@ export default function OrderConfirmationEmail({
               </Text>
             </Column>
           </Row>
+
+          {addressLines ? (
+            <>
+              <Hr style={{ borderColor: "#E5E5E5", margin: "24px 0" }} />
+              <Text
+                style={{
+              fontFamily: BODY_FONT,
+              fontSize: "12px",
+              letterSpacing: "2px",
+              textTransform: "uppercase",
+              color: COLORS.inkSoft,
+                  margin: "0 0 8px 0",
+                }}
+              >
+                Delivering to
+              </Text>
+              <Text
+                style={{
+                  fontFamily: BODY_FONT,
+                  fontSize: "14px",
+                  lineHeight: 1.5,
+                  color: COLORS.ink,
+                  margin: 0,
+                }}
+              >
+                {addressLines.map((line, i) => (
+                  <span key={i}>
+                    {i > 0 ? <br /> : null}
+                    {line}
+                  </span>
+                ))}
+              </Text>
+            </>
+          ) : null}
 
           {orderUrl ? (
             <Text style={{ margin: "32px 0 0 0" }}>

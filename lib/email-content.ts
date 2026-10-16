@@ -1,7 +1,14 @@
 // Pure email-content builder for order confirmation mail (LIVE-03, D-05, D-06).
 // Prisma-import-free (types + pure functions only) so it stays unit-testable
 // without a DB or network — mirrors lib/orders.ts and lib/catalog.ts.
-import { parseOrderItems } from "@/lib/orders";
+import { addressLines } from "@/lib/address";
+import { formatMoney } from "@/lib/currency";
+import {
+  orderCurrency,
+  orderShippingMinor,
+  parseOrderItems,
+  parseShippingAddress,
+} from "@/lib/orders";
 
 /** Structural subset of the Prisma `Order` row this module consumes. Declared
  * structurally (not imported from `@prisma/client`) so this module never
@@ -10,7 +17,12 @@ export type OrderEmailSource = {
   id: string;
   email: string;
   items: string;
+  /** Minor units of `currency`. */
   total: number;
+  /** "NGN" | "USD"; orders from before multi-currency are "USD". */
+  currency: string;
+  /** JSON snapshot of the delivery address; null on legacy orders. */
+  shippingAddress: string | null;
   status: string;
   createdAt: Date;
 };
@@ -33,6 +45,10 @@ export type OrderEmailContent = {
   lines: OrderEmailLine[];
   total: number;
   formattedTotal: string;
+  /** Derived fee (total minus lines), or "Free". */
+  formattedShipping: string;
+  /** Delivery address, one entry per printed line; null when there's none. */
+  addressLines: string[] | null;
   statusLabel: string;
   statusColor: string;
   orderUrl: string | null;
@@ -45,16 +61,6 @@ export type OrderEmailContent = {
  * never inline the slice at call sites. */
 export function orderReference(id: string): string {
   return `#${id.slice(-8)}`;
-}
-
-/**
- * Local reimplementation of `lib/products.ts`'s `formatPrice`. Duplicated
- * (not imported) because `lib/products.ts` imports `@/lib/db`, which would
- * drag Prisma into this module and defeat its DB-free, unit-testable
- * discipline. Kept byte-identical to that formatter's output on purpose.
- */
-export function formatCents(cents: number): string {
-  return `$${(cents / 100).toFixed(0)}`;
 }
 
 // Four-state status presentation (UI-SPEC "Specific Contracts" section 2 /
@@ -96,6 +102,9 @@ export function buildOrderConfirmationContent(
   const reference = orderReference(order.id);
   const items = parseOrderItems(order.items);
   const { label: statusLabel, color: statusColor } = statusMeta(order.status);
+  // Every amount in the order's own currency (D-26): the one it was charged in.
+  const currency = orderCurrency(order);
+  const money = (minor: number) => formatMoney(minor, currency);
 
   const lines: OrderEmailLine[] = items.map((item) => {
     const lineTotal = item.unitPrice * item.qty;
@@ -105,15 +114,18 @@ export function buildOrderConfirmationContent(
       qty: item.qty,
       unitPrice: item.unitPrice,
       lineTotal,
-      formattedUnitPrice: formatCents(item.unitPrice),
-      formattedLineTotal: formatCents(lineTotal),
+      formattedUnitPrice: money(item.unitPrice),
+      formattedLineTotal: money(lineTotal),
       image: item.image,
     };
   });
 
-  // The order's stored cents total is the authority — never a re-sum of the
-  // parsed line items, since that's what the customer actually paid.
-  const formattedTotal = formatCents(order.total);
+  // The order's stored total is the authority — never a re-sum of the parsed
+  // line items, since that's what the customer actually paid. Shipping is
+  // what the total holds beyond the lines (UI-SPEC A-7).
+  const formattedTotal = money(order.total);
+  const shipping = orderShippingMinor(order);
+  const address = parseShippingAddress(order.shippingAddress);
 
   const placedOn = order.createdAt.toLocaleDateString("en-US", {
     year: "numeric",
@@ -128,6 +140,8 @@ export function buildOrderConfirmationContent(
     lines,
     total: order.total,
     formattedTotal,
+    formattedShipping: shipping === 0 ? "Free" : money(shipping),
+    addressLines: address ? addressLines(address) : null,
     statusLabel,
     statusColor,
     orderUrl: baseUrl ? `${baseUrl}/account/orders/${order.id}` : null,

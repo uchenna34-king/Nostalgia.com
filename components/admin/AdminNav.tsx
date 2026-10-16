@@ -8,6 +8,7 @@ const SECTIONS = [
   { href: "/admin/collections", label: "Collections" },
   { href: "/admin/orders", label: "Orders" },
   { href: "/admin/reviews", label: "Reviews" },
+  { href: "/admin/settings", label: "Settings" },
 ];
 
 export default function AdminNav() {

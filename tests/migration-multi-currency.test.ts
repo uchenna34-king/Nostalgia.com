@@ -2,6 +2,7 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
+import { MAX_MINOR } from "@/lib/currency";
 
 const root = process.cwd();
 const sql = readFileSync(
@@ -19,7 +20,20 @@ describe("multi-currency migration", () => {
     expect(backfill).toBeGreaterThan(add);
     expect(tighten).toBeGreaterThan(backfill);
     expect(sql).toContain('SET "priceUsdOverride" = "price"');
-    expect(sql).toContain('(ROUND("price"::numeric * 1500 / 50000) * 50000)::integer');
+    expect(sql).toContain('ROUND("price"::numeric * 1500 / 50000) * 50000');
+  });
+
+  it("cannot overflow the INTEGER column, whatever price a product has", () => {
+    // Rehearsal finding: any product over $14,316.55 made price x 1500 overflow
+    // INTEGER, which rolls the migration back but records it as failed, and
+    // that blocks every later deploy until it is resolved by hand.
+    const cap = Math.floor(MAX_MINOR / 50000) * 50000;
+    expect(sql).toContain(
+      `GREATEST(LEAST(ROUND("price"::numeric * 1500 / 50000) * 50000, ${cap}), 0)::integer`,
+    );
+    // The capped naira price is still one the admin form accepts on save.
+    expect(cap).toBeLessThanOrEqual(MAX_MINOR);
+    expect(cap % 50000).toBe(0);
   });
 
   it("labels legacy orders USD and seeds the placeholder rate once", () => {

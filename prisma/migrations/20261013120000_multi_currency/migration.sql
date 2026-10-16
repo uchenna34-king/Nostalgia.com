@@ -13,9 +13,12 @@ ADD COLUMN     "priceUsdOverride" INTEGER;
 --   priceNgn         = price (cents) x 1500, rounded to the nearest ₦500
 --                      (50000 kobo). 1500 is the placeholder rate; the owner
 --                      reviews these prices in /admin.
+-- Clamped to 0..₦21,474,500 (2147450000 kobo, the largest ₦500 step an
+-- INTEGER holds): anything over $14,316.55 would otherwise overflow, and a
+-- failed migration blocks every later deploy until it is resolved by hand.
 UPDATE "Product"
 SET "priceUsdOverride" = "price",
-    "priceNgn" = (ROUND("price"::numeric * 1500 / 50000) * 50000)::integer;
+    "priceNgn" = GREATEST(LEAST(ROUND("price"::numeric * 1500 / 50000) * 50000, 2147450000), 0)::integer;
 
 ALTER TABLE "Product" ALTER COLUMN "priceNgn" SET NOT NULL;
 

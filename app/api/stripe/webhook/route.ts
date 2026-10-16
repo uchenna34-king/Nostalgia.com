@@ -3,7 +3,8 @@ import { headers } from "next/headers";
 import Stripe from "stripe";
 import { stripe } from "@/lib/stripe";
 import { prisma } from "@/lib/db";
-import { sendOrderConfirmation } from "@/lib/email";
+import { parseCurrency } from "@/lib/currency";
+import { markOrderPaid } from "@/lib/payments";
 
 // Prisma with a pooled Postgres connection requires the Node.js runtime, not
 // Edge — state it explicitly since webhook routes are sometimes mistakenly
@@ -11,12 +12,13 @@ import { sendOrderConfirmation } from "@/lib/email";
 export const runtime = "nodejs";
 
 /**
- * The single source of truth for payment status (D-04). Verifies the Stripe
- * signature over the RAW request body, then idempotently transitions the
- * matching Order from `pending` to `paid` and fires the one shared
- * confirmation email (D-06). Never trusts anything in the event payload
- * beyond `metadata.orderId` — the stored Order row is the sole authority for
- * recipient, total, and current status (T-11-05-04).
+ * Payment confirmation for dollar orders paid through Stripe (D-04, D-22).
+ * Verifies the Stripe signature over the RAW request body, checks that the
+ * session was actually paid, for exactly the order's total and currency, then
+ * hands off to markOrderPaid: an atomic pending → paid switch that sends the
+ * one shared confirmation email only when it made the change. The stored
+ * Order row stays the sole authority for recipient, total and status
+ * (T-11-05-04); the session is only checked against it.
  */
 export async function POST(req: Request) {
   if (!stripe) {
@@ -60,6 +62,16 @@ export async function POST(req: Request) {
       return NextResponse.json({ received: true });
     }
 
+    // A completed Checkout session isn't always a paid one (an async method
+    // completes first and settles later); card-only today, but never assume.
+    if (session.payment_status !== "paid") {
+      console.error("stripe webhook: completed session is not paid", {
+        orderId,
+        eventId: event.id,
+      });
+      return NextResponse.json({ received: true });
+    }
+
     const order = await prisma.order.findUnique({ where: { id: orderId } });
     if (!order) {
       console.error(
@@ -69,22 +81,33 @@ export async function POST(req: Request) {
       return NextResponse.json({ received: true });
     }
 
-    // Idempotency guard: the transition runs only when the order is still
-    // pending, so a repeated Stripe delivery — or an order that already
-    // advanced to fulfilled/cancelled — is a safe no-op (T-11-05-03). No
-    // separate event-ledger table is needed for this single one-way
-    // transition.
-    if (order.status === "pending") {
-      await prisma.order.update({
-        where: { id: orderId },
-        data: { status: "paid" },
+    // The charge must be exactly what this order was created for: same
+    // minor-unit amount, same currency (Stripe reports it lowercase).
+    const currency = parseCurrency(order.currency);
+    if (
+      !currency ||
+      session.amount_total !== order.total ||
+      session.currency !== order.currency.toLowerCase()
+    ) {
+      console.error("stripe webhook: amount or currency does not match the order", {
+        orderId,
+        eventId: event.id,
       });
-      await sendOrderConfirmation(order.id);
+      return NextResponse.json({ received: true });
     }
+
+    // Idempotent: only a still-pending order created for Stripe flips, so a
+    // repeated delivery, or an order already paid, fulfilled or cancelled, is
+    // a safe no-op that sends no second email (T-11-05-03).
+    await markOrderPaid(order.id, {
+      provider: "stripe",
+      amount: order.total,
+      currency,
+    });
   }
 
   // Always ack 2xx once the signature is verified, per Stripe's guidance —
   // downstream errors must not turn into a non-2xx and a retry storm.
-  // sendOrderConfirmation already swallows its own failures (11-04).
+  // sendOrderConfirmation (via markOrderPaid) swallows its own failures (11-04).
   return NextResponse.json({ received: true });
 }

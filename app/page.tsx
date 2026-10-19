@@ -9,12 +9,12 @@ import CategoryTiles, {
   type CategoryTile,
 } from "@/components/home/CategoryTiles";
 import Newsletter from "@/components/home/Newsletter";
-import { getFeaturedProducts, getProducts } from "@/lib/products";
+import { getCachedFeaturedProducts, getCachedProducts } from "@/lib/storefront-cache";
 
 export default async function Home() {
   const [featured, all] = await Promise.all([
-    getFeaturedProducts(),
-    getProducts(),
+    getCachedFeaturedProducts(),
+    getCachedProducts(),
   ]);
 
   // Category tiles built from the live catalogue — first image per category as

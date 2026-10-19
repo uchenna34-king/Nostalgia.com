@@ -12,7 +12,7 @@ import {
   DepartmentTabs,
   LocationChips,
 } from "@/components/shop/ShopNav";
-import { getCatalog } from "@/lib/products";
+import { getCachedCatalog } from "@/lib/storefront-cache";
 import {
   categoryByLabel,
   locationMetaTitle,
@@ -105,7 +105,7 @@ export default async function ShopPage({
   const legacyCategory = !loc.department ? searchParams.category : undefined;
   const legacy = categoryByLabel(legacyCategory);
 
-  const { products, total, totalPages, sizes } = await getCatalog({
+  const { products, total, totalPages, sizes } = await getCachedCatalog({
     q: searchParams.q,
     department: loc.department?.slug,
     category: loc.category?.label ?? legacyCategory,

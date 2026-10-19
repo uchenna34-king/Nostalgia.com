@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { slugParam } from "@/lib/slug";
 import ProductGrid from "@/components/ProductGrid";
 import Pagination from "@/components/shop/Pagination";
-import { getCatalog, getCollectionBySlug } from "@/lib/products";
+import { getCachedCatalog, getCachedCollectionBySlug } from "@/lib/storefront-cache";
 
 export const dynamic = "force-dynamic";
 
@@ -13,7 +13,7 @@ export async function generateMetadata({
 }: {
   params: { slug: string };
 }): Promise<Metadata> {
-  const collection = await getCollectionBySlug(slugParam(params.slug));
+  const collection = await getCachedCollectionBySlug(slugParam(params.slug));
   if (!collection) return {};
   const title = `${collection.name} — Nostalgia`;
   const description =
@@ -45,10 +45,10 @@ export default async function CollectionDetailPage({
   params: { slug: string };
   searchParams: CollectionSearchParams;
 }) {
-  const collection = await getCollectionBySlug(slugParam(params.slug));
+  const collection = await getCachedCollectionBySlug(slugParam(params.slug));
   if (!collection) notFound();
 
-  const { products, totalPages } = await getCatalog({
+  const { products, totalPages } = await getCachedCatalog({
     collection: slugParam(params.slug),
     sort: searchParams.sort,
     page: searchParams.page,

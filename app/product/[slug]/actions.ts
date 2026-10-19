@@ -1,10 +1,10 @@
 "use server";
 
 import { getServerSession } from "next-auth";
-import { revalidatePath } from "next/cache";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { hasPurchased, isValidRating } from "@/lib/reviews";
+import { revalidateStorefront } from "@/lib/storefront-revalidate";
 
 export type ReviewActionResult = { ok: true } | { ok: false; error: string };
 
@@ -15,14 +15,6 @@ const BODY_MAX = 2000;
 function field(fd: FormData, key: string): string {
   const v = fd.get(key);
   return typeof v === "string" ? v.trim() : "";
-}
-
-// Refresh every surface an aggregate-rating change affects (D-04).
-function revalidateStorefront(): void {
-  revalidatePath("/product/[slug]", "page");
-  revalidatePath("/shop");
-  revalidatePath("/");
-  revalidatePath("/collections/[slug]", "page");
 }
 
 /**
@@ -76,6 +68,8 @@ export async function submitReview(
     create: { productId: product.id, userId, rating, title, body },
   });
 
+  // Every surface an aggregate-rating change affects (D-04): the cached
+  // reads and the pages built from them.
   revalidateStorefront();
   return { ok: true };
 }

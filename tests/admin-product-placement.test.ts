@@ -6,7 +6,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 const create = vi.fn();
 const findRate = vi.fn();
 
-vi.mock("next/cache", () => ({ revalidatePath: vi.fn() }));
+vi.mock("next/cache", () => ({ revalidatePath: vi.fn(), revalidateTag: vi.fn() }));
 vi.mock("@/lib/admin", () => ({ requireOwner: vi.fn(async () => undefined) }));
 vi.mock("@/lib/db", () => ({
   prisma: {

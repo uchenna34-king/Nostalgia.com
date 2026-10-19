@@ -5,6 +5,7 @@ const calls: string[] = [];
 const requireOwner = vi.fn();
 const setUsdNgnRate = vi.fn();
 const revalidatePath = vi.fn();
+const revalidateTag = vi.fn();
 
 vi.mock("@/lib/admin", () => ({
   requireOwner: (...a: unknown[]) => {
@@ -20,6 +21,7 @@ vi.mock("@/lib/settings", () => ({
 }));
 vi.mock("next/cache", () => ({
   revalidatePath: (...a: unknown[]) => revalidatePath(...a),
+  revalidateTag: (...a: unknown[]) => revalidateTag(...a),
 }));
 
 import { saveExchangeRate } from "@/app/admin/settings/actions";
@@ -30,6 +32,7 @@ beforeEach(() => {
   requireOwner.mockResolvedValue(undefined);
   setUsdNgnRate.mockReset();
   revalidatePath.mockReset();
+  revalidateTag.mockReset();
 });
 
 describe("saveExchangeRate (D-05, D-06)", () => {
@@ -61,9 +64,10 @@ describe("saveExchangeRate (D-05, D-06)", () => {
     expect(setUsdNgnRate).toHaveBeenCalledWith(1600);
   });
 
-  it("refreshes the admin and every storefront page that shows a price", async () => {
+  it("refreshes the admin, the cached storefront reads and every storefront page that shows a price", async () => {
     setUsdNgnRate.mockResolvedValue(0);
     await saveExchangeRate("1600");
+    expect(revalidateTag).toHaveBeenCalledWith("storefront");
     expect(revalidatePath.mock.calls).toEqual([
       ["/admin/products"],
       ["/admin/settings"],
@@ -72,6 +76,7 @@ describe("saveExchangeRate (D-05, D-06)", () => {
       ["/product/[slug]", "page"],
       ["/collections"],
       ["/collections/[slug]", "page"],
+      ["/sitemap.xml"],
     ]);
   });
 

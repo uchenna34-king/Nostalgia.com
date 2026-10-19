@@ -3,6 +3,7 @@
 import { requireOwner } from "@/lib/admin";
 import { prisma } from "@/lib/db";
 import { revalidatePath } from "next/cache";
+import { revalidateStorefront } from "@/lib/storefront-revalidate";
 
 // Refresh every surface a review-visibility change affects: the admin list, the
 // PDP list + average, the product-card stars (/, /shop), collection pages, and
@@ -10,10 +11,7 @@ import { revalidatePath } from "next/cache";
 // from all of them at once.
 function revalidateReviewSurfaces() {
   revalidatePath("/admin/reviews");
-  revalidatePath("/");
-  revalidatePath("/shop");
-  revalidatePath("/product/[slug]", "page");
-  revalidatePath("/collections/[slug]", "page");
+  revalidateStorefront();
 }
 
 // Server Actions are independently-callable public HTTP endpoints — the admin

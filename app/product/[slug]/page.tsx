@@ -6,19 +6,16 @@ import AddToCart from "@/components/AddToCart";
 import Gallery from "@/components/Gallery";
 import ProductCard from "@/components/ProductCard";
 import RatingStars from "@/components/RatingStars";
-import ReviewForm, { type ReviewEligibility } from "@/components/ReviewForm";
+import ReviewFormIsland from "@/components/ReviewFormIsland";
 import ReviewList, { type ReviewDisplay } from "@/components/ReviewList";
 import ViewProductTracker from "@/components/ViewProductTracker";
 import WishlistButton from "@/components/WishlistButton";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
-import { prisma } from "@/lib/db";
+import { formatPrice } from "@/lib/products";
 import {
-  getProductBySlug,
-  getCatalog,
-  formatPrice,
-} from "@/lib/products";
-import { getReviewsForProduct, hasPurchased } from "@/lib/reviews";
+  getCachedCatalog,
+  getCachedProductBySlug,
+  getCachedReviewsForProduct,
+} from "@/lib/storefront-cache";
 import {
   categoryByLabel,
   getDepartment,
@@ -27,14 +24,28 @@ import {
 } from "@/lib/taxonomy";
 import { buildProductJsonLd, serializeJsonLd } from "@/lib/seo";
 
-export const dynamic = "force-dynamic";
+/**
+ * A cached page, the same HTML for every visitor. Each product page is built
+ * on its first visit and then served from cache — no database round trip —
+ * until a write clears it (revalidateStorefront in lib/storefront-revalidate)
+ * or the hourly refresh below rebuilds it, which also keeps the relative
+ * review dates current. Nothing here may read the session, cookies or
+ * headers: one such call turns every view back into a live render. The
+ * per-shopper review form state is fetched by ReviewFormIsland instead.
+ */
+export const revalidate = 3600;
+
+/** Build no product pages at deploy time; build each on its first visit. */
+export async function generateStaticParams() {
+  return [];
+}
 
 export async function generateMetadata({
   params,
 }: {
   params: { slug: string };
 }): Promise<Metadata> {
-  const product = await getProductBySlug(slugParam(params.slug));
+  const product = await getCachedProductBySlug(slugParam(params.slug));
   if (!product) return {};
   const image = product.images[0] ? [{ url: product.images[0] }] : undefined;
   return {
@@ -54,7 +65,10 @@ export async function generateMetadata({
   };
 }
 
-/** Server-side relative date so there is no client/server hydration mismatch. */
+/**
+ * Server-side relative date so there is no client/server hydration mismatch.
+ * On the cached page it is as fresh as the last rebuild — an hour at most.
+ */
 const RELATIVE = new Intl.RelativeTimeFormat("en", { numeric: "auto" });
 function relativeDate(from: Date): string {
   const diffMs = from.getTime() - Date.now();
@@ -68,40 +82,12 @@ function relativeDate(from: Date): string {
   return "today";
 }
 
-/**
- * Review-form eligibility, derived server-side (D-01). This drives DISPLAY
- * only — submitReview re-checks session + purchase independently on every
- * submit, so this is never the security boundary (T-10-05-01).
- */
-async function reviewFormState(
-  productId: string,
-  slug: string,
-): Promise<{
-  eligibility: ReviewEligibility;
-  existingReview?: { rating: number; title: string; body: string | null };
-}> {
-  const session = await getServerSession(authOptions);
-  const userId = (session?.user as { id?: string } | undefined)?.id;
-  if (!userId) return { eligibility: "signed-out" };
-
-  const [purchased, own] = await Promise.all([
-    hasPurchased(userId, slug),
-    prisma.review.findUnique({
-      where: { productId_userId: { productId, userId } },
-      select: { rating: true, title: true, body: true },
-    }),
-  ]);
-  if (!purchased) return { eligibility: "no-purchase" };
-  if (own) return { eligibility: "already-reviewed", existingReview: own };
-  return { eligibility: "eligible" };
-}
-
 export default async function ProductPage({
   params,
 }: {
   params: { slug: string };
 }) {
-  const product = await getProductBySlug(slugParam(params.slug));
+  const product = await getCachedProductBySlug(slugParam(params.slug));
   if (!product) notFound();
 
   // Where this piece sits in the shop tree. A unisex piece belongs to both
@@ -131,22 +117,21 @@ export default async function ProductPage({
     category: product.category,
     page: 1,
   };
-  // Related products, reviews and the review-form state are independent —
-  // fetch them together so the page waits on one database round trip, not
-  // several in a row.
-  const [[sameSection, sameCategory], { reviews: reviewRows }, review] =
+  // Related products and reviews are independent — fetch them together so a
+  // rebuild waits on one round of cache or database reads, not several.
+  const [[sameSection, sameCategory], { reviews: reviewRows }] =
     await Promise.all([
       Promise.all([
         section
-          ? getCatalog({ ...relatedScope, subcategory: section.slug })
-          : Promise.resolve({ products: [] as Awaited<ReturnType<typeof getCatalog>>["products"] }),
-        getCatalog(relatedScope),
+          ? getCachedCatalog({ ...relatedScope, subcategory: section.slug })
+          : Promise.resolve({
+              products: [] as Awaited<ReturnType<typeof getCachedCatalog>>["products"],
+            }),
+        getCachedCatalog(relatedScope),
       ]),
       // Verified-purchase reviews (bounded set) for the #reviews list.
-      getReviewsForProduct(product.id),
-      reviewFormState(product.id, product.slug),
+      getCachedReviewsForProduct(product.id),
     ]);
-  const { eligibility, existingReview } = review;
   const seen = new Set([product.slug]);
   const related = [...sameSection.products, ...sameCategory.products]
     .filter((p) => (seen.has(p.slug) ? false : (seen.add(p.slug), true)))
@@ -316,11 +301,7 @@ export default async function ProductPage({
             No reviews yet — be the first to review this product.
           </p>
         )}
-        <ReviewForm
-          slug={product.slug}
-          eligibility={eligibility}
-          existingReview={existingReview}
-        />
+        <ReviewFormIsland slug={product.slug} />
       </section>
     </main>
   );

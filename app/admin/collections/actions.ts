@@ -3,6 +3,7 @@
 import { requireOwner } from "@/lib/admin";
 import { prisma } from "@/lib/db";
 import { revalidatePath } from "next/cache";
+import { revalidateStorefront } from "@/lib/storefront-revalidate";
 import { toSlug } from "@/lib/slug";
 
 export type CollectionActionResult = { ok: true } | { ok: false; error: string };
@@ -39,12 +40,9 @@ function isUniqueViolation(e: unknown): boolean {
   );
 }
 
-function revalidateStorefront() {
+function revalidateAfterWrite() {
   revalidatePath("/admin/collections");
-  revalidatePath("/collections");
-  revalidatePath("/collections/[slug]", "page");
-  revalidatePath("/shop");
-  revalidatePath("/");
+  revalidateStorefront();
 }
 
 function parseCollectionInput(fd: FormData): ParsedCollection | null {
@@ -80,7 +78,7 @@ export async function createCollection(
     throw e;
   }
 
-  revalidateStorefront();
+  revalidateAfterWrite();
   return { ok: true };
 }
 
@@ -107,7 +105,7 @@ export async function updateCollection(
     throw e;
   }
 
-  revalidateStorefront();
+  revalidateAfterWrite();
   return { ok: true };
 }
 
@@ -116,5 +114,5 @@ export async function deleteCollection(id: string): Promise<void> {
   // Deleting a collection detaches its products (implicit m2m join rows) but
   // never deletes the products themselves.
   await prisma.collection.delete({ where: { id } });
-  revalidateStorefront();
+  revalidateAfterWrite();
 }

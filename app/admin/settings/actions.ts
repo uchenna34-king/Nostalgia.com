@@ -2,6 +2,7 @@
 
 import { requireOwner } from "@/lib/admin";
 import { revalidatePath } from "next/cache";
+import { revalidateStorefront } from "@/lib/storefront-revalidate";
 import { isValidRate } from "@/lib/currency";
 import { setUsdNgnRate } from "@/lib/settings";
 
@@ -34,10 +35,6 @@ export async function saveExchangeRate(raw: string): Promise<RateActionResult> {
 
   revalidatePath("/admin/products");
   revalidatePath("/admin/settings");
-  revalidatePath("/");
-  revalidatePath("/shop/[[...slug]]", "page");
-  revalidatePath("/product/[slug]", "page");
-  revalidatePath("/collections");
-  revalidatePath("/collections/[slug]", "page");
+  revalidateStorefront();
   return { ok: true, updated };
 }

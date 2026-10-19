@@ -1,7 +1,9 @@
 import Link from "next/link";
-import { getCollections } from "@/lib/products";
+import { getCachedCollections } from "@/lib/storefront-cache";
 
-export const dynamic = "force-dynamic";
+// Static: built once, rebuilt when a collection is saved (revalidateStorefront)
+// or at the latest hourly. Nothing on this page differs per visitor.
+export const revalidate = 3600;
 
 /**
  * Collections index (DISC-04, D-10): lists the seeded curated collections,
@@ -9,7 +11,7 @@ export const dynamic = "force-dynamic";
  * collection management (create/edit) is deferred to the Phase 9 admin (D-11).
  */
 export default async function CollectionsPage() {
-  const collections = await getCollections();
+  const collections = await getCachedCollections();
 
   return (
     <main className="container-x py-14">

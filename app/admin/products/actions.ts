@@ -3,6 +3,7 @@
 import { requireOwner } from "@/lib/admin";
 import { prisma } from "@/lib/db";
 import { revalidatePath } from "next/cache";
+import { revalidateStorefront } from "@/lib/storefront-revalidate";
 import {
   categoryByLabel,
   getSection,
@@ -66,13 +67,11 @@ function isUniqueViolation(e: unknown): boolean {
   );
 }
 
-// Refresh every storefront route a product change can affect (SC#2).
-function revalidateStorefront() {
+// Refresh the admin list and every storefront route and cached read a product
+// change can affect (SC#2).
+function revalidateAfterWrite() {
   revalidatePath("/admin/products");
-  revalidatePath("/");
-  revalidatePath("/shop/[[...slug]]", "page");
-  revalidatePath("/product/[slug]", "page");
-  revalidatePath("/collections/[slug]", "page");
+  revalidateStorefront();
 }
 
 // Explicit field-by-field extraction — never spread raw FormData into Prisma
@@ -209,7 +208,7 @@ export async function createProduct(
     throw e;
   }
 
-  revalidateStorefront();
+  revalidateAfterWrite();
   return { ok: true };
 }
 
@@ -256,7 +255,7 @@ export async function updateProduct(
     throw e;
   }
 
-  revalidateStorefront();
+  revalidateAfterWrite();
   return { ok: true };
 }
 
@@ -266,5 +265,5 @@ export async function deleteProduct(id: string): Promise<void> {
   // Product, so past orders keep their record (D-07). Cascade removes the
   // product's ProductImage / ProductSizeStock child rows automatically.
   await prisma.product.delete({ where: { id } });
-  revalidateStorefront();
+  revalidateAfterWrite();
 }

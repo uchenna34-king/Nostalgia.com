@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { flushSync } from "react-dom";
 
 type Theme = "light" | "dark";
 
@@ -14,6 +15,14 @@ type Theme = "light" | "dark";
  *
  * Choice is persisted; absence of a choice means "follow the system", and that
  * keeps following it live (the media listener below) until the user picks.
+ *
+ * A deliberate switch cross-fades the whole page through a view transition:
+ * the browser snapshots the old page, applies the class swap in one style
+ * pass, and fades between the two snapshots on the compositor. Do not go back
+ * to transitioning colours per element (the old `.theme-transition *` rule) —
+ * every element in flight makes each frame of the fade a whole-page style
+ * recompute and repaint, which halved the frame rate on a laptop and, on a
+ * mid-range phone, left a freeze followed by a snap.
  */
 export default function ThemeToggle({ className = "" }: { className?: string }) {
   const [theme, setTheme] = useState<Theme | null>(null);
@@ -34,22 +43,29 @@ export default function ThemeToggle({ className = "" }: { className?: string }) 
 
   const toggle = () => {
     const next: Theme = theme === "dark" ? "light" : "dark";
-    const root = document.documentElement;
-
-    // Opt into the cross-fade only for a deliberate switch — never on load, and
-    // never for the system-preference path above (which can fire at sunset,
-    // unattended). Removed once the transition has run so it doesn't linger on
-    // every unrelated colour change.
-    root.classList.add("theme-transition");
-    root.classList.toggle("dark", next === "dark");
-    window.setTimeout(() => root.classList.remove("theme-transition"), 550);
 
     try {
       localStorage.setItem("theme", next);
     } catch {
       // Private mode / blocked storage: the theme still applies for this visit.
     }
-    setTheme(next);
+
+    // flushSync so the icon swap is in the DOM before the browser captures the
+    // new snapshot — otherwise the old icon would fade in with the new page.
+    const apply = () => {
+      document.documentElement.classList.toggle("dark", next === "dark");
+      flushSync(() => setTheme(next));
+    };
+
+    // Fade only for a deliberate switch — never on load, and never for the
+    // system-preference path above (which can fire at sunset, unattended).
+    // Browsers without view transitions, and reduced motion, switch instantly.
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduceMotion || typeof document.startViewTransition !== "function") {
+      apply();
+      return;
+    }
+    document.startViewTransition(apply);
   };
 
   // Pre-mount: a neutral, same-size placeholder so the nav doesn't reflow when

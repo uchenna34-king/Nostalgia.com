@@ -5,11 +5,15 @@ import { Suspense, useEffect, useRef } from "react";
 import { useSearchParams } from "next/navigation";
 import { useCart } from "@/context/CartContext";
 import { trackEvent } from "@/lib/analytics";
+import { parseCurrency } from "@/lib/currency";
 
 function SuccessInner() {
   const params = useSearchParams();
   const orderId = params.get("order");
   const isDemo = params.get("demo") === "1";
+  // The currency the order was charged in, set by the payment route (D-27).
+  // Allow-listed, so an edited URL can't put arbitrary text into analytics.
+  const currency = parseCurrency(params.get("currency"));
   const { clear } = useCart();
   const cleared = useRef(false);
   const trackedRef = useRef(false);
@@ -27,9 +31,9 @@ function SuccessInner() {
   useEffect(() => {
     if (orderId && !trackedRef.current) {
       trackedRef.current = true;
-      trackEvent("purchase", { orderId, demo: isDemo });
+      trackEvent("purchase", { orderId, demo: isDemo, ...(currency && { currency }) });
     }
-  }, [orderId, isDemo]);
+  }, [orderId, isDemo, currency]);
 
   return (
     <main className="container-x flex min-h-[70vh] flex-col items-center justify-center py-20 text-center">

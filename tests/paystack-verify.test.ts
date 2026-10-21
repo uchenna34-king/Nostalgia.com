@@ -3,6 +3,8 @@ import { createHmac } from "node:crypto";
 import { describe, expect, it } from "vitest";
 import {
   evaluatePaystackTransaction,
+  isPaystackReference,
+  toPaystackTx,
   verifyWebhookSignature,
   type PaystackOrderRef,
   type PaystackTx,
@@ -81,5 +83,67 @@ describe("evaluatePaystackTransaction", () => {
 
   it("checks the reference before the status", () => {
     expect(evaluatePaystackTransaction(tx({ status: "failed", reference: "x" }), order)).toBe("mismatch");
+  });
+});
+
+describe("toPaystackTx", () => {
+  it("keeps the four fields we check and drops the rest", () => {
+    expect(
+      toPaystackTx({
+        status: "success",
+        reference: "ord_1",
+        amount: 4_500_000,
+        currency: "NGN",
+        customer: { email: "ada@example.com" },
+      }),
+    ).toEqual({ status: "success", reference: "ord_1", amount: 4_500_000, currency: "NGN" });
+  });
+
+  it("reads a string of digits as the same amount", () => {
+    expect(toPaystackTx({ amount: "4500000" }).amount).toBe(4_500_000);
+  });
+
+  it.each([undefined, null, "", " 4500000", "4500000.0", "4,500,000", "-1", true, [], {}])(
+    "never turns amount %j into a number that could match",
+    (amount) => {
+      expect(toPaystackTx({ amount }).amount).toBeNaN();
+    },
+  );
+
+  it("reads non-string text fields as empty, never as their String() form", () => {
+    expect(toPaystackTx({ status: true, reference: 12345678901, currency: ["NGN"] })).toEqual({
+      status: "",
+      reference: "",
+      amount: NaN,
+      currency: "",
+    });
+  });
+
+  it.each([undefined, null, "x", 42, []])("tolerates data of %j", (data) => {
+    expect(toPaystackTx(data)).toEqual({ status: "", reference: "", amount: NaN, currency: "" });
+  });
+});
+
+describe("isPaystackReference", () => {
+  it("accepts our order ids", () => {
+    expect(isPaystackReference("cmorder0000000000000000001")).toBe(true);
+    expect(isPaystackReference("ord_12345-AB")).toBe(true);
+  });
+
+  it.each([
+    ["empty", ""],
+    ["too short", "abc123456"],
+    ["too long", "x".repeat(65)],
+    ["a path", "../../admin"],
+    ["a protocol-relative URL", "//evil.test/x"],
+    ["a URL", "https://evil.test"],
+    ["spaces", "cmorder 000000000001"],
+    ["a query string", "cmorder000001?x=1"],
+    ["an encoded slash", "cmorder%2F00000001"],
+    ["a trailing newline", "cmorder0000000001\n"],
+    ["a number", 12345678901],
+    ["null", null],
+  ])("refuses %s", (_label, value) => {
+    expect(isPaystackReference(value)).toBe(false);
   });
 });

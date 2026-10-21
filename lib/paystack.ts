@@ -5,7 +5,7 @@
 // Never log the key, a request body or a response body: they carry the
 // secret and the customer's email.
 import type { Currency } from "@/lib/currency";
-import type { PaystackTx } from "@/lib/paystack-verify";
+import { toPaystackTx, type PaystackTx } from "@/lib/paystack-verify";
 
 const key = process.env.PAYSTACK_SECRET_KEY;
 export const paystackEnabled = Boolean(key);
@@ -80,14 +80,8 @@ export async function initializeTransaction(
 
 /** The transaction as Paystack records it, fetched with our secret key. */
 export async function verifyTransaction(reference: string): Promise<PaystackTx> {
-  const r = await call<{ data: Partial<PaystackTx> }>(
+  const r = await call<{ data?: unknown }>(
     `/transaction/verify/${encodeURIComponent(reference)}`,
   );
-  const d = r.data ?? {};
-  return {
-    status: String(d.status ?? ""),
-    reference: String(d.reference ?? ""),
-    amount: Number(d.amount ?? NaN),
-    currency: String(d.currency ?? ""),
-  };
+  return toPaystackTx(r.data);
 }

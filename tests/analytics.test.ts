@@ -49,6 +49,17 @@ describe("trackEvent consent gating", () => {
     expect(track).toHaveBeenCalledWith("add_to_cart", { slug: "x" });
   });
 
+  it("forwards a purchase's currency unchanged, alongside the opaque order id only", () => {
+    // D-27: purchase and begin_checkout carry the currency; nothing personal.
+    setConsent("accepted");
+    trackEvent("purchase", { orderId: "cmorder0000000000000000001", demo: false, currency: "NGN" });
+    expect(track).toHaveBeenCalledWith("purchase", {
+      orderId: "cmorder0000000000000000001",
+      demo: false,
+      currency: "NGN",
+    });
+  });
+
   it("never throws even when the underlying track call throws", () => {
     setConsent("accepted");
     (track as ReturnType<typeof vi.fn>).mockImplementation(() => {

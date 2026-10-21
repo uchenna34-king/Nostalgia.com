@@ -30,6 +30,42 @@ export type PaystackTx = {
   currency: string;
 };
 
+/**
+ * The transaction from a verify response's or a webhook event's `data`, in
+ * one shape for both paths. Anything missing or malformed becomes a value
+ * that can never match an order: text fields must be strings, and the amount
+ * a number (or a string of digits), so `""`, `null` or `true` never read as 0
+ * or 1.
+ */
+export function toPaystackTx(data: unknown): PaystackTx {
+  const d = (data && typeof data === "object" ? data : {}) as Record<string, unknown>;
+  const text = (v: unknown) => (typeof v === "string" ? v : "");
+  const amount =
+    typeof d.amount === "number"
+      ? d.amount
+      : typeof d.amount === "string" && /^\d+$/.test(d.amount)
+        ? Number(d.amount)
+        : NaN;
+  return {
+    status: text(d.status),
+    reference: text(d.reference),
+    amount,
+    currency: text(d.currency),
+  };
+}
+
+// The reference is our Order id (a cuid), sent to Paystack at checkout.
+const REFERENCE = /^[A-Za-z0-9_-]{10,64}$/;
+
+/**
+ * Whether a reference handed back to us could be one of our order ids.
+ * Anything else (path characters, a URL, an empty or oversized value) is
+ * refused before it reaches the database or a Paystack URL.
+ */
+export function isPaystackReference(value: unknown): value is string {
+  return typeof value === "string" && REFERENCE.test(value);
+}
+
 export type TxVerdict = "paid" | "failed" | "pending" | "mismatch";
 
 /** The stored Order fields the verdict is checked against — the only authority. */

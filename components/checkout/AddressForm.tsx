@@ -11,6 +11,7 @@ import {
   type ShippingAddress,
 } from "@/lib/address";
 import { countryOptions } from "@/lib/countries";
+import { regionFromCountry } from "@/lib/region";
 
 type Values = Record<AddressField, string>;
 
@@ -35,20 +36,27 @@ const CONTROL =
 /**
  * Delivery address form (D-15, UI-SPEC Surface 3). Validation runs through
  * the same validateAddress the server uses, so rules and messages can't
- * drift; the server stays the authority. No prefill besides Nigeria.
+ * drift; the server stays the authority. No prefill besides the country,
+ * which starts at the shopper's ship-to region (D-33) and is theirs to change.
  */
 export default function AddressForm({
+  initialCountry,
   onValidSubmit,
   onCountryChange,
   serverErrors,
   disabled,
 }: {
+  /** Read once, at mount; anything we don't ship to starts at Nigeria. */
+  initialCountry?: string;
   onValidSubmit: (address: ShippingAddress) => void;
   onCountryChange?: (country: string) => void;
   serverErrors?: AddressErrors | null;
   disabled: boolean;
 }) {
-  const [values, setValues] = useState<Values>(EMPTY);
+  const [values, setValues] = useState<Values>(() => ({
+    ...EMPTY,
+    country: regionFromCountry(initialCountry),
+  }));
   const [errors, setErrors] = useState<AddressErrors>({});
   const refs = useRef<Partial<Record<AddressField, HTMLInputElement | HTMLSelectElement | null>>>({});
   const countries = useMemo(() => countryOptions(), []);

@@ -20,7 +20,7 @@ vi.mock("@/context/WishlistContext", () => ({
   useWishlist: () => ({ count: 0 }),
 }));
 vi.mock("@/components/ThemeToggle", () => ({ default: () => null }));
-vi.mock("@/components/CurrencyToggle", () => ({ default: () => null }));
+vi.mock("@/components/RegionPicker", () => ({ default: () => null }));
 vi.mock("@/components/ShopMenu", () => ({
   MegaPanel: () => null,
   MobileShopMenu: () => null,

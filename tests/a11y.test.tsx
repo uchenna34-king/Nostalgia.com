@@ -13,6 +13,15 @@ vi.mock("next/navigation", () => ({
 vi.mock("@/app/product/[slug]/actions", () => ({
   submitReview: vi.fn(async () => ({ ok: true })),
 }));
+// RegionDialog's country select: a short list keeps axe to about a second
+// (~245 identical <option>s took ten). Only that dialog reads it.
+vi.mock("@/lib/countries", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/lib/countries")>()),
+  countryOptions: () => [
+    { code: "NG", name: "Nigeria" },
+    { code: "GH", name: "Ghana" },
+  ],
+}));
 
 expect.extend(toHaveNoViolations);
 
@@ -25,6 +34,8 @@ describe("ReviewForm a11y", () => {
   // block fails independently (the 10-01 scaffold contract, kept intact).
   const spec = "@/components/ReviewForm";
 
+  // The file's first axe run cold-loads axe-core, which can pass the 5s
+  // default while the full suite runs in parallel (alone it takes ~1s).
   it("renders its eligible state with zero axe violations", async () => {
     const { default: ReviewForm } = await import(/* @vite-ignore */ spec);
     const { container } = render(
@@ -32,7 +43,7 @@ describe("ReviewForm a11y", () => {
     );
     const results = await axe(container);
     expect(results).toHaveNoViolations();
-  });
+  }, 30_000);
 
   it("exposes the star input as a five-option radiogroup with numeric labels", async () => {
     const { default: ReviewForm } = await import(/* @vite-ignore */ spec);
@@ -94,6 +105,22 @@ describe("SizeGuideModal a11y", () => {
     );
     const results = await axe(container);
     expect(results).toHaveNoViolations();
+  });
+});
+
+describe("RegionDialog a11y", () => {
+  // D-33 (12-REGION-SPEC.md). Portalled onto <body>, so axe runs on the body.
+  it("renders open with zero axe violations, in both currencies", async () => {
+    const { default: RegionDialog } = await import("@/components/RegionDialog");
+    for (const initial of [
+      { region: "NG", currency: "NGN" as const },
+      { region: "GH", currency: "USD" as const },
+    ]) {
+      render(<RegionDialog open initial={initial} onSave={() => {}} onClose={() => {}} />);
+      expect(screen.getByRole("dialog", { name: "Region and currency" })).toBeDefined();
+      expect(await axe(document.body)).toHaveNoViolations();
+      cleanup();
+    }
   });
 });
 

@@ -7,6 +7,7 @@ const updatePrices = vi.fn();
 const trackEvent = vi.fn();
 let sessionStatus: "loading" | "authenticated" | "unauthenticated" = "authenticated";
 let currency: "NGN" | "USD" | null = "NGN";
+let region: string | null = "NG";
 
 const items: CartItem[] = [
   {
@@ -33,7 +34,7 @@ vi.mock("@/context/CartContext", () => ({
     updatePrices,
   }),
 }));
-vi.mock("@/context/CurrencyContext", () => ({ useCurrency: () => ({ currency }) }));
+vi.mock("@/context/CurrencyContext", () => ({ useCurrency: () => ({ currency, region }) }));
 vi.mock("@/lib/analytics", () => ({ trackEvent: (...a: unknown[]) => trackEvent(...a) }));
 
 import CheckoutClient from "@/components/checkout/CheckoutClient";
@@ -68,6 +69,7 @@ function reply(status: number, body: unknown) {
 beforeEach(() => {
   sessionStatus = "authenticated";
   currency = "NGN";
+  region = "NG";
   vi.stubGlobal("fetch", fetchMock);
   fetchMock.mockReset();
   replace.mockReset();
@@ -98,6 +100,25 @@ describe("CheckoutClient", () => {
     mount();
     fireEvent.change(screen.getByLabelText(/^country/i), { target: { value: "GB" } });
     expect(screen.getByText("International · United Kingdom")).toBeTruthy();
+    expect(screen.getByText("₦60,000")).toBeTruthy();
+  });
+
+  it("starts the destination at the ship-to region, with its shipping (D-33)", () => {
+    region = "GH";
+    currency = "USD";
+    mount();
+    expect((screen.getByLabelText(/^country/i) as HTMLSelectElement).value).toBe("GH");
+    expect(screen.getByText("International · Ghana")).toBeTruthy();
+    expect(screen.getByText("$40")).toBeTruthy();
+  });
+
+  it("keeps the destination the form shows when the region changes later", () => {
+    region = "GH";
+    const { rerender } = mount();
+    region = "NG";
+    rerender(<CheckoutClient providers={PROVIDERS} payment={null} />);
+    expect((screen.getByLabelText(/^country/i) as HTMLSelectElement).value).toBe("GH");
+    expect(screen.getByText("International · Ghana")).toBeTruthy();
     expect(screen.getByText("₦60,000")).toBeTruthy();
   });
 

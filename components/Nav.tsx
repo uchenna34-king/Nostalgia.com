@@ -7,7 +7,7 @@ import { useCart } from "@/context/CartContext";
 import { useWishlist } from "@/context/WishlistContext";
 import { useSession, signIn } from "next-auth/react";
 import ThemeToggle from "@/components/ThemeToggle";
-import CurrencyToggle from "@/components/CurrencyToggle";
+import RegionPicker from "@/components/RegionPicker";
 import Wordmark from "@/components/Wordmark";
 import { MegaPanel, MobileShopMenu } from "@/components/ShopMenu";
 import { DEPARTMENTS, type DepartmentSlug } from "@/lib/taxonomy";
@@ -112,8 +112,11 @@ export default function Nav() {
 
         {/* Desktop links. Women / Men are disclosure buttons: hover opens
             them for a pointer, click / Enter / Space for everyone else, and the
-            panel itself carries a "Shop all" link to the department page. */}
-        <ul className="hidden items-center gap-8 lg:ml-10 lg:flex">
+            panel itself carries a "Shop all" link to the department page.
+            Spaced a step tighter from lg to xl, with the right cluster: at
+            1024px the full spacing ran 46px short and "One of one" / "The
+            House" broke onto two lines. */}
+        <ul className="hidden items-center gap-6 lg:ml-8 lg:flex xl:ml-10 xl:gap-8">
           {DEPARTMENTS.map((d) => (
             <li
               key={d.slug}
@@ -147,14 +150,14 @@ export default function Nav() {
           ))}
         </ul>
 
-        {/* Right: account + theme + wishlist + cart. The theme switch belongs
+        {/* Right: account + region (lg+) + theme + wishlist + cart. The theme switch belongs
             with the commerce controls at every width, not with the menu button. Wishlist/Cart render as icons on
             mobile (to fit the narrowest phones) and as text on md+. Each control
             carries an aria-label that *contains* its visible word, so the icon
             state has an accessible name and the text state still satisfies WCAG
             2.5.3 Label in Name (visible "Wishlist"/"Cart" ⊂ the label). The count
             badge is aria-hidden — the count already rides in the label. */}
-        <div className="flex min-w-0 flex-1 basis-0 items-center justify-end gap-2.5 sm:gap-4 lg:ml-auto lg:flex-none lg:basis-auto lg:gap-5">
+        <div className="flex min-w-0 flex-1 basis-0 items-center justify-end gap-2.5 sm:gap-4 lg:ml-auto lg:flex-none lg:basis-auto lg:gap-4 xl:gap-5">
           {isOwner && (
             <Link
               href="/admin"
@@ -179,7 +182,7 @@ export default function Nav() {
             </button>
           )}
 
-          <CurrencyToggle variant="bar" />
+          <RegionPicker variant="bar" />
           <ThemeToggle />
 
           <Link
@@ -300,7 +303,7 @@ export default function Nav() {
               </li>
             )}
           </ul>
-          <CurrencyToggle variant="menu" tabIndex={mobileOpen ? 0 : -1} />
+          <RegionPicker variant="menu" tabIndex={mobileOpen ? 0 : -1} />
         </div>
       </div>
     </header>

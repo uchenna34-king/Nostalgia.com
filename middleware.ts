@@ -6,6 +6,7 @@ import {
   currencyFromCountry,
   parseCurrency,
 } from "@/lib/currency";
+import { REGION_COOKIE, parseRegion, regionFromCountry } from "@/lib/region";
 
 // First-layer, defense-in-depth gate for /admin: redirects anonymous (no valid
 // JWT) visitors to /signin before the route renders. This is NOT the
@@ -38,41 +39,55 @@ async function adminGate(req: NextRequest) {
 }
 
 /**
- * First visit only (the matcher skips requests that already carry the
- * cookie): default the shopper's currency from Vercel's country header — NG
- * or unknown → NGN, anywhere else → USD (D-09). Not httpOnly: the toggle and
- * the before-paint script read it. A value off the allow-list is replaced.
+ * Only while one of the two is missing (the matcher skips requests that carry
+ * both): default the shopper's currency and ship-to region from Vercel's
+ * country header. Currency: NG or unknown → NGN, anywhere else → USD (D-09).
+ * Region: that country if we ship there, else Nigeria (D-33). Each cookie is
+ * set only when it is absent or off its allow-list, so a choice made in the
+ * region picker is never overwritten. Not httpOnly: the picker and the
+ * before-paint scripts read them.
  */
-function currencyCookie(req: NextRequest) {
+function preferenceCookies(req: NextRequest) {
   const res = NextResponse.next();
-  if (parseCurrency(req.cookies.get(CURRENCY_COOKIE)?.value)) return res;
-  res.cookies.set({
-    name: CURRENCY_COOKIE,
-    value: currencyFromCountry(req.headers.get("x-vercel-ip-country")),
+  const country = req.headers.get("x-vercel-ip-country");
+  const attrs = {
     path: "/",
     maxAge: CURRENCY_COOKIE_MAX_AGE,
-    sameSite: "lax",
+    sameSite: "lax" as const,
     secure: req.nextUrl.protocol === "https:",
-  });
+  };
+  if (!parseCurrency(req.cookies.get(CURRENCY_COOKIE)?.value)) {
+    res.cookies.set({ name: CURRENCY_COOKIE, value: currencyFromCountry(country), ...attrs });
+  }
+  if (!parseRegion(req.cookies.get(REGION_COOKIE)?.value)) {
+    res.cookies.set({ name: REGION_COOKIE, value: regionFromCountry(country), ...attrs });
+  }
   return res;
 }
 
 export async function middleware(req: NextRequest) {
   const p = req.nextUrl.pathname;
   if (p === "/admin" || p.startsWith("/admin/")) return adminGate(req);
-  return currencyCookie(req);
+  return preferenceCookies(req);
 }
 
 export const config = {
   matcher: [
     "/admin/:path*",
+    // Every page except /admin (above), API routes, Next internals, private
+    // media and files with an extension, while either preference cookie is
+    // missing: two entries, because one `missing` list needs ALL of its
+    // cookies absent. TWO backslashes here make ONE in the pattern; a single
+    // one silently matches nothing. Literals only: Next reads this at build
+    // time and ignores anything computed (tests/currency-middleware.test.ts
+    // guards all three).
     {
-      // Every page except /admin (above), API routes, Next internals, private
-      // media and files with an extension. TWO backslashes here make ONE in
-      // the pattern; a single one silently matches nothing
-      // (tests/currency-middleware.test.ts guards it).
       source: "/((?!admin|api|_next|media|.*\\..*).*)",
       missing: [{ type: "cookie", key: "nostalgia-currency" }],
+    },
+    {
+      source: "/((?!admin|api|_next|media|.*\\..*).*)",
+      missing: [{ type: "cookie", key: "nostalgia-region" }],
     },
   ],
 };

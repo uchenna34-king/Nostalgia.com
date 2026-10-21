@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Wordmark from "@/components/Wordmark";
 import PaymentMarks from "@/components/PaymentMarks";
+import RegionPicker from "@/components/RegionPicker";
 
 const COLUMNS: { heading: string; links: { label: string; href: string }[] }[] = [
   {
@@ -119,9 +120,14 @@ export default function Footer() {
             © {new Date().getFullYear()} Nostalgia®. A combination of the past
             and the present with the future.
           </span>
-          <span className="tracking-[0.04em]">
-            Terms · Privacy · nostalgia.com
-          </span>
+          {/* Where the order ships and what it's paid in, with the other
+              utility links (D-33). */}
+          <div className="flex shrink-0 flex-col items-center gap-2 text-center sm:whitespace-nowrap lg:flex-row lg:gap-6">
+            <RegionPicker variant="footer" />
+            <span className="tracking-[0.04em]">
+              Terms · Privacy · nostalgia.com
+            </span>
+          </div>
         </div>
       </div>
     </footer>

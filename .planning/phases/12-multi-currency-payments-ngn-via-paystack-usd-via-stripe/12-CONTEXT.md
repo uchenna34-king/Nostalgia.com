@@ -103,6 +103,7 @@ Deferred).
   - updates a small client `CurrencyContext` (for code that needs the value in JS:
     checkout POST, analytics)
   - calls `router.refresh()` so server-side price sort/filter re-runs.
+  - **Superseded by D-33** (2026-10-21): the toggle became a region & currency picker.
 - **D-12:** Server code that needs the currency (only /shop and collection price
   sort/filter) uses a `getCurrency()` server helper: cookie, then geo header, then
   NGN, all through the allow-list. Those routes are already `force-dynamic`, so the
@@ -261,6 +262,10 @@ Deferred).
     `11-OWNER-SETUP.md`).
 - **D-32:** Phase completion = **deployed and UAT-ready on Paystack TEST + Stripe
   TEST keys** (mirrors Phase 11 D-11). Live keys are an owner action.
+- **D-33 (owner, 2026-10-21):** the nav currency toggle becomes a **region & currency
+  picker** (nav, mobile menu, footer): ship-to country + currency, geo-defaulted, the
+  currency following the country until the shopper picks one, checkout prefilled with
+  the ship-to country. Naira and dollars only. Contract: `12-REGION-SPEC.md`.
 
 ### Claude's Discretion
 - File/module layout beyond the files named above, component names, and the

@@ -135,6 +135,16 @@
   display: none;
 }
 
+/* Zone-specific copy (D-33), the same way: <ShipZone> renders a span per
+   delivery zone, the before-paint REGION_SCRIPT sets <html data-zone> from
+   the region cookie, and this hides the other zone's. No attribute means
+   domestic (Nigeria). Unlayered for the same reason as the two rules above.
+   tests/region-css.test.ts guards it. */
+:root:not([data-zone="international"]) [data-ship-zone="international"],
+:root[data-zone="international"] [data-ship-zone="domestic"] {
+  display: none;
+}
+
 @layer components {
   /* Film-grain overlay applied over the whole page */
   .grain::before {

@@ -7,6 +7,7 @@ import GlassMotion from "@/components/GlassMotion";
 import { buildProviderFlags } from "@/lib/auth-flags";
 import { SESSION_HINT_SCRIPT } from "@/lib/site-gate";
 import { CURRENCY_SCRIPT } from "@/lib/currency";
+import { REGION_SCRIPT } from "@/lib/region";
 import "./globals.css";
 
 // Read from the flags directly rather than lib/auth, so the root layout doesn't
@@ -52,6 +53,9 @@ export default function RootLayout({
             span from the first paint. This layout still reads no cookies
             itself, so static pages stay static (D-10, D-12). */}
         <script dangerouslySetInnerHTML={{ __html: CURRENCY_SCRIPT }} />
+        {/* And the ship-to region: <html data-zone="international"> when the
+            nostalgia-region cookie isn't Nigeria, for <ShipZone> copy (D-33). */}
+        <script dangerouslySetInnerHTML={{ __html: REGION_SCRIPT }} />
       </head>
       <body className="min-h-screen">
         <GlassMotion />

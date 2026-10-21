@@ -40,6 +40,19 @@ describe("AddressForm", () => {
     expect(region.value).toBe("");
   });
 
+  it("starts at the ship-to region it is given, falling back to Nigeria (D-33)", () => {
+    const { unmount } = render(<AddressForm initialCountry="GH" onValidSubmit={vi.fn()} disabled={false} />);
+    expect((screen.getByLabelText(/^country/i) as HTMLSelectElement).value).toBe("GH");
+    expect(screen.getByLabelText(/state \/ region/i).tagName).toBe("INPUT");
+    unmount();
+
+    for (const junk of ["KP", "gh", "ZZ", ""]) {
+      const r = render(<AddressForm initialCountry={junk} onValidSubmit={vi.fn()} disabled={false} />);
+      expect((screen.getByLabelText(/^country/i) as HTMLSelectElement).value, junk).toBe("NG");
+      r.unmount();
+    }
+  });
+
   it("an invalid submit shows errors, focuses the first and does not submit", () => {
     const onValid = vi.fn();
     render(<AddressForm onValidSubmit={onValid} disabled={false} />);

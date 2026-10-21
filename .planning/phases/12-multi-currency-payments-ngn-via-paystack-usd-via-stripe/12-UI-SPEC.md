@@ -120,6 +120,8 @@ Black and white only (DESIGN.md "Black and white, nothing else"). Values from `a
 
 ### Surface 1. Nav currency toggle (`components/CurrencyToggle.tsx`, "use client")
 
+> **Superseded by `12-REGION-SPEC.md` (D-33, 2026-10-21).** The toggle became a region & currency picker; this section is kept for history.
+
 A two-option segmented switch, one control with two renderings. It is a **preference control, not a dropdown**, and matches `ThemeToggle`'s scale: 13px medium type, 24px visual height, no borders, no shadow.
 
 **Placement**
@@ -622,7 +624,7 @@ Everything below was resolved without asking the owner (auto mode). Each item sa
 | A-16 | Checkout currency source | `CurrencyContext` (initialised from the cookie/attribute, consumed only after the session resolves) so the page can show "Free" and totals as text; every other storefront price uses `<Money>` |
 | A-17 | Admin extras | The "Paid via" column and the products-table footnote are small additions for reconciliation and discoverability; drop either without affecting the contract |
 | A-18 | Country list | Nigeria first, then localised names. Which countries are shippable is an owner decision (RESEARCH Open Question 3); the select renders whatever list `lib/countries.ts` provides |
-| A-19 | No address prefill | Deferred by CONTEXT (saved addresses); the form always starts empty except Country = Nigeria |
+| A-19 | No address prefill | Deferred by CONTEXT (saved addresses); the form always starts empty except Country, which is the shopper's ship-to region (D-33, `12-REGION-SPEC.md`; was Nigeria) |
 | A-20 | Browser support | `Intl` `narrowSymbol` and `Intl.DisplayNames` are assumed available in all supported evergreen browsers (RESEARCH Pattern 3); a unit test pins the exact strings |
 | A-21 | Next.js detail for the planner | `useSearchParams()` on `/checkout` needs a `Suspense` boundary in Next 14 (the success page already shows the pattern) |
 

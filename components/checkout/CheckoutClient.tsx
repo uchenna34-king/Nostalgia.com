@@ -9,6 +9,7 @@ import { useCurrency } from "@/context/CurrencyContext";
 import { trackEvent } from "@/lib/analytics";
 import { calculateShipping } from "@/lib/shipping";
 import { formatMoney, type Currency } from "@/lib/currency";
+import { DEFAULT_REGION } from "@/lib/region";
 import type { AddressErrors, ShippingAddress } from "@/lib/address";
 import type { CheckoutProvider } from "@/lib/payment-provider";
 import AddressForm from "@/components/checkout/AddressForm";
@@ -33,9 +34,16 @@ export default function CheckoutClient({
 }) {
   const { data: session, status } = useSession();
   const { items, subtotals, updatePrices } = useCart();
-  const { currency } = useCurrency();
+  const { currency, region } = useCurrency();
   const router = useRouter();
-  const [country, setCountry] = useState("NG");
+  // The destination starts at the ship-to region (D-33) and is pinned there:
+  // once the address form is showing it, the form is the authority, and a
+  // region change in the nav doesn't move it.
+  const [country, setCountry] = useState<string | null>(null);
+  useEffect(() => {
+    if (region) setCountry((c) => c ?? region);
+  }, [region]);
+  const destination = country ?? region ?? DEFAULT_REGION;
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [serverErrors, setServerErrors] = useState<AddressErrors | null>(null);
@@ -90,7 +98,7 @@ export default function CheckoutClient({
     );
   }
 
-  const shipping = calculateShipping(subtotal, currency, country);
+  const shipping = calculateShipping(subtotal, currency, destination);
   const total = subtotal + shipping;
 
   async function pay(address: ShippingAddress) {
@@ -169,6 +177,7 @@ export default function CheckoutClient({
               optional.
             </p>
             <AddressForm
+              initialCountry={destination}
               onValidSubmit={pay}
               onCountryChange={setCountry}
               serverErrors={serverErrors}
@@ -183,7 +192,7 @@ export default function CheckoutClient({
             subtotal={subtotal}
             shipping={shipping}
             total={total}
-            country={country}
+            country={destination}
             provider={providers[currency]}
             loading={loading}
             error={error}

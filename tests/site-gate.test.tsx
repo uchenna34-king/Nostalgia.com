@@ -6,14 +6,15 @@ import {
   SESSION_HINT_CLASS,
   SESSION_HINT_KEY,
   SESSION_HINT_SCRIPT,
-  isOpenPath,
+  isGatedPath,
 } from "@/lib/site-gate";
 import AppFrame from "@/components/AppFrame";
 import { GoogleEnabledContext } from "@/context/GoogleEnabledContext";
 
 const signIn = vi.hoisted(() => vi.fn());
+// Browsing is open; the gate is met when a signed-out visitor opens a product.
 const state = vi.hoisted(() => ({
-  pathname: "/",
+  pathname: "/product/wool-coat",
   status: "unauthenticated",
 }));
 
@@ -31,7 +32,7 @@ afterEach(() => {
   cleanup();
   signIn.mockReset();
   localStorage.clear();
-  state.pathname = "/";
+  state.pathname = "/product/wool-coat";
   state.status = "unauthenticated";
 });
 
@@ -48,47 +49,49 @@ function renderFrame(googleEnabled = false) {
 }
 
 const gate = () =>
-  screen.queryByRole("dialog", { name: "Before you continue" });
+  screen.queryByRole("dialog", { name: "Sign in to Nostalgia" });
 const frameOf = (container: HTMLElement) =>
   container.querySelector(".grain") as HTMLElement;
 
-describe("isOpenPath", () => {
-  it("keeps sign-in, policies and admin open", () => {
-    for (const path of [
-      "/signin",
-      "/returns",
-      "/shipping",
-      "/admin",
-      "/admin/orders",
-    ]) {
-      expect(isOpenPath(path)).toBe(true);
+describe("isGatedPath", () => {
+  it("asks for sign-in on every product page", () => {
+    for (const path of ["/product/wool-coat", "/product/x"]) {
+      expect(isGatedPath(path)).toBe(true);
     }
   });
 
-  it("gates everything else, including look-alike paths", () => {
+  it("leaves browsing open everywhere else, including look-alike paths", () => {
     for (const path of [
       "/",
       "/shop",
-      "/product/x",
+      "/shop/men/shoes",
+      "/collections",
+      "/collections/autumn-archive",
+      "/wishlist",
       "/cart",
-      "/checkout",
-      "/register",
-      "/signing",
+      "/signin",
+      "/returns",
+      "/shipping",
+      "/admin/orders",
+      "/product",
+      "/products-sale",
     ]) {
-      expect(isOpenPath(path)).toBe(false);
+      expect(isGatedPath(path)).toBe(false);
     }
-    expect(isOpenPath(null)).toBe(false);
+    expect(isGatedPath(null)).toBe(false);
   });
 });
 
 describe("SiteGate in AppFrame", () => {
-  it("asks a signed-out visitor to sign in with Google first", () => {
+  it("asks a signed-out visitor to sign in with Google when they open a product", () => {
     const { container } = renderFrame(true);
     expect(gate()).not.toBeNull();
     fireEvent.click(
       screen.getByRole("button", { name: "Continue with Google" }),
     );
-    expect(signIn).toHaveBeenCalledWith("google", { callbackUrl: "/" });
+    expect(signIn).toHaveBeenCalledWith("google", {
+      callbackUrl: "/product/wool-coat",
+    });
     // Google is the only way in: no registration or password route.
     expect(
       screen.queryByRole("link", { name: /create an account/i }),
@@ -98,15 +101,22 @@ describe("SiteGate in AppFrame", () => {
     expect(frameOf(container).hasAttribute("inert")).toBe(true);
   });
 
-  it("returns the visitor to the page they were trying to see", () => {
-    state.pathname = "/product/wool-coat";
+  it("returns the visitor to the product they were trying to see", () => {
+    state.pathname = "/product/denim-jacket";
     renderFrame(true);
     fireEvent.click(
       screen.getByRole("button", { name: "Continue with Google" }),
     );
     expect(signIn).toHaveBeenCalledWith("google", {
-      callbackUrl: "/product/wool-coat",
+      callbackUrl: "/product/denim-jacket",
     });
+  });
+
+  it("offers a way back to browsing instead of a close button", () => {
+    renderFrame(true);
+    expect(
+      screen.getByRole("link", { name: "Keep browsing" }).getAttribute("href"),
+    ).toBe("/shop");
   });
 
   it("falls back to the sign-in page when Google isn't configured", () => {
@@ -124,12 +134,15 @@ describe("SiteGate in AppFrame", () => {
     expect(screen.queryByRole("button", { name: /close/i })).toBeNull();
   });
 
-  it("stays away from the open pages", () => {
-    state.pathname = "/signin";
-    const { container } = renderFrame();
-    expect(gate()).toBeNull();
-    expect(frameOf(container).hasAttribute("inert")).toBe(false);
-  });
+  it.each(["/", "/shop/men", "/collections", "/signin"])(
+    "lets a signed-out visitor browse %s freely",
+    (path) => {
+      state.pathname = path;
+      const { container } = renderFrame();
+      expect(gate()).toBeNull();
+      expect(frameOf(container).hasAttribute("inert")).toBe(false);
+    },
+  );
 
   it("never shows for signed-in customers", () => {
     state.status = "authenticated";
@@ -176,7 +189,7 @@ describe("SiteGate in AppFrame", () => {
         </AppFrame>
       </GoogleEnabledContext.Provider>,
     );
-    expect(html).toContain("Before you continue");
+    expect(html).toContain("Sign in to Nostalgia");
     expect(html).toContain("data-gate-provisional");
     // Not inert on the server: a returning customer's page must stay usable
     // while CSS hides the provisional gate.

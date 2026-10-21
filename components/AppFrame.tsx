@@ -8,7 +8,7 @@ import CartDrawer from "@/components/CartDrawer";
 import SiteGate from "@/components/SiteGate";
 import { useGoogleEnabled } from "@/context/GoogleEnabledContext";
 import {
-  isOpenPath,
+  isGatedPath,
   readSessionHint,
   writeSessionHint,
 } from "@/lib/site-gate";
@@ -20,12 +20,13 @@ import {
  * shell (D-14). Footer is a Server Component, so it is passed in as a prop
  * rather than imported into this client component.
  *
- * Also the sign-in gate: a signed-out visitor gets the SiteGate dialog on every
- * page except the open ones (lib/site-gate.ts), and the frame behind it goes
- * `inert` so nothing there can be clicked, tabbed to or read out. The gate is
- * in the first HTML so it's there the moment the site opens, not after the
- * session request returns; the session hint (lib/site-gate.ts) keeps it hidden
- * for browsers that were signed in last time.
+ * Also the sign-in gate: browsing is open, and a signed-out visitor who opens
+ * a product gets the SiteGate dialog (lib/site-gate.ts), with the frame behind
+ * it `inert` so nothing there can be clicked, tabbed to or read out. The gate
+ * is in the product page's first HTML so it's there the moment the page
+ * opens, not after the session request returns; the session hint
+ * (lib/site-gate.ts) keeps it hidden for browsers that were signed in last
+ * time.
  */
 export default function AppFrame({
   children,
@@ -56,7 +57,7 @@ export default function AppFrame({
   // server HTML. The gate is rendered so a new visitor sees it at first paint;
   // SESSION_HINT_SCRIPT + CSS hide it for returning customers.
   let gate: "open" | "provisional" | "closed" = "closed";
-  if (!isOpenPath(pathname)) {
+  if (isGatedPath(pathname)) {
     if (status === "unauthenticated") gate = "open";
     else if (status === "loading") {
       if (hint === null) gate = "provisional";

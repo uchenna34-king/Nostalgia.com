@@ -1,20 +1,12 @@
-// Paths a signed-out visitor can use without the "Before you continue"
-// sign-in gate (components/SiteGate.tsx). Everything else asks them to sign in
-// first.
-//
-// - /signin: the gate's own destination — gating it would leave no way
-//   through.
-// - /returns, /shipping: store policies stay readable before anyone commits
-//   to an account.
-// - /admin: has its own chrome and its own server-side guard (middleware.ts,
-//   requireOwner()).
-const OPEN_PATHS = ["/signin", "/returns", "/shipping", "/admin"];
+// Where a signed-out visitor meets the "Sign in to Nostalgia" gate
+// (components/SiteGate.tsx): on opening any product. Browsing — home, shop,
+// collections, wishlist, policies — stays open to everyone; clicking into a
+// piece is where the account comes in. Checkout, account and admin are still
+// enforced on the server regardless.
+const GATED_PREFIX = "/product/";
 
-export function isOpenPath(pathname: string | null | undefined): boolean {
-  if (!pathname) return false;
-  return OPEN_PATHS.some(
-    (open) => pathname === open || pathname.startsWith(`${open}/`),
-  );
+export function isGatedPath(pathname: string | null | undefined): boolean {
+  return !!pathname && pathname.startsWith(GATED_PREFIX) && pathname.length > GATED_PREFIX.length;
 }
 
 /**

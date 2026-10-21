@@ -5,11 +5,13 @@ import { useEffect, useRef } from "react";
 import GoogleButton from "@/components/GoogleButton";
 
 /**
- * "Before you continue": the Google sign-in wall a signed-out visitor
- * meets on any storefront page (AppFrame decides when; lib/site-gate.ts lists
- * the pages that stay open). It is deliberately NOT dismissible — no close
- * button, Escape does nothing, the backdrop doesn't close it — and AppFrame
- * makes the page behind it inert, so the only ways forward are its links.
+ * "Sign in to Nostalgia": the Google sign-in a signed-out visitor meets when
+ * they open a product (AppFrame decides when; lib/site-gate.ts says where).
+ * Browsing the shop stays open — this is the member-product pattern, where
+ * the account comes in at the piece itself. It is deliberately NOT
+ * dismissible — no close button, Escape does nothing, the backdrop doesn't
+ * close it — and AppFrame makes the page behind it inert, so the ways forward
+ * are signing in or "Keep browsing" back to the shop.
  *
  * This is a browsing gate, not a security boundary: anything that must be
  * protected (checkout, account, admin) is still enforced on the server.
@@ -93,8 +95,8 @@ export default function SiteGate({
         className="fixed inset-0 z-[100] bg-shade/60 backdrop-blur-md"
       />
 
-      {/* Centered on every screen size — this is the first thing a visitor
-          sees, so it sits in the middle rather than docking at the bottom. */}
+      {/* Centered on every screen size, in the middle of the product the
+          visitor just opened rather than docked at the bottom. */}
       <div className="fixed inset-0 z-[110] flex items-center justify-center p-4">
         <div
           ref={panelRef}
@@ -111,11 +113,11 @@ export default function SiteGate({
             tabIndex={-1}
             className="mt-3 font-serif text-3xl font-normal focus:outline-none"
           >
-            Before you continue
+            Sign in to Nostalgia
           </h2>
           <p id={descId} className="mt-3 text-sm text-ink-soft">
-            Sign in{googleEnabled ? " with Google" : ""} to explore the
-            collection. Your bag and wishlist stay with you.
+            Sign in{googleEnabled ? " with Google" : ""} to see this piece and
+            shop it. Your bag and wishlist stay with you.
           </p>
 
           <div className="mt-7">
@@ -132,6 +134,13 @@ export default function SiteGate({
               </Link>
             )}
           </div>
+
+          <Link
+            href="/shop"
+            className="mt-4 inline-block text-xs uppercase tracking-[0.18em] text-ink-soft underline"
+          >
+            Keep browsing
+          </Link>
 
           <p className="mt-6 text-xs text-ink-soft">
             Read our{" "}

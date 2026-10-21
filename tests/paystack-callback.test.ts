@@ -108,11 +108,13 @@ function expectUnpaid(status = "pending") {
 }
 
 describe("GET /api/paystack/callback — configuration", () => {
+  // First in the file, so it pays for the cold import of the route and
+  // next/server: room for a loaded full run, as in tests/admin.test.ts.
   it("is rendered per request on Node (a cached redirect would replay one shopper's result)", async () => {
     const route = await import("@/app/api/paystack/callback/route");
     expect(route.dynamic).toBe("force-dynamic");
     expect(route.runtime).toBe("nodejs");
-  });
+  }, 30_000);
 
   it("500s without NEXTAUTH_URL, before asking Paystack or the database", async () => {
     vi.stubEnv("NEXTAUTH_URL", "");

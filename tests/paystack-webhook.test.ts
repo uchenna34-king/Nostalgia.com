@@ -112,10 +112,12 @@ function expectUntouched() {
 }
 
 describe("POST /api/paystack/webhook — configuration", () => {
+  // First in the file, so it pays for the cold import of the route and
+  // next/server: room for a loaded full run, as in tests/admin.test.ts.
   it("runs on Node (node:crypto and Prisma), never Edge", async () => {
     const route = await import("@/app/api/paystack/webhook/route");
     expect(route.runtime).toBe("nodejs");
-  });
+  }, 30_000);
 
   it("acknowledges and does nothing when no Paystack key is configured", async () => {
     vi.stubEnv("PAYSTACK_SECRET_KEY", "");

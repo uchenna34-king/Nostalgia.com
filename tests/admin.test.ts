@@ -32,8 +32,10 @@ describe("isOwnerEmail", () => {
     expect(isOwnerEmail(undefined)).toBe(false);
   });
 
+  // A cold import of lib/admin pulls in next-auth and the Prisma client: about
+  // a second alone, but past the 5s default when the whole suite runs at once.
   it("is re-exported by lib/admin", async () => {
     const admin = await import("@/lib/admin");
     expect(admin.isOwnerEmail).toBe(isOwnerEmail);
-  });
+  }, 30_000);
 });
